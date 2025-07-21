@@ -3,7 +3,7 @@
 // NOVO: Define a URL base da API dinamicamente para desenvolvimento local e Render
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3001' // Para desenvolvimento local
-    : 'https://gamerivals-site-backend.onrender.com'; // **MUDE PARA A URL DO SEU SERVIÇO DE BACKEND NO RENDER**
+    : 'https://gamerivals-site.onrender.com'; // **MUDE PARA A URL DO SEU SERVIÇO DE BACKEND NO RENDER**
 
 // Função de Notificação Reutilizável
 export function showNotification(message, type = 'info') {
