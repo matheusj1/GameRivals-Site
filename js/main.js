@@ -1,4 +1,5 @@
 // arquivo: site_de_jogos/js/main.js
+import { API_BASE_URL } from './utils.js';
 
 function showNotification(message, type = 'info') {
     const container = document.getElementById('notification-container');
