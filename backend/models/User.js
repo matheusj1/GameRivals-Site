@@ -5,13 +5,13 @@ const UserSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
-        unique: true,
+        unique: true, // Este já cria o índice para username
         trim: true
     },
     email: {
         type: String,
         required: true,
-        unique: true,
+        unique: true, // Este já cria o índice para email
         trim: true,
         lowercase: true
     },
@@ -35,9 +35,9 @@ const UserSchema = new mongoose.Schema({
         type: Number,
         default: 1000
     },
-    role: { // Campo para papel (user/admin)
+    role: { // Campo para papel (user/admin/support)
         type: String,
-        enum: ['user', 'admin'],
+        enum: ['user', 'admin', 'support'],
         default: 'user'
     },
     isActive: { // Campo para ativar/desativar conta
@@ -71,9 +71,8 @@ const UserSchema = new mongoose.Schema({
         default: ''
     },
     avatarUrl: { // URL para a foto de perfil
-        // ATUALIZADO: URL do placeholder padrão agora é um caminho relativo
         type: String,
-        default: '/img/avatar-placeholder.png' 
+        default: 'https://gamerivals-site.onrender.com/img/avatar-placeholder.png' // <--- MUDADO PARA O URL DO RENDER
     },
     profileCompleted: { // Indica se o usuário já completou o perfil inicial
         type: Boolean,
@@ -132,5 +131,16 @@ const UserSchema = new mongoose.Schema({
         }
     ]
 });
+
+// ==== ÍNDICES PARA O MODELO USER ====
+// As linhas abaixo foram REMOVIDAS pois 'unique: true' já cria esses índices.
+// UserSchema.index({ username: 1 });
+// UserSchema.index({ email: 1 });
+UserSchema.index({ role: 1 });
+UserSchema.index({ isActive: 1 });
+UserSchema.index({ createdAt: -1 }); // Para ordenação por data de criação
+UserSchema.index({ friends: 1 }); // Multi-chave para buscas por amigos
+UserSchema.index({ blockedUsers: 1 }); // Multi-chave para buscas por usuários bloqueados
+
 
 module.exports = mongoose.model('User', UserSchema);
