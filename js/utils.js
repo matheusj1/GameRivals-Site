@@ -1,5 +1,5 @@
 // arquivo: site_de_jogos/js/utils.js
-
+export const API_BASE_URL = 'https://gamerivals-site.onrender.com'; // URL fixa do backend
 // NOVO: Define a URL base da API dinamicamente para desenvolvimento local e Render
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3001' // Para desenvolvimento local
