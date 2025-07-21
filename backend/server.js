@@ -31,8 +31,8 @@ const server = http.createServer(app);
 app.set('trust proxy', true);
 
 // NOVO: Defina as URLs do frontend e backend dinamicamente
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://127.0.0.1:5500";
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001"; // Esta será a URL do seu serviço de backend no Render
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://matheusj1.github.io/GameRivals-Site/";
+const BACKEND_URL = process.env.BACKEND_URL || "https://gamerivals-site.onrender.com"; // Esta será a URL do seu serviço de backend no Render
 
 const io = new Server(server, {
     cors: {
