@@ -42,7 +42,7 @@ const server = http.createServer(app);
 app.set('trust proxy', true);
 
 // NOVO: Defina o URL do seu frontend aqui!
-const frontendUrl = "https://matheusj1.github.io/GameRivals-Site/";
+const frontendUrl = "https://matheusj1.github.io";
 const backendRenderUrl = "https://gamerivals-site.onrender.com";
 
 
