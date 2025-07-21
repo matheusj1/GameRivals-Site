@@ -1,5 +1,10 @@
 // arquivo: site_de_jogos/js/utils.js
 
+// NOVO: Define a URL base da API dinamicamente para desenvolvimento local e Render
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3001' // Para desenvolvimento local
+    : 'https://gamerivals-site-backend.onrender.com'; // **MUDE PARA A URL DO SEU SERVIÇO DE BACKEND NO RENDER**
+
 // Função de Notificação Reutilizável
 export function showNotification(message, type = 'info') {
     const container = document.getElementById('notification-container');
@@ -24,6 +29,7 @@ export function showNotification(message, type = 'info') {
 
 // Função para obter o caminho do ícone do console
 export const getConsoleIconPath = (consoleName) => {
+    // Caminhos para as imagens de ícones do console, relativos aos arquivos HTML
     switch (consoleName) {
         case 'PS5':
         case 'PS4':
@@ -32,10 +38,13 @@ export const getConsoleIconPath = (consoleName) => {
         case 'Xbox One':
             return 'img/xbox-icon.png';
         case 'PC':
-            return 'img/pc-icon.png';
+        return 'img/pc-icon.png';
         case 'Nintendo Switch':
-            return 'img/nintendo-icon.png'; // <- LINHA ALTERADA: Adicione o caminho para o seu ícone do Nintendo Switch
+            return 'img/nintendo-icon.png';
         default:
             return ''; // Retorna vazio se não houver correspondência
     }
 };
+
+// NOVO: Exporte a URL base da API para que outros módulos possam usá-la
+export { API_BASE_URL };

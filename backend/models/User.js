@@ -71,8 +71,9 @@ const UserSchema = new mongoose.Schema({
         default: ''
     },
     avatarUrl: { // URL para a foto de perfil
+        // ATUALIZADO: URL do placeholder padrão agora é um caminho relativo
         type: String,
-        default: 'http://127.0.0.1:5500/img/avatar-placeholder.png' // URL do placeholder padrão
+        default: '/img/avatar-placeholder.png' 
     },
     profileCompleted: { // Indica se o usuário já completou o perfil inicial
         type: Boolean,

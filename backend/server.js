@@ -28,22 +28,25 @@ const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const app = express();
 const server = http.createServer(app);
 
-
-
 app.set('trust proxy', true);
+
+// NOVO: Defina as URLs do frontend e backend dinamicamente
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://127.0.0.1:5500";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001"; // Esta será a URL do seu serviço de backend no Render
 
 const io = new Server(server, {
     cors: {
-        origin: "http://127.0.0.1:5500",
+        origin: FRONTEND_URL, // Use a URL dinâmica do frontend para CORS
         methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"]
     }
 });
 
-const PORT = 3001;
+// NOVO: Use a porta fornecida pelo ambiente (Render usa process.env.PORT)
+const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-    origin: "http://127.0.0.1:5500",
+    origin: FRONTEND_URL, // Use a URL dinâmica do frontend para CORS
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
 }));
@@ -81,6 +84,7 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }
 });
 
+// Sirva os avatares estaticamente
 app.use('/avatars', express.static(avatarsDir));
 
 const client = new MercadoPagoConfig({ accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN });
@@ -145,8 +149,8 @@ io.on('connection', async (socket) => {
             const currentSocketId = socket.id;
             let listNeedsUpdate = false;
 
-            let avatarUrl = 'http://127.0.0.1:5500/img/avatar-placeholder.png';
-            let userConsole = '';
+            // Use a URL do frontend para o avatar padrão, pois a imagem será servida pelo frontend
+            let avatarUrl = `${FRONTEND_URL}/img/avatar-placeholder.png`;
 
             try {
                 const dbUser = await User.findById(userIdString).select('avatarUrl console');
@@ -176,7 +180,7 @@ io.on('connection', async (socket) => {
                     listNeedsUpdate = true;
                 }
             }
-            
+
             onlineUsers.set(userIdString, {
                 id: userIdString,
                 username: user.username,
@@ -236,7 +240,7 @@ io.on('connection', async (socket) => {
             console.warn('[SOCKET PRIVATE CHAT] Falha ao enviar mensagem privada. Destinatário não encontrado, remetente inválido, enviando para si mesmo ou mensagem vazia.', data);
         }
     });
-    
+
     socket.on('join matchmaking queue', async (data) => {
         const userId = data.id; // Corrigido de data.userId para data.id
         const game = data.game;
@@ -256,7 +260,7 @@ io.on('connection', async (socket) => {
 
         matchmakingQueue.forEach((consoleMap, gameKey) => {
             consoleMap.forEach((betAmountMap, consoleKey) => {
-                betAmountMap.forEach((userMap, betKey) => { 
+                betAmountMap.forEach((userMap, betKey) => {
                     if (userMap.has(userId)) {
                         userMap.delete(userId);
                         emitMatchmakingQueueCounts();
@@ -267,42 +271,42 @@ io.on('connection', async (socket) => {
 
         let foundOpponentObject = null;
 
-if (matchmakingQueue.has(game)) {
-    const consoleMap = matchmakingQueue.get(game);
-    if (consoleMap.has(platform)) {
-        const betAmountMap = consoleMap.get(platform);
-        for (const [betKey, userMap] of betAmountMap.entries()) {
-            for (const [entryUserId, entry] of userMap.entries()) {
-                if (entry && String(entryUserId) !== String(userId)) {
-                    foundOpponentObject = entry;
-                    userMap.delete(entryUserId);
-                    break;
+        if (matchmakingQueue.has(game)) {
+            const consoleMap = matchmakingQueue.get(game);
+            if (consoleMap.has(platform)) {
+                const betAmountMap = consoleMap.get(platform);
+                for (const [betKey, userMap] of betAmountMap.entries()) {
+                    for (const [entryUserId, entry] of userMap.entries()) {
+                        if (entry && String(entryUserId) !== String(userId)) {
+                            foundOpponentObject = entry;
+                            userMap.delete(entryUserId);
+                            break;
+                        }
+                    }
+                    if (foundOpponentObject) break;
                 }
             }
-            if (foundOpponentObject) break;
         }
-    }
-}
 
 
-        if (foundOpponentObject) { 
+        if (foundOpponentObject) {
             try {
-                const creatorId = String(foundOpponentObject.userId); 
-                const opponentId = String(userId); 
+                const creatorId = String(foundOpponentObject.userId);
+                const opponentId = String(userId);
 
                 if (!creatorId || creatorId === 'undefined' || creatorId.length === 0) {
-                    throw new Error(`Creator ID é undefined, vazio ou inválido: "${creatorId}". foundOpponentObject: ${JSON.stringify(foundOpponentObject)}`); 
+                    throw new Error(`Creator ID é undefined, vazio ou inválido: "${creatorId}". foundOpponentObject: ${JSON.stringify(foundOpponentObject)}`);
                 }
-                if (!opponentId || opponentId === 'undefined' || opponentId.length === 0) { 
+                if (!opponentId || opponentId === 'undefined' || opponentId.length === 0) {
                     throw new Error(`Opponent ID é undefined, vazio ou inválido: "${opponentId}"`);
                 }
-                
+
                 const newChallenge = new Challenge({
                     game: game,
                     console: platform,
                     betAmount: betAmount,
-                    createdBy: creatorId, 
-                    opponent: opponentId, 
+                    createdBy: creatorId,
+                    opponent: opponentId,
                     status: 'accepted'
                 });
                 await newChallenge.save();
@@ -314,7 +318,7 @@ if (matchmakingQueue.has(game)) {
                     betAmount: newChallenge.betAmount,
                     createdBy: newChallenge.createdBy.toString(),
                     opponent: newChallenge.opponent.toString(),
-                    creatorUsername: foundOpponentObject.username, 
+                    creatorUsername: foundOpponentObject.username,
                     opponentUsername: user.username,
                     status: newChallenge.status
                 };
@@ -346,11 +350,11 @@ if (matchmakingQueue.has(game)) {
                 betAmountMap.set(betAmount, new Map());
             }
             const userMap = betAmountMap.get(betAmount);
-            userMap.set(userId, { 
-                socketId: user.socketId, 
-                username: user.username, 
-                betAmount: betAmount, 
-                userId: userId 
+            userMap.set(userId, {
+                socketId: user.socketId,
+                username: user.username,
+                betAmount: betAmount,
+                userId: userId
             });
 
             socket.emit('matchmaking status', { inQueue: true, game, console: platform, betAmount, message: 'Procurando partida...' });
@@ -505,8 +509,9 @@ app.post('/api/payment/deposit-mp', auth, async (req, res) => {
             return res.status(400).json({ message: 'Seu perfil não tem um e-mail configurado para o pagamento.' });
         }
 
-        const publicBaseUrl = 'https://2aba2968ae3b.ngrok-free.app';
-        console.log('Using hardcoded publicBaseUrl for MP:', publicBaseUrl);
+        // NOVO: Use a URL dinâmica do backend para o webhook do Mercado Pago
+        const publicBaseUrl = BACKEND_URL;
+        console.log('Using dynamic publicBaseUrl for MP:', publicBaseUrl);
 
         let preference;
         if (payment_method === 'pix') {
@@ -517,14 +522,14 @@ app.post('/api/payment/deposit-mp', auth, async (req, res) => {
                     unit_price: amount
                 }],
                 payer: {
-                    email: user.email 
+                    email: user.email
                 },
                 external_reference: userId,
                 notification_url: `${publicBaseUrl}/api/webhooks/mercadopago`,
                 back_urls: {
-                    success: `${publicBaseUrl}/profile.html?payment_status=success`,
-                    failure: `${publicBaseUrl}/profile.html?payment_status=failure`,
-                    pending: `${publicBaseUrl}/profile.html?payment_status=pending`
+                    success: `${FRONTEND_URL}/profile.html?payment_status=success`, // Use a URL dinâmica do frontend
+                    failure: `${FRONTEND_URL}/profile.html?payment_status=failure`,   // Use a URL dinâmica do frontend
+                    pending: `${FRONTEND_URL}/profile.html?payment_status=pending`    // Use a URL dinâmica do frontend
                 },
                 auto_return: 'approved'
             };
@@ -537,7 +542,6 @@ app.post('/api/payment/deposit-mp', auth, async (req, res) => {
         const mpResponse = await preferences.create({ body: preference });
         console.log('[Mercado Pago API Full Response]', JSON.stringify(mpResponse, null, 2));
 
-        // Acesso direto às propriedades da resposta
         const initPoint = mpResponse.init_point;
         const sandboxInitPoint = mpResponse.sandbox_init_point;
         const paymentId = mpResponse.id;
@@ -545,7 +549,6 @@ app.post('/api/payment/deposit-mp', auth, async (req, res) => {
         console.log('Valor de initPoint:', initPoint);
         console.log('Valor de sandboxInitPoint:', sandboxInitPoint);
 
-        // Verificação da URL de redirecionamento
         const redirectUrl = sandboxInitPoint || initPoint;
         if (!redirectUrl) {
             console.error('[API PAYMENT] Resposta do Mercado Pago não contém URL de redirecionamento válida.');
@@ -568,8 +571,6 @@ app.post('/api/payment/deposit-mp', auth, async (req, res) => {
         res.status(500).json({ message: 'Erro ao iniciar pagamento. Tente novamente mais tarde.' });
     }
 });
-
-// ... (rest of the file) ...
 
 // --- Rotas da Carteira Temporária (mantidas para saque) ---
 app.post('/api/wallet/deposit', auth, async (req, res) => {
@@ -827,7 +828,8 @@ app.patch('/api/users/profile', auth, upload.single('avatar'), async (req, res) 
         if (updates.bio !== undefined) user.bio = updates.bio;
         if (updates.description !== undefined) user.description = updates.description;
         if (updates.console !== undefined) user.console = updates.console;
-        if (req.file) { user.avatarUrl = `http://localhost:${PORT}/avatars/${req.file.filename}`; }
+        // NOVO: Use a URL dinâmica do backend para o avatar
+        if (req.file) { user.avatarUrl = `${BACKEND_URL}/avatars/${req.file.filename}`; }
         if (!user.profileCompleted) { user.profileCompleted = true; }
         await user.save();
         if (onlineUsers.has(userId)) {
@@ -1090,7 +1092,8 @@ app.post('/api/forgot-password', async (req, res) => {
         const resetToken = crypto.randomBytes(32).toString('hex');
         const resetExpires = Date.now() + 3600000;
         user.resetPasswordToken = resetToken; user.resetPasswordExpires = resetExpires; await user.save();
-        const resetUrl = `http://127.0.0.1:5500/login.html?resetToken=${resetToken}`;
+        // NOVO: Use a URL dinâmica do frontend para o link de redefinição de senha
+        const resetUrl = `${FRONTEND_URL}/login.html?resetToken=${resetToken}`;
         const mailOptions = { to: user.email, from: process.env.EMAIL_USER, subject: 'GameRivals - Redefinição de Senha', html: `<p>Você solicitou uma redefinição de senha para sua conta GameRivals.</p><p>Por favor, clique no link a seguir para redefinir sua senha:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Este link expirará em 1 hora.</p><p>Se você não solicitou esta redefinição, por favor, ignore este e-mail.</p>` };
         await transporter.sendMail(mailOptions);
         res.status(200).json({ message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' });
