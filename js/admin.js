@@ -1,18 +1,7 @@
-// Função de Notificação Reutilizável
-function showNotification(message, type = 'info') {
-    const container = document.getElementById('notification-container');
-    if (!container) {
-        console.error('Container de notificação não encontrado.');
-        return;
-    }
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    container.appendChild(notification);
-    setTimeout(() => {
-        notification.remove();
-    }, 4000);
-}
+// arquivo: site_de_jogos/js/admin.js
+
+// NOVO: Importa showNotification e API_BASE_URL de utils.js
+import { showNotification, API_BASE_URL } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
@@ -29,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- SOCKET.IO para atualização de usuários online (apenas a contagem) ---
     if (typeof io !== 'undefined') {
-        const socket = io('http://localhost:3001');
+        const socket = io(API_BASE_URL); // ATUALIZADO: Usando API_BASE_URL
 
         socket.on('connect', () => {
             console.log('Admin Frontend: Conectado ao Socket.IO.');
@@ -76,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const fetchAdminData = async (endpoint) => {
         try {
-            const response = await fetch(`http://localhost:3001/api/admin/${endpoint}`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/${endpoint}`, { // ATUALIZADO: Usando API_BASE_URL
                 headers: {
                     'x-auth-token': token
                 }
@@ -241,7 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:3001/api/admin/users/${userIdToEdit}/update-coins`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/users/${userIdToEdit}/update-coins`, { // ATUALIZADO: Usando API_BASE_URL
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -291,7 +280,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const isActive = row.querySelector('td:nth-child(8)').textContent === 'Sim';
                 const action = isActive ? 'desativar' : 'ativar';
                 if (confirm(`Tem certeza que deseja ${action} a conta deste usuário?`)) {
-                    fetch(`http://localhost:3001/api/admin/users/${userId}/toggle-active`, {
+                    fetch(`${API_BASE_URL}/api/admin/users/${userId}/toggle-active`, { // ATUALIZADO: Usando API_BASE_URL
                         method: 'PATCH',
                         headers: {
                             'x-auth-token': token
@@ -326,7 +315,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const winnerId = winnerRadio.value;
 
         try {
-            const response = await fetch(`http://localhost:3001/api/admin/challenges/${challengeId}/resolve-dispute`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/challenges/${challengeId}/resolve-dispute`, { // ATUALIZADO: Usando API_BASE_URL
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -390,7 +379,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Botão Cancelar Desafio
             if (target.classList.contains('cancel-challenge-btn')) {
                 if (confirm("Tem certeza que deseja CANCELAR este desafio?")) {
-                    fetch(`http://localhost:3001/api/admin/challenges/${challengeId}/cancel`, {
+                    fetch(`${API_BASE_URL}/api/admin/challenges/${challengeId}/cancel`, { // ATUALIZADO: Usando API_BASE_URL
                         method: 'PATCH',
                         headers: {
                             'x-auth-token': token
