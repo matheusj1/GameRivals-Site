@@ -1,0 +1,697 @@
+/* arquivo: site_de_jogos/css/base.css */
+
+/* RESET CSS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* NOVO TEMA: CLEAN / MODERNO */
+:root {
+    --bg-color: #F8F9FA; /* Fundo muito claro */
+    --primary-neon: #6F42C1; /* Roxo vibrante (clean neon) */
+    --secondary-neon: #17A2B8; /* Ciano (clean neon) */
+    --text-color: #343A40; /* Texto escuro padrão */
+    --text-muted: #6C757D; /* Texto cinza suave */
+    --card-bg: #FFFFFF; /* Fundo de card branco puro */
+    --border-color: #E9ECEF; /* Borda cinza muito clara */
+    --glow-strong: 0 0 15px rgba(111, 66, 193, 0.5), 0 0 30px rgba(111, 66, 193, 0.3); /* Brilho suave */
+    --glow-medium: 0 0 10px rgba(111, 66, 193, 0.4);
+    --glow-soft: 0 0 5px rgba(111, 66, 193, 0.2);
+    --glow-hover-subtle-text: 0 0 5px rgba(111, 66, 193, 0.5);
+    --glow-hover-subtle-box: 0 0 10px rgba(111, 66, 193, 0.2);
+    --input-bg: #F0F2F5; /* Fundo de input levemente cinza */
+    --input-bg-disabled: #E9ECEF; /* NOVO: Cor de fundo para inputs desabilitados/readonly */
+    
+    --win-color: #28A745; /* Verde para vitória */
+    --loss-color: #DC3545; /* Vermelho para derrota */
+    --pending-color: #FFC107; /* Amarelo para pendente */
+
+    /* Cores de status mais clean */
+    --status-open-bg: rgba(23, 162, 184, 0.1);
+    --status-open-text: #17A2B8;
+    --status-accepted-bg: rgba(255, 193, 7, 0.1);
+    --status-accepted-text: #FFC107;
+    --status-disputed-bg: rgba(220, 53, 69, 0.1);
+    --status-disputed-text: #DC3545;
+    --status-completed-bg: rgba(40, 167, 69, 0.1);
+    --status-completed-text: #28A745;
+    --status-cancelled-bg: rgba(108, 117, 125, 0.1);
+    --status-cancelled-text: #6C757D;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    cursor: auto;
+    overflow-x: hidden; /* CRÍTICO: Previne scroll horizontal */
+}
+
+/* NOVO: Classe para impedir scroll no body quando a sidebar mobile está aberta */
+body.mobile-nav-open {
+    overflow: hidden; /* Impede o scroll do body */
+    position: fixed; /* Fixa o body para evitar scroll em iOS */
+    width: 100%; /* Garante que o body ocupe a largura total */
+    height: 100%; /* Garante que o body ocupe a altura total */
+}
+
+body::before { content: none; }
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+    overflow: visible;
+    padding: 0 20px;
+}
+
+/* HEADER GLOBAL */
+header {
+    background: var(--card-bg);
+    backdrop-filter: blur(5px);
+    color: var(--text-color);
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo h1 a {
+    display: block;
+    line-height: 0;
+}
+
+.logo h1 a img {
+    height: auto;
+    max-width: 160px;
+    display: block;
+    margin: 0;
+    filter: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.logo h1 a:hover img {
+    opacity: 0.9;
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+/* NOVO: Wrapper para os elementos do usuário no desktop, para controle de display */
+.user-nav-desktop {
+    display: flex; /* Visível por padrão em desktop */
+    align-items: center;
+    gap: 25px;
+}
+
+header nav ul#main-nav-links {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    /* Reset para desktop, para o mobile será sobrescrito */
+    position: static;
+    width: auto;
+    height: auto;
+    background: transparent;
+    box-shadow: none;
+    flex-direction: row;
+    transform: translateX(0); /* Garante visível em desktop */
+    transition: none; /* Desabilita transição em desktop */
+
+    /* NOVO: Esconde a seção mobile-user-info-section em desktop */
+    .mobile-user-info-section {
+        display: none; /* Esconde em desktop */
+    }
+}
+
+header nav ul#main-nav-links li {
+    display: inline-block;
+    margin-left: 30px;
+}
+
+header nav ul#main-nav-links li a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+    padding: 5px 0;
+    letter-spacing: 0;
+}
+
+header nav ul#main-nav-links li a:not(.nav-button):hover,
+header nav ul#main-nav-links li a.active:not(.nav-button) {
+    color: var(--primary-neon);
+    text-shadow: var(--glow-hover-subtle-text);
+}
+
+.nav-button {
+    background: var(--primary-neon);
+    color: #fff !important;
+    padding: 10px 25px !important;
+    border-radius: 25px;
+    font-weight: bold;
+    text-shadow: none !important;
+    box-shadow: var(--glow-medium);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease, color 0.3s ease;
+    border: none;
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo com min-height/width */
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-button:hover {
+    background: #5E3A9F;
+    box-shadow: var(--glow-hover-subtle-box);
+    transform: translateY(-2px);
+    color: #fff !important;
+}
+
+.hamburger-menu {
+    display: none; /* Escondido por padrão em desktop */
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 25px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1005; /* Acima da sidebar */
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    align-items: center; /* NOVO: Centraliza spans */
+}
+
+.hamburger-menu span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: var(--primary-neon);
+    border-radius: 3px;
+    transition: all 0.3s ease-in-out;
+}
+
+/* FOOTER GLOBAL */
+footer {
+    background: var(--text-color);
+    color: #fff;
+    text-align: center;
+    padding: 30px 0;
+    margin-top: 50px;
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* Ajustado: era 0 -2px, agora 0 2px para consistência */
+}
+footer ul { list-style: none; margin-top: 10px; }
+footer ul li { display: inline; margin: 0 15px; }
+footer ul li a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo */
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px; /* NOVO: Ajuste de padding para não distorcer */
+}
+footer ul li a:hover { color: var(--primary-neon); text-shadow: var(--glow-hover-subtle-text); }
+
+/* UTILITÁRIOS GLOBAIS */
+section { padding: 60px 0; position: relative; }
+section h2 {
+    /* NOVO: Tipografia fluida com clamp() */
+    font-size: clamp(28px, 5vw, 38px);
+    margin-bottom: 40px;
+    color: var(--text-color);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    text-shadow: none;
+    font-weight: 700;
+}
+.cta-button {
+    display: inline-block;
+    background: var(--primary-neon);
+    color: #fff;
+    padding: 15px 35px;
+    text-decoration: none;
+    border-radius: 25px;
+    font-size: 17px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease, color 0.3s ease;
+    box-shadow: var(--glow-medium);
+    border: none;
+    letter-spacing: 0.5px;
+    overflow: hidden; /* Garante que o flash não vaze */
+    position: relative; /* Para posicionar o ::after */
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo com min-height/width */
+    align-items: center;
+    justify-content: center;
+    text-align: center; /* NOVO: Garante que o texto se alinhe dentro do botão */
+}
+.cta-button.proximity-glow {
+    box-shadow: 0 0 10px rgba(111, 66, 193, 0.3), 0 0 20px rgba(111, 66, 193, 0.2);
+}
+.cta-button:hover {
+    background: #5E3A9F;
+    box-shadow: var(--glow-hover-subtle-box);
+    transform: translateY(-2px) scale(1.01);
+    color: #fff;
+}
+
+/* NOVO: Animações para botões de sucesso/falha */
+.cta-button.flash-success,
+.cta-button.flash-error {
+    transition: none; /* Desabilita transições normais durante o flash */
+    animation: none; /* Reset para permitir re-trigger */
+}
+
+.cta-button.flash-success::after,
+.cta-button.flash-error::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    animation: buttonFlash 0.6s ease-out forwards;
+}
+
+.cta-button.flash-success::after {
+    background-color: rgba(40, 167, 69, 0.8); /* Verde semi-transparente */
+}
+
+.cta-button.flash-error::after {
+    background-color: rgba(220, 53, 69, 0.8); /* Vermelho semi-transparente */
+}
+
+@keyframes buttonFlash {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+
+/* --- PADRONIZAÇÃO DE ELEMENTOS DE FORMULÁRIO --- */
+.input-group input[type="text"],
+.input-group input[type="email"],
+.input-group input[type="password"],
+.input-group input[type="number"],
+.input-group select,
+.input-group textarea,
+/* Adicionar classes para inputs fora de .input-group se houver */
+input[type="text"].standard-input,
+input[type="email"].standard-input,
+input[type="password"].standard-input,
+input[type="number"].standard-input,
+select.standard-input,
+textarea.standard-input {
+    width: 100%;
+    padding: 14px 18px; /* Padronizar padding para todos os inputs */
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px; /* Padronizar border-radius */
+    color: var(--text-color);
+    font-size: 16px; /* Padronizar font-size */
+    font-family: 'Montserrat', sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    box-shadow: none;
+    -webkit-appearance: none; /* Remover estilos padrão do navegador */
+    -moz-appearance: none;
+    appearance: none;
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+}
+
+.input-group input[type="text"]:focus,
+.input-group input[type="email"]:focus,
+.input-group input[type="password"]:focus,
+.input-group input[type="number"]:focus,
+.input-group select:focus,
+.input-group textarea:focus,
+input[type="text"].standard-input:focus,
+input[type="email"].standard-input:focus,
+input[type="password"].standard-input:focus,
+input[type="number"].standard-input:focus,
+select.standard-input:focus,
+textarea.standard-input:focus {
+    outline: none;
+    border-color: var(--primary-neon);
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+    background-color: var(--card-bg); /* Fundo branco no foco */
+}
+
+/* Estilo para selects com ícone de seta customizado */
+.input-group select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236C757D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 1.2em;
+    padding-right: 40px;
+}
+
+/* Readonly fields */
+input[readonly],
+textarea[readonly] {
+    background-color: var(--input-bg-disabled) !important; /* Uma nova variável pode ser criada */
+    color: var(--text-muted) !important;
+    cursor: not-allowed !important;
+    border-color: var(--border-color) !important;
+}
+
+/* NOVO: Animação de tremor para campos com erro */
+.input-group input.error,
+.input-group select.error,
+.input-group textarea.error {
+    animation: shakeX 0.5s;
+    border-color: var(--loss-color) !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2) !important;
+}
+@keyframes shakeX {
+    from,
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translate3d(-5px, 0, 0);
+    }
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translate3d(5px, 0, 0);
+    }
+}
+
+
+.reveal-on-scroll {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.reveal-on-scroll.visible { opacity: 1; transform: translateY(0); }
+
+/* NOTIFICAÇÕES */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999; 
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification {
+    min-width: 300px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border-left: 5px solid #fff;
+    opacity: 0;
+    transform: translateX(100%);
+    /* Removido forwards para controlar a remoção via JS */
+    animation: slideIn 0.5s ease-out; 
+    text-shadow: none;
+    display: flex; /* Para ícone */
+    align-items: center; /* Para ícone */
+    gap: 10px; /* Espaço entre ícone e texto */
+}
+/* NOVO: Ícone na notificação */
+.notification::before {
+    /* É necessário importar uma biblioteca de ícones como Font Awesome no HTML, se ainda não o fez */
+    /* Ex: <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> */
+    font-family: 'Font Awesome 5 Free'; 
+    font-weight: 900;
+    font-size: 1.2em;
+    content: ''; /* Conteúdo padrão vazio */
+    display: inline-block;
+    vertical-align: middle;
+}
+.notification.success::before { content: "\f058"; } /* Check-circle */
+.notification.error::before { content: "\f06a"; } /* Exclamation-circle */
+.notification.info::before { content: "\f05a"; } /* Info-circle */
+
+
+.notification.success {
+    background: #28A745;
+    border-left-color: #28A745;
+}
+
+.notification.error {
+    background: #DC3545;
+    border-left-color: #DC3545;
+}
+
+.notification.info {
+    background: #17A2B8;
+    border-left-color: #17A2B8;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+/* NOVO: Animação de saída da notificação */
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+
+/* ======================================================= */
+/* RESPONSIVIDADE GERAL - HEADER/FOOTER (Mobile-First Overrides) */
+/* ======================================================= */
+
+/* Estilos para Telas Médias (Tablets em retrato, celulares maiores) */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+
+    .logo h1 a img { 
+        max-width: 130px;
+    }
+
+    /* Oculta os elementos de navegação desktop */
+    .user-nav-desktop {
+        display: none;
+    }
+
+    .hamburger-menu { 
+        display: flex; /* Mostra o hambúrguer */
+    } 
+    
+    /* Menu de navegação mobile como sidebar (Gaveta Lateral) */
+    header nav ul#main-nav-links { 
+        position: fixed; /* Fixa na tela */
+        top: 0;
+        right: -280px; /* Escondido à direita, 280px para permitir um pouco de "puxada" */
+        width: 250px; /* Largura da sidebar */
+        height: 100vh; /* Altura total da viewport */
+        background-color: var(--card-bg); /* Fundo branco do menu */
+        box-shadow: -5px 0 15px rgba(0,0,0,0.1); /* Sombra à esquerda */
+        flex-direction: column;
+        justify-content: flex-start; /* Alinha itens ao topo */
+        padding: 20px; /* Padding geral */
+        transition: right 0.3s ease-in-out; /* Transição para deslizar */
+        z-index: 1006; /* NOVO: Aumentado z-index para garantir que esteja acima de tudo */
+        overflow-y: auto; /* Adiciona scroll se o conteúdo for muito grande */
+        -webkit-overflow-scrolling: touch; /* Melhora o scroll em iOS */
+        display: none; /* NOVO: Oculta por padrão no mobile */
+    }
+    
+    /* Estado ativo da sidebar */
+    header nav ul#main-nav-links.mobile-nav-active { 
+        right: 0; /* Desliza para a posição visível */
+        display: flex; /* NOVO: Mostra quando ativo */
+    }
+
+    header nav ul#main-nav-links li { 
+        display: block; 
+        margin: 0; 
+        width: 100%; 
+        text-align: left; /* Alinha links à esquerda */
+        border-bottom: 1px solid var(--border-color); /* Borda para separar links */
+        padding: 12px 0; /* Ajusta padding para itens */
+    }
+
+    header nav ul#main-nav-links li:last-child {
+        border-bottom: none; /* Último item sem borda */
+    }
+
+    header nav ul#main-nav-links li a { 
+        display: block; /* Links ocupam a largura total do item */
+        font-size: 16px; 
+    }
+
+    header nav ul#main-nav-links li a.nav-button { 
+        border-bottom: none; 
+        margin: 15px 0; /* Margem vertical */
+        display: block; /* Ocupa largura total na sidebar */
+        width: 100%;
+        padding: 10px 20px !important;
+        font-size: 15px !important;
+        text-align: center;
+    }
+
+    /* Animação do ícone hambúrguer (funciona em conjunto com o overlay) */
+    .hamburger-menu.active span:nth-child(1) { transform: translateY(8.5px) rotate(45deg); }
+    .hamburger-menu.active span:nth-child(2) { opacity: 0; }
+    .hamburger-menu.active span:nth-child(3) { transform: translateY(-8.5px) rotate(-45deg); }
+
+    /* Overlay escuro quando a sidebar está aberta */
+    body::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.4);
+        z-index: 1003; /* Abaixo da sidebar */
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease-in-out;
+    }
+    body.mobile-nav-open::after {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* NOVO: Estilo para a seção de informações do usuário dentro do menu mobile */
+    .mobile-user-info-section {
+        display: flex; /* Mostra a seção no mobile */
+        flex-direction: column;
+        align-items: center;
+        padding-bottom: 20px; /* Espaço abaixo */
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 15px; /* Espaço após a borda */
+        width: 100%; /* Ocupa a largura total */
+    }
+
+    .mobile-user-profile-summary {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .mobile-user-profile-summary .user-avatar {
+        width: 60px; /* Avatar maior no menu */
+        height: 60px;
+        border: 3px solid var(--primary-neon);
+        box-shadow: var(--glow-soft);
+    }
+    .mobile-user-profile-summary .username {
+        font-size: 18px; /* Nome de usuário maior */
+        font-weight: 700;
+        color: var(--text-color);
+    }
+
+    .mobile-user-stats-wallet {
+        display: flex;
+        flex-wrap: wrap; /* Permite quebra de linha */
+        justify-content: center;
+        gap: 15px;
+        width: 100%;
+    }
+    .mobile-user-stats-wallet .wallet-info,
+    .mobile-user-stats-wallet .user-stats {
+        padding: 6px 12px;
+        font-size: 14px;
+        border-radius: 15px;
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-color);
+        box-shadow: inset 0 0 3px rgba(0,0,0,0.05);
+    }
+    .mobile-user-stats-wallet .user-stats span {
+        font-size: 13px;
+    }
+
+
+    /* Ajustes gerais para telas menores */
+    section { padding: 40px 0; }
+    section h2 { 
+        font-size: 30px;
+        margin-bottom: 30px; 
+    }
+    .cta-button {
+        padding: 12px 25px !important;
+        font-size: 15px;
+    }
+
+    footer {
+        padding: 25px 0;
+    }
+    footer ul li {
+        margin: 0 10px;
+    }
+    footer p {
+        font-size: 14px;
+    }
+}
+
+/* Estilos para Celulares Pequenos */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 10px;
+    }
+    .logo h1 a img {
+        max-width: 100px;
+    }
+    section h2 {
+        font-size: 26px;
+        margin-bottom: 25px;
+    }
+    .cta-button {
+        padding: 10px 20px !important;
+        font-size: 14px;
+    }
+    .notification {
+        min-width: 280px;
+        right: 10px;
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+    /* Ajustes para sidebar em telas muito pequenas */
+    header nav ul#main-nav-links {
+        width: 80%;
+        right: -80%;
+    }
+}

@@ -1,0 +1,143 @@
+/* arquivo: site_de_jogos/css/_theme-and-utils.css */
+
+/* GERAL DE COMPONENTES E UTILS */
+.no-challenges-message {
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    background: var(--input-bg);
+    border-radius: 8px;
+    border: 1px dashed var(--border-color);
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+}
+
+/* SELEÇÃO DE TEMA (Estilos para o modal de seleção, que ainda existe no profile.html) */
+#theme-selection-modal-backdrop {
+    z-index: 2001; 
+}
+
+.theme-selection-options {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.theme-option {
+    cursor: pointer;
+    text-align: center;
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+    flex: 1; 
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.theme-option.light {
+    background-color: #F8F9FA;
+    color: #343A40;
+    border-color: #DEE2E6;
+}
+
+.theme-option.dark {
+    background-color: #343A40;
+    color: #E0E0E0;
+    border-color: #6C757D;
+}
+
+.theme-option:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-color: var(--primary-neon);
+}
+
+.theme-option input[type="radio"] { display: none; }
+
+.theme-option input[type="radio"]:checked + span {
+    font-weight: bold;
+    color: var(--primary-neon);
+    text-shadow: var(--glow-soft);
+}
+
+.theme-option .preview-box {
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    margin: 0 auto 10px auto;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.theme-option.light .preview-box {
+    background: linear-gradient(45deg, #FFFFFF 50%, #DEE2E6 50%);
+}
+
+.theme-option.dark .preview-box {
+    background: linear-gradient(45deg, #2C2C2C 50%, #1A1A1A 50%);
+}
+
+/* NOVO: Estilos para o botão de matchmaking em estado de carregamento */
+.matchmaking-loading-btn {
+    position: relative;
+    overflow: hidden;
+    pointer-events: none;
+    cursor: default;
+    color: transparent !important;
+    background-color: var(--primary-neon) !important;
+    border-color: var(--primary-neon) !important;
+    box-shadow: var(--glow-medium);
+    transition: none;
+}
+
+.matchmaking-loading-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    border-top: 3px solid #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: buttonSpin 1s linear infinite;
+    box-sizing: border-box;
+}
+
+@keyframes buttonSpin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ======================================================= */
+/* RESPONSIVIDADE UTILS (Mobile-First Overrides) */
+/* ======================================================= */
+
+/* Estilos para Telas Médias (Tablets em retrato e Celulares) */
+@media (max-width: 768px) {
+    .bet-amount-options {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+    .bet-option {
+        width: 100%;
+        min-width: unset;
+        padding: 10px 15px;
+        font-size: 15px;
+    }
+    .queue-count {
+        font-size: 0.85em;
+    }
+}
+
+/* Estilos para Celulares Pequenos */
+@media (max-width: 480px) {
+    .bet-option {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}

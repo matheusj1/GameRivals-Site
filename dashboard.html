@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - GameRivals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/_cards.css">
+    <link rel="stylesheet" href="css/_chat-and-friends.css">
+    <link rel="stylesheet" href="css/_modals.css">
+    <link rel="stylesheet" href="css/_theme-and-utils.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1 class="logo-h1"><a href="dashboard.html"><img src="img/logo-gamerivals.png" alt="Game Rivals Logo"></a></h1>
+            </div>
+
+            <nav>
+                <ul id="main-nav-links">
+                    <li class="mobile-user-info-section">
+                        <div class="mobile-user-profile-summary">
+                            <img src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar" id="current-user-avatar-mobile">
+                            <span class="username" id="username-mobile">Carregando...</span>
+                        </div>
+                        <div class="mobile-user-stats-wallet">
+                            <div class="wallet-info">
+                                <span class="coin-icon">💰</span>
+                                <span class="coin-balance" id="coin-balance-mobile">1.000</span>
+                            </div>
+                            <div class="user-stats">
+                                <span>🏆<span id="user-wins-mobile">0</span></span>
+                                <span>☠️<span id="user-losses-mobile">0</span></span>
+                            </div>
+                        </div>
+                    </li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="profile.html">Meu Perfil</a></li>
+                    <li><a href="#" id="logout-button" class="nav-button">Sair</a></li>
+                </ul>
+            </nav>
+
+            <button class="hamburger-menu" aria-label="Abrir menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="user-nav-desktop">
+                <div class="wallet-info">
+                    <span class="coin-icon">💰</span>
+                    <span class="coin-balance" id="coin-balance-desktop">1.000</span>
+                </div>
+                <div class="user-profile" id="user-profile-menu-desktop">
+                    <span class="username" id="username-desktop">Carregando... <img id="current-user-console-icon" alt="Console Icon" class="console-icon" style="display: none;"></span>
+                    <div class="user-stats">
+                        <span>🏆<span id="user-wins-desktop">0</span></span>
+                        <span>☠️<span id="user-losses-desktop">0</span></span>
+                    </div>
+                    <img src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar" id="current-user-avatar-desktop">
+                </div>
+            </div>
+            </div>
+    </header>
+
+    <main class="dashboard-main">
+        <div class="challenges-column">
+            <div class="challenges-header">
+                <h2>Desafios Abertos</h2>
+                <button class="cta-button" id="create-challenge-btn">Criar Novo Desafio</button>
+            </div>
+            <div class="challenges-list">
+            </div>
+
+            <div class="my-challenges-section">
+                <h2>Meus Desafios</h2>
+                <div class="my-challenges-list">
+                </div>
+                <div class="show-more-container" id="my-challenges-show-more-container" style="display: none;">
+                    <button class="show-more-btn" id="my-challenges-show-more-btn">Mostrar Mais</button>
+                </div>
+            </div>
+        </div>
+
+        <aside class="sidebar-column">
+            <div class="friends-section-container">
+                <div class="friends-tabs">
+                    <button class="friends-tab-btn active" data-tab="online-players-tab">Online (<span id="player-count">0</span>)</button>
+                    <button class="friends-tab-btn" data-tab="my-friends-tab">Amigos (<span id="friends-count">0</span>)</button>
+                    <button class="friends-tab-btn" data-tab="friend-requests-tab">Solicitações (<span id="friend-requests-count">0</span>)</button>
+                    <button class="friends-tab-btn" data-tab="search-friends-tab">Pesquisar</button>
+                    <button class="friends-tab-btn" data-tab="matchmaking-tab">Procurar Partida</button>
+                    <button class="friends-tab-btn" data-tab="blocked-users-tab">Bloqueados</button>
+                </div>
+                <div class="friends-content">
+                    <div id="online-players-tab" class="friends-tab-content active">
+                        <ul class="player-list">
+                            </ul>
+                    </div>
+                    <div id="my-friends-tab" class="friends-tab-content">
+                        <ul class="friends-list">
+                            </ul>
+                    </div>
+                    <div id="friend-requests-tab" class="friends-tab-content">
+                        <ul class="friend-requests-list">
+                            </ul>
+                        <h4 style="color: var(--text-muted); margin-top: 20px; border-top: 1px dashed var(--border-color); padding-top: 15px;">Solicitações Enviadas</h4>
+                        <ul class="sent-friend-requests-list">
+                            </ul>
+                    </div>
+                    <div id="search-friends-tab" class="friends-tab-content">
+                        <div class="search-input-group">
+                            <input type="text" id="friend-search-input" placeholder="Pesquisar por nome de usuário...">
+                            <button id="friend-search-btn">🔍</button>
+                        </div>
+                        <ul class="search-results-list">
+                            </ul>
+                        <p class="form-error-message" id="friend-search-error"></p>
+                    </div>
+                    <div id="matchmaking-tab" class="friends-tab-content">
+                        <h3 class="matchmaking-title">Procurar Partida Rápida</h3>
+                        <p class="matchmaking-description">Selecione o jogo e o valor da aposta para entrar na fila de espera. O sistema encontrará um oponente automaticamente!</p>
+                        <form id="matchmaking-form" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                            <div class="input-group">
+                                <label for="matchmaking-game-select">Jogo</label>
+                                <select id="matchmaking-game-select" name="game" required>
+                                    <option value="" disabled selected>Selecione um jogo</option>
+                                    <option value="Ea Sports 24">Ea Sports 24</option>
+                                    <option value="Ea Sports 25">Ea Sports 25</option>
+                                    <option value="Rocket League">Rocket League</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="matchmaking-console-select">Console</label>
+                                <select id="matchmaking-console-select" name="console" required>
+                                    <option value="" disabled selected>Selecione um console</option>
+                                    <option value="PS5">PlayStation 5</option>
+                                    <option value="PS4">PlayStation 4</option>
+                                    <option value="XBOX Series">Xbox Series S/X</option>
+                                    <option value="Xbox One">Xbox One</option>
+                                    <option value="PC">PC</option>
+                                    <option value="Nintendo Switch">Nintendo Switch</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="matchmaking-bet-amount">Valor da Aposta (em moedas)</label>
+                                <div class="bet-amount-options">
+                                    <label class="bet-option">
+                                        <input type="radio" name="matchmaking-bet" value="10" required> 10 💰 <span class="queue-count" data-bet="10">(0)</span>
+                                    </label>
+                                    <label class="bet-option">
+                                        <input type="radio" name="matchmaking-bet" value="20"> 20 💰 <span class="queue-count" data-bet="20">(0)</span>
+                                    </label>
+                                    <label class="bet-option">
+                                        <input type="radio" name="matchmaking-bet" value="50"> 50 💰 <span class="queue-count" data-bet="50">(0)</span>
+                                    </label>
+                                    <label class="bet-option">
+                                        <input type="radio" name="matchmaking-bet" value="100"> 100 💰 <span class="queue-count" data-bet="100">(0)</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <p class="form-error-message" id="matchmaking-error"></p>
+                            <button type="submit" class="cta-button form-submit-btn" id="join-matchmaking-btn">Entrar na Fila</button>
+                            <button type="button" class="cta-button form-submit-btn" id="leave-matchmaking-btn" style="background-color: #e74c3c; display: none;">Sair da Fila</button>
+                            <p id="matchmaking-status-message" style="text-align: center; color: var(--secondary-neon); font-weight: bold; margin-top: 10px;"></p>
+                        </form>
+                    </div>
+                    <div id="blocked-users-tab" class="friends-tab-content">
+                        <ul class="blocked-users-list">
+                            </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <h3>Chat Universal</h3>
+                <div class="chat-messages">
+                </div>
+                <form class="chat-input-area">
+                    <input type="text" placeholder="Digite sua mensagem..." autocomplete="off">
+                    <button type="button" class="emoji-toggle-btn" data-target="universal-emoji-palette">😀</button>
+                    <button type="submit">Enviar</button>
+                    <div class="emoji-palette" id="universal-emoji-palette">
+                        <span>😊</span><span>👍</span><span>❤️</span><span>😂</span><span>🔥</span>
+                        <span>😎</span><span>👋</span><span>💯</span><span>🎮</span><span>🏆</span>
+                        <span>💪</span><span>🎉</span><span>🥳</span><span>🤩</span><span>🤙</span>
+                    </div>
+                </form>
+            </div>
+        </aside>
+    </main>
+
+    <div class="modal-backdrop" id="challenge-modal-backdrop">
+        <div class="modal" id="challenge-modal">
+            <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
+            <h2>Criar Novo Desafio</h2>
+            <form id="create-challenge-form">
+                <div class="input-group"><label for="game-select">Jogo</label><select id="game-select" name="game" required><option value="" disabled selected>Selecione um jogo</option><option value="Ea Sports 24">Ea Sports 24</option><option value="Ea Sports 25">Ea Sports 25</option><option value="Rocket League">Rocket League</option></select></div>
+                <div class="input-group"><label for="console-select">Console</label><select id="console-select" name="console" required><option value="" disabled selected>Selecione um console</option><option value="PS5">PlayStation 5</option><option value="PS4">PlayStation 4</option><option value="XBOX Series">Xbox Series S/X</option><option value="Xbox One">Xbox One</option><option value="PC">PC</option><option value="Nintendo Switch">Nintendo Switch</option></select></div>
+                <div class="input-group">
+                    <label for="scheduled-time">Horário Sugerido (Opcional)</label>
+                    <input type="time" id="scheduled-time" name="scheduledTime">
+                </div>
+                <div class="input-group"><label for="bet-amount">Valor da Aposta (em moedas)</label><input type="number" id="bet-amount" name="betAmount" placeholder="Ex: 100" min="10" required></div>
+                <p class="form-error-message" id="challenge-error"></p>
+                <button type="submit" class="cta-button form-submit-btn">Lançar Desafio</button>
+            </form>
+        </div>
+    </div>
+    <div class="modal-backdrop" id="report-modal-backdrop">
+        <div class="modal" id="report-modal">
+            <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
+            <h2>Reportar Resultado</h2>
+            <p class="report-match-info">Partida: <span id="report-match-details"></span></p>
+            <form id="report-result-form">
+                <div class="input-group"><label>Quem venceu o desafio?</label><div class="winner-selection"></div></div>
+                <input type="hidden" id="report-challenge-id">
+                <p class="form-error-message" id="report-error"></p>
+                <button type="submit" class="cta-button form-submit-btn">Confirmar Vencedor</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="match-found-modal-backdrop" style="display: none;">
+        <div class="modal" id="match-found-modal">
+            <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
+            <h2>Partida Encontrada!</h2>
+            <p style="text-align: center; font-size: 1.1em; margin-bottom: 20px;">Seu desafio foi aceito!</p>
+            <div style="text-align: center; margin-bottom: 25px;">
+                <p style="font-size: 1.2em; font-weight: bold; color: var(--primary-neon);"><span id="match-found-game"></span> - <span id="match-found-console"></span></p>
+                <p style="font-size: 1.1em; color: var(--text-muted);">Aposta: <span class="coin-icon">💰</span> <span id="match-found-bet"></span> moedas</p>
+                <p style="margin-top: 15px; font-size: 1.1em;">Contra: <strong id="match-found-opponent-username"></strong></p>
+            </div>
+            <button class="cta-button form-submit-btn" id="view-match-details-btn">Ver Detalhes da Partida</button>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="private-challenge-modal-backdrop">
+        <div class="modal" id="private-challenge-modal">
+            <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
+            <h2>Desafiar <span id="private-challenge-opponent-username"></span></h2>
+            <form id="create-private-challenge-form">
+                <input type="hidden" id="private-challenge-opponent-id">
+                <div class="input-group">
+                    <label for="private-game-select">Jogo</label>
+                    <select id="private-game-select" name="game" required>
+                        <option value="" disabled selected>Selecione um jogo</option>
+                        <option value="Ea Sports 24">Ea Sports 24</option>
+                        <option value="Ea Sports 25">Ea Sports 25</option>
+                        <option value="Rocket League">Rocket League</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="private-console-select">Console</label>
+                    <select id="private-console-select" name="console" required>
+                        <option value="" disabled selected>Selecione um console</option>
+                        <option value="PS5">PlayStation 5</option>
+                        <option value="PS4">PlayStation 4</option>
+                        <option value="XBOX Series">Xbox Series S/X</option>
+                        <option value="Xbox One">Xbox One</option>
+                        <option value="PC">PC</option>
+                        <option value="Nintendo Switch">Nintendo Switch</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="private-bet-amount">Valor da Aposta (em moedas)</label>
+                    <input type="number" id="private-bet-amount" name="betAmount" placeholder="Ex: 100" min="0" required>
+                    <small style="color: var(--text-muted); display: block; margin-top: 5px;">Digite 0 para desafio sem moedas.</small>
+                </div>
+                <p class="form-error-message" id="private-challenge-error"></p>
+                <button type="submit" class="cta-button form-submit-btn">Enviar Desafio</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification-container"></div>
+<template id="user-profile-dropdown-template">
+    <div class="user-profile-dropdown">
+        <ul>
+            <li><a href="profile.html">Meu Perfil</a></li>
+            <li><a href="#" id="dropdown-logout-button">Sair</a></li>
+        </ul>
+    </div>
+</template>
+
+<template id="search-result-item-template">
+    <li class="app-list-item player-item">
+        <img src="img/avatar-placeholder.png" alt="Avatar" class="app-list-item-avatar">
+        <div class="app-list-item-main-content">
+            <span class="app-list-item-username">Nome de Usuário<img src="" alt="Console Icon" class="console-icon"></span>
+            <span class="app-list-item-sub-info console-name"></span>
+        </div>
+        <div class="app-list-item-actions">
+            <button class="view-profile-btn" title="Ver Perfil">👁️</button>
+            <button class="start-chat-btn" title="Iniciar Chat">💬</button>
+            <button class="send-friend-request-btn" title="Adicionar Amigo">➕</button>
+        </div>
+    </li>
+</template>
+
+<template id="friend-list-item-template">
+    <li class="app-list-item friend-list-item">
+        <img src="img/avatar-placeholder.png" alt="Avatar" class="app-list-item-avatar">
+        <div class="app-list-item-main-content">
+            <span class="app-list-item-username">Nome do Amigo <img src="" alt="Console Icon" class="console-icon"></span>
+            <span class="app-list-item-sub-info console-name"></span>
+            <span class="app-list-item-sub-info online-status"></span>
+        </div>
+        <div class="app-list-item-actions">
+            <button class="start-private-chat-btn" title="Chat Privado">💬</button>
+            <button class="challenge-friend-btn" title="Desafiar Amigo">⚔️</button>
+            <button class="remove-friend-btn" title="Remover Amigo">✖️</button>
+        </div>
+    </li>
+</template>
+
+<template id="received-friend-request-template">
+    <li class="app-list-item friend-request-item">
+        <img src="img/avatar-placeholder.png" alt="Avatar" class="app-list-item-avatar">
+        <div class="app-list-item-main-content">
+            <span class="app-list-item-username">Solicitação De <img src="" alt="Console Icon" class="console-icon"></span>
+            <span class="app-list-item-sub-info console-name"></span>
+            <span class="app-list-item-sub-info status-pending">Pendente</span>
+        </div>
+        <div class="app-list-item-actions">
+            <button class="accept-friend-request-btn" title="Aceitar">✔️</button>
+            <button class="reject-friend-request-btn" title="Rejeitar">✖️</button>
+        </div>
+    </li>
+</template>
+
+<template id="sent-friend-request-template">
+    <li class="app-list-item sent-friend-request-item">
+        <img src="img/avatar-placeholder.png" alt="Avatar" class="app-list-item-avatar">
+        <div class="app-list-item-main-content">
+            <span class="app-list-item-username">Enviado Para <img src="" alt="Console Icon" class="console-icon"></span>
+            <span class="app-list-item-sub-info console-name"></span>
+            <span class="app-list-item-sub-info status-pending">Pendente</span>
+        </div>
+        <div class="app-list-item-actions">
+            <button class="cancel-friend-request-btn" title="Cancelar Solicitação">❌</button>
+        </div>
+    </li>
+</template>
+
+<template id="blocked-user-item-template">
+    <li class="app-list-item blocked-user-item">
+        <img src="img/avatar-placeholder.png" alt="Avatar" class="app-list-item-avatar">
+        <div class="app-list-item-main-content">
+            <span class="app-list-item-username">Nome do Usuário<img src="" alt="Console Icon" class="console-icon"></span>
+            <span class="app-list-item-sub-info console-name"></span>
+        </div>
+        <div class="app-list-item-actions">
+            <button class="view-profile-btn" title="Ver Perfil">👁️</button>
+            <button class="unblock-user-btn" title="Desbloquear Usuário">🔓</button>
+        </div>
+    </li>
+</template>
+
+<template id="private-chat-template">
+    <div class="private-chat-window">
+        <div class="private-chat-header">
+            <span class="chat-partner-name"></span>
+            <button class="close-private-chat">&times;</button>
+        </div>
+        <div class="private-chat-messages">
+            </div>
+        <form class="private-chat-input-area">
+            <input type="text" placeholder="Digite sua mensagem..." autocomplete="off">
+            <button type="button" class="emoji-toggle-btn">😀</button>
+            <button type="submit">Enviar</button>
+            <div class="emoji-palette">
+                <span>😊</span><span>👍</span><span>❤️</span><span>😂</span><span>🔥</span>
+                <span>😎</span><span>👋</span><span>💯</span><span>🎮</span><span>🏆</span>
+                <span>💪</span><span>🎉</span><span>🥳</span><span>🤩</span><span>🤙</span>
+            </div>
+        </form>
+    </div>
+</template>
+
+<template id="other-user-profile-modal-template">
+    <div class="modal-backdrop">
+        <div class="modal other-user-profile-modal">
+            <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
+            
+            <div class="profile-header">
+                <img id="other-user-avatar-preview" src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar-large">
+                <div class="header-info">
+                    <h2 id="other-user-profile-username">Nome do Usuário</h2>
+                    <p class="console-display">
+                        <img id="other-user-console-icon-profile" src="" alt="Console Icon" class="console-icon"> 
+                        <span id="other-user-console">N/A</span>
+                    </p>
+                    <div class="profile-stats-summary">
+                        <span class="stat-item">🏆 <span id="other-user-wins">0</span> Vitórias</span>
+                        <span class="stat-item">☠️ <span id="other-user-losses">0</span> Derrotas</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-details-content">
+                <h3>Bio</h3>
+                <p id="other-user-bio">N/A</p>
+
+                <h3>Sobre Mim</h3>
+                <p id="other-user-description">N/A</p>
+                
+            </div>
+
+            <div class="modal-actions-profile">
+                <button class="cta-button view-profile-chat-btn" id="start-private-chat-from-modal">Iniciar Chat Privado</button>
+                <button class="cta-button" id="send-friend-request-from-modal" style="background-color: var(--secondary-neon);">Enviar Solicitação de Amizade</button>
+                <button class="cta-button" id="block-user-from-modal" style="background-color: #e74c3c; margin-top: 10px;">Bloquear Usuário</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+        <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+        <script src="js/utils.js" type="module"></script>
+        <script src="js/challenges.js" type="module"></script>
+        <script src="js/friends_and_chat.js" type="module"></script>
+        <script src="js/matchmaking.js" type="module"></script>
+        <script src="js/dashboard.js" type="module"></script>
+        <div id="private-chats-container"></div>
+
+    </body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Administração - GameRivals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/_cards.css">
+    <link rel="stylesheet" href="css/_chat-and-friends.css">
+    <link rel="stylesheet" href="css/_modals.css">
+    <link rel="stylesheet" href="css/_theme-and-utils.css">
+    </head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><a href="dashboard.html"><img src="img/logo-gamerivals.png" alt="Game Rivals Logo"></a></h1>
+            </div>
+            
+            <nav>
+                <ul id="main-nav-links">
+                    <li class="mobile-user-info-section" style="display: none;">
+                        <div class="mobile-user-profile-summary">
+                            <img src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar">
+                            <span class="username">Visitante</span>
+                        </div>
+                        <div class="mobile-user-stats-wallet">
+                             <div class="wallet-info">
+                                <span class="coin-icon">💰</span>
+                                <span class="coin-balance">0</span>
+                            </div>
+                            <div class="user-stats">
+                                <span>🏆<span>0</span></span>
+                                <span>☠️<span>0</span></span>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="#" id="admin-logout-button" class="nav-button">Sair Admin</a></li>
+                </ul>
+            </nav>
+
+            <button class="hamburger-menu" aria-label="Abrir menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <div class="user-nav-desktop" style="display: none;"></div>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <h2>Painel de Administração</h2>
+
+        <section id="admin-dashboard-overview">
+            <h3>Visão Geral do Site</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Total de Usuários</h4>
+                    <p id="total-users">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Usuários Online</h4>
+                    <p id="online-users-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Desafios Criados</h4>
+                    <p id="total-challenges">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Desafios Completos</h4>
+                    <p id="completed-challenges">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Desafios em Disputa</h4>
+                    <p id="disputed-challenges">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Moedas Apostadas</h4>
+                    <p id="total-coins-bet">0</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin-user-management">
+            <h3>Gerenciamento de Usuários</h3>
+            <div class="table-container">
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Registro</th>
+                            <th>Vitórias</th>
+                            <th>Derrotas</th>
+                            <th>Moedas</th>
+                            <th>Ativo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="admin-challenge-management">
+            <h3>Gerenciamento de Desafios</h3>
+            <div class="table-container">
+                <table id="challenges-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Jogo</th>
+                            <th>Console</th>
+                            <th>Aposta</th>
+                            <th>Criado Por</th>
+                            <th>Oponente</th>
+                            <th>Status</th>
+                            <th>Vencedor</th>
+                            <th>Criação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; <span id="currentYear"></span> GameRivals Admin. Todos os direitos reservados.</p>
+            <ul>
+                <li><a href="#">Termos de Uso</a></li>
+                <li><a href="#">Política de Privacidade</a></li>
+                <li><a href="#">Contato</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <div class="modal-backdrop" id="edit-coins-modal-backdrop">
+        <div class="modal">
+            <button class="close-modal-btn">&times;</button>
+            <h2>Editar Moedas do Usuário</h2>
+            <form id="edit-coins-form" class="modal-form">
+                <p>Usuário: <strong id="edit-coins-username"></strong></p>
+                <div class="input-group">
+                    <label for="new-coins-amount">Novo Saldo de Moedas</label>
+                    <input type="number" id="new-coins-amount" name="newCoinsAmount" min="0" required>
+                </div>
+                <input type="hidden" id="edit-coins-user-id">
+                <p class="form-error-message" id="edit-coins-error"></p>
+                <button type="submit" class="cta-button form-submit-btn">Salvar Moedas</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="resolve-dispute-modal-backdrop">
+        <div class="modal">
+            <button class="close-modal-btn">&times;</button>
+            <h2>Resolver Disputa de Desafio</h2>
+            <p>Desafio: <strong id="dispute-challenge-info"></strong></p>
+            <p>Criado por: <span id="dispute-creator-username"></span> (ID: <span id="dispute-creator-id"></span>)</p>
+            <p>Oponente: <span id="dispute-opponent-username"></span> (ID: <span id="dispute-opponent-id"></span>)</p>
+            <form id="resolve-dispute-form" class="modal-form">
+                <div class="input-group">
+                    <label>Quem é o vencedor?</label>
+                    <div class="winner-selection">
+                        </div>
+                </div>
+                <input type="hidden" id="dispute-challenge-id">
+                <p class="form-error-message" id="resolve-dispute-error"></p>
+                <button type="submit" class="cta-button form-submit-btn">Confirmar Vencedor e Resolver</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="notification-container"></div>
+    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+    <script src="js/main.js"></script> <script src="js/admin.js"></script>
+</body>
+</html>

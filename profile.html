@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - GameRivals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/_cards.css">
+    <link rel="stylesheet" href="css/_chat-and-friends.css">
+    <link rel="stylesheet" href="css/_modals.css">
+    <link rel="stylesheet" href="css/_theme-and-utils.css">
+    </head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><a href="dashboard.html"><img src="img/logo-gamerivals.png" alt="Game Rivals Logo"></a></h1>
+            </div>
+            
+            <nav>
+                <ul id="main-nav-links">
+                    <li class="mobile-user-info-section">
+                        <div class="mobile-user-profile-summary">
+                            <img src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar" id="current-user-avatar-mobile">
+                            <span class="username" id="username-mobile">Carregando...</span>
+                        </div>
+                        <div class="mobile-user-stats-wallet">
+                            <div class="wallet-info">
+                                <span class="coin-icon">💰</span>
+                                <span class="coin-balance" id="coin-balance-mobile">1.000</span>
+                            </div>
+                            <div class="user-stats">
+                                <span>🏆<span id="user-wins-mobile">0</span></span>
+                                <span>☠️<span id="user-losses-mobile">0</span></span>
+                            </div>
+                        </div>
+                    </li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="profile.html">Meu Perfil</a></li>
+                    <li><a href="#" id="logout-button" class="nav-button">Sair</a></li>
+                </ul>
+            </nav>
+
+            <button class="hamburger-menu" aria-label="Abrir menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <div class="user-nav-desktop" style="display: none;"></div>
+        </div>
+    </header>
+
+    <main class="profile-main">
+        <div class="profile-container">
+            <h2>Meu Perfil</h2>
+            <form id="profile-form">
+                <div class="avatar-upload-area">
+                    <img id="profile-avatar-preview" src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar-large">
+                    <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                    <label for="avatar-upload" class="cta-button upload-avatar-btn">Alterar Foto</label>
+                </div>
+
+                <div class="input-group">
+                    <label for="username">Nome de Usuário</label>
+                    <input type="text" id="username" name="username" readonly>
+                </div>
+
+                <div class="input-group">
+                    <label for="phone">Telefone (Opcional)</label>
+                    <input type="text" id="phone" name="phone" placeholder="(XX) XXXXX-XXXX">
+                </div>
+
+                <div class="input-group">
+                    <label for="bio">Bio / Slogan</label>
+                    <textarea id="bio" name="bio" rows="3" placeholder="Conte algo sobre você..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="description">Descrição Detalhada</label>
+                    <textarea id="description" name="description" rows="5" placeholder="Uma descrição mais completa sobre seu estilo de jogo, interesses, etc."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="console">Console Principal</label>
+                    <select id="console" name="console" required>
+                        <option value="" disabled selected>Selecione seu console</option>
+                        <option value="PS5">PlayStation 5</option>
+                        <option value="PS4">PlayStation 4</option>
+                        <option value="XBOX Series">Xbox Series S/X</option>
+                        <option value="Xbox One">Xbox One</option>
+                        <option value="PC">PC</option>
+                        <option value="Nintendo Switch">Nintendo Switch</option>
+                    </select>
+                </div>
+
+                <p class="form-error-message" id="profile-error"></p>
+                <button type="submit" class="cta-button form-submit-btn">Salvar Perfil</button>
+            </form>
+
+            <hr style="width: 80%; border-color: var(--border-color); margin: 30px 0;">
+
+            <div style="text-align: center; width: 100%;">
+                <button type="button" class="cta-button" id="open-theme-modal-btn" style="background-color: var(--secondary-neon);">Escolher Tema do Site</button>
+            </div>
+
+            <hr style="width: 80%; border-color: var(--border-color); margin: 30px 0;">
+            <section id="temporary-wallet" style="text-align: center; width: 100%;">
+                <h3>Minha Carteira</h3>
+                <div class="wallet-info" style="margin: 20px auto; max-width: 250px;">
+                    <span class="coin-icon">💰</span>
+                    <span class="coin-balance" id="wallet-current-balance">Carregando...</span>
+                </div>
+
+                <div class="wallet-actions" style="display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin: 0 auto;">
+                    <h4>Depositar Moedas (via Pix)</h4>
+                    <div class="deposit-options" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+                        <button type="button" class="cta-button deposit-amount-btn" data-amount="10">10 Moedas</button>
+                        <button type="button" class="cta-button deposit-amount-btn" data-amount="20">20 Moedas</button>
+                        <button type="button" class="cta-button deposit-amount-btn" data-amount="50">50 Moedas</button>
+                        <button type="button" class="cta-button deposit-amount-btn" data-amount="100">100 Moedas</button>
+                        <button type="button" class="cta-button deposit-amount-btn" data-amount="1000">1000 Moedas</button>
+                    </div>
+
+                    <div id="pix-payment-details" style="margin-top: 20px; display: none; background-color: var(--input-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
+                        <h5 style="color: var(--primary-neon); margin-bottom: 15px;">Escaneie para Pagar via Pix</h5>
+                        <img id="pix-qr-code" src="" alt="QR Code Pix" style="width: 180px; height: 180px; display: block; margin: 0 auto 15px auto; border: 1px solid var(--border-color);">
+                        <p style="color: var(--text-muted); font-size: 0.9em; margin-bottom: 10px;">Ou copie e cole:</p>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <input type="text" id="pix-key-copy" value="" readonly style="width: 100%; max-width: 200px; text-align: center;">
+                            <button class="cta-button" id="copy-pix-key-btn" style="padding: 8px 12px; font-size: 14px;">Copiar</button>
+                        </div>
+                        <p style="color: var(--text-muted); font-size: 0.8em; margin-top: 15px;">Aguardando confirmação do pagamento...</p>
+                    </div>
+
+
+                    <div class="input-group" style="margin-top: 20px;">
+                        <label for="withdraw-amount">Retirar Moedas (simulado)</label>
+                        <input type="number" id="withdraw-amount" name="withdraw-amount" placeholder="Ex: 200" min="1" required>
+                    </div>
+                    <button type="button" class="cta-button form-submit-btn" id="withdraw-btn" style="background-color: #e74c3c;">Retirar</button>
+                    <p class="form-error-message" id="wallet-error"></p>
+                </div>
+            </section>
+            </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; <span id="currentYear"></span> GameRivals. Todos os direitos reservados.</p>
+            <ul>
+                <li><a href="#">Termos de Uso</a></li>
+                <li><a href="#">Política de Privacidade</a></li>
+                <li><a href="#">Contato</a></li>
+            </ul>
+        </footer>
+
+        <div id="notification-container"></div>
+
+        <div class="modal-backdrop" id="theme-selection-modal-backdrop">
+            <div class="modal">
+                <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
+                <h2>Escolha seu Tema</h2>
+                <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px;">
+                    Selecione o tema de sua preferência para o site.
+                </p>
+                <div class="theme-selection-options" id="profile-theme-selector">
+                    <label class="theme-option light" id="profile-light-theme-option">
+                        <input type="radio" name="theme" value="light">
+                        <div class="preview-box"></div>
+                        <span>Tema Claro</span>
+                    </label>
+                    <label class="theme-option dark" id="profile-dark-theme-option">
+                        <input type="radio" name="theme" value="dark">
+                        <div class="preview-box"></div>
+                        <span>Tema Escuro</span>
+                    </label>
+                </div>
+                <button type="button" class="cta-button form-submit-btn" id="save-theme-button">Salvar Tema</button>
+            </div>
+        </div>
+    <div class="modal-backdrop" id="theme-selection-modal-backdrop">
+        <div class="modal">
+            <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
+            <h2>Escolha seu Tema</h2>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px;">
+                Selecione o tema de sua preferência para o site.
+            </p>
+            <div class="theme-selection-options" id="profile-theme-selector">
+                <label class="theme-option light" id="profile-light-theme-option">
+                    <input type="radio" name="theme" value="light">
+                    <div class="preview-box"></div>
+                    <span>Tema Claro</span>
+                </label>
+                <label class="theme-option dark" id="profile-dark-theme-option">
+                    <input type="radio" name="theme" value="dark">
+                    <div class="preview-box"></div>
+                    <span>Tema Escuro</span>
+                </label>
+            </div>
+            <button type="button" class="cta-button form-submit-btn" id="save-theme-button">Salvar Tema</button>
+        </div>
+    </div>
+
+        <script src="js/main.js"></script>
+        <script src="js/profile.js"></script>
+    </body>
+    </html>

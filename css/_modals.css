@@ -1,0 +1,739 @@
+/* arquivo: site_de_jogos/css/_modals.css */
+
+/* MODAIS GERAIS */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.modal-backdrop.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    width: 100%;
+    /* MUDANÇA: max-width padrão para mobile primeiro */
+    max-width: 500px;
+    transform: translateY(-20px);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+/* Garante que a área principal de conteúdo dentro do modal que precisa rolar não tenha padding extra que force o scroll */
+.modal > *:not(.close-modal-btn) {
+    flex-shrink: 0;
+}
+
+/* A seção de membros do grupo e o chat precisam ter flex-grow e, se houver, um max-height */
+/* REMOVIDO: Regras de CSS específicas para grupo
+.group-members-section {
+    margin-bottom: 20px;
+}
+
+.group-members-list {
+    max-height: 150px; 
+    overflow-y: auto; 
+    margin-bottom: 15px; 
+} */
+
+
+.modal-backdrop.active .modal {
+    transform: translateY(0);
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 32px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s ease, transform 0.2s ease;
+    text-shadow: none;
+}
+
+.close-modal-btn:hover {
+    color: var(--primary-neon);
+    transform: scale(1.1);
+}
+
+.modal h2 {
+    color: var(--primary-neon);
+    text-shadow: var(--glow-soft);
+    margin-bottom: 25px;
+    font-size: 28px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.modal select,
+.modal input[type="number"],
+.modal input[type="text"],
+.modal textarea {
+    width: 100%;
+    padding: 14px 18px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 16px;
+    font-family: 'Montserrat', sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: none;
+}
+
+.modal select:focus,
+.modal input[type="number"]:focus,
+.modal input[type="text"]:focus,
+.modal textarea:focus {
+    outline: none;
+    border-color: var(--primary-neon);
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+    background-color: var(--card-bg);
+}
+
+.modal select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A0A0A0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 1.2em;
+    padding-right: 40px;
+}
+
+.report-match-info {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 25px;
+    font-size: 16px;
+}
+
+.report-match-info span {
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+.winner-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.winner-option {
+    display: flex;
+    align-items: center;
+    background-color: var(--input-bg);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: none;
+}
+
+.winner-option:hover {
+    border-color: var(--primary-neon);
+    background-color: var(--card-bg);
+    box-shadow: inset 0 0 5px rgba(111, 66, 193, 0.1);
+}
+
+.winner-option input[type="radio"] {
+    opacity: 0;
+    position: fixed;
+    width: 0;
+}
+
+.winner-option label {
+    flex-grow: 1;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--text-color);
+}
+
+.winner-option input[type="radio"]:checked+label {
+    color: var(--primary-neon);
+    font-weight: bold;
+    text-shadow: var(--glow-soft);
+}
+
+.modal-form .input-group {
+    margin-bottom: 15px;
+}
+
+.modal-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-muted);
+}
+
+.modal-form .form-error-message {
+    margin-top: 10px;
+    color: var(--loss-color);
+}
+
+.modal-form button[type="submit"] {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 25px;
+}
+
+.table-actions button {
+    background-color: var(--primary-neon);
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    margin-right: 5px;
+    box-shadow: var(--glow-soft);
+}
+
+.table-actions button.edit {
+    background-color: var(--secondary-neon);
+}
+
+.table-actions button.toggle-active {
+    background-color: #FFC107;
+}
+
+.table-actions button.resolve {
+    background-color: var(--win-color);
+}
+
+.table-actions button.cancel {
+    background-color: var(--loss-color);
+}
+
+.table-actions button:hover {
+    opacity: 0.9;
+    box-shadow: var(--glow-medium);
+    color: #fff;
+}
+
+/* NOVO: Estilos para o Modal de Perfil de Outro Usuário Modernizado */
+.other-user-profile-modal {
+    padding: 0;
+    overflow: hidden;
+}
+
+.other-user-profile-modal .close-modal-btn {
+    z-index: 10;
+}
+
+.other-user-profile-modal .profile-header {
+    background: linear-gradient(135deg, var(--primary-neon) 0%, var(--secondary-neon) 100%);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    margin-bottom: 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.other-user-profile-modal .user-avatar-large {
+    width: 120px;
+    height: 120px;
+    border: 4px solid rgba(255, 255, 255, 0.6);
+    box-shadow: var(--glow-medium);
+    margin-bottom: 15px;
+}
+
+.other-user-profile-modal .user-avatar-large:hover {
+    transform: scale(1.05);
+    box-shadow: var(--glow-strong);
+}
+
+.other-user-profile-modal .header-info h2 {
+    color: #fff;
+    text-shadow: none;
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.other-user-profile-modal .console-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.other-user-profile-modal .console-display .console-icon {
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+    filter: brightness(1.2);
+}
+
+.other-user-profile-modal .profile-stats-summary {
+    display: flex;
+    gap: 20px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    text-shadow: none;
+}
+
+.other-user-profile-modal .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.other-user-profile-modal .profile-details-content {
+    padding: 0 30px 20px 30px;
+    color: var(--text-color);
+}
+
+.other-user-profile-modal .profile-details-content h3 {
+    font-size: 20px;
+    color: var(--primary-neon);
+    text-shadow: var(--glow-soft);
+    margin-top: 25px;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 5px;
+}
+
+.other-user-profile-modal .profile-details-content p {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.other-user-profile-modal .modal-actions-profile {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 30px 30px 30px;
+}
+
+.other-user-profile-modal .modal-actions-profile .cta-button {
+    width: 100%;
+    font-size: 16px;
+    padding: 12px 20px;
+    border-radius: 25px;
+}
+
+/* REMOVIDO: Estilos para o Modal de Seleção de Grupo (select-group-modal-backdrop) */
+/* #select-group-modal-backdrop .modal h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+#select-group-modal-backdrop .modal p {
+    font-size: 16px;
+}
+
+.invite-group-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    border-bottom: 1px dashed var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 8px;
+}
+
+.invite-group-option:last-child {
+    border-bottom: none;
+}
+
+.invite-group-option:hover {
+    background-color: var(--input-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.invite-group-option .group-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+.invite-group-option .groupname {
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 17px;
+}
+
+.invite-group-option .group-member-count {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.invite-group-option .player-item-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--primary-neon);
+}
+
+.invite-group-option .send-group-invite-btn {
+    background-color: var(--primary-neon);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: var(--glow-soft);
+}
+
+.invite-group-option .send-group-invite-btn:hover {
+    background-color: #5E3A9F;
+    transform: scale(1.03);
+    box-shadow: var(--glow-medium);
+} */
+
+/* REMOVIDO: Estilos para o chat dentro do modal de grupo (group-details-modal) */
+/* .group-chat-section {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.group-chat-section h3 {
+    text-align: center;
+    font-size: 20px;
+    color: var(--primary-neon);
+    margin-bottom: 15px;
+    text-shadow: var(--glow-soft);
+}
+
+.group-chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 250px;
+    padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.group-chat-input-area {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.group-chat-input-area input {
+    flex-grow: 1;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    border-radius: 20px;
+    padding: 10px 15px;
+    color: var(--text-color);
+    outline: none;
+}
+
+.group-chat-input-area button {
+    background: var(--primary-neon);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 0 15px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: var(--glow-soft);
+    flex-shrink: 0;
+} */
+
+
+/* ======================================================= */
+/* RESPONSIVIDADE MODAIS (Otimização Mobile) */
+/* ======================================================= */
+
+/* MUDANÇA: Estilos para Telas Maiores (Desktop Web) - Acima de 768px */
+@media (min-width: 769px) { /* Aplica-se a partir de tablets em paisagem e desktops */
+    /* REMOVIDO: Regras de modal de grupo para desktop
+    #group-details-modal-backdrop .modal {
+        max-width: 700px; 
+        max-height: 80vh; 
+        padding: 40px 50px; 
+    }
+
+    #group-details-modal-backdrop .group-members-list {
+        max-height: 200px; 
+    }
+
+    #group-details-modal-backdrop .group-chat-messages {
+        max-height: 300px; 
+    } */
+
+    /* Opcional: Ajustes finos para layout em colunas se desejar no futuro, mas por enquanto, mantém flex-direction: column */
+    /* .group-members-section, .group-chat-section {
+        flex-direction: row; // Exemplo para layout em colunas
+    } */
+}
+
+
+/* Estilos Mobile (Tablet em retrato e Celulares) - Abaixo de 768px */
+@media (max-width: 768px) {
+    .other-user-profile-modal .profile-header {
+        flex-direction: column;
+        padding: 25px 15px;
+        gap: 10px;
+    }
+
+    .other-user-profile-modal .header-info h2 {
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+
+    .other-user-profile-modal .user-avatar-large {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 10px;
+    }
+
+    .other-user-profile-modal .console-display {
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+
+    .other-user-profile-modal .profile-stats-summary {
+        font-size: 14px;
+        flex-direction: row;
+        gap: 15px;
+    }
+
+    .other-user-profile-modal .profile-details-content,
+    .other-user-profile-modal .modal-actions-profile {
+        padding: 0 15px 15px 15px;
+    }
+
+    .other-user-profile-modal .profile-details-content h3 {
+        font-size: 18px;
+        margin-top: 20px;
+        margin-bottom: 8px;
+        padding-bottom: 4px;
+    }
+
+    .other-user-profile-modal .profile-details-content p {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .other-user-profile-modal .modal-actions-profile .cta-button {
+        font-size: 15px;
+        padding: 10px 15px;
+        border-radius: 20px;
+    }
+
+    .modal {
+        width: 95%;
+        padding: 20px;
+        max-height: 95vh;
+    }
+
+    .modal h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .modal select,
+    .modal input[type="number"],
+    .modal input[type="text"],
+    .modal textarea {
+        padding: 12px 15px;
+        font-size: 15px;
+    }
+
+    .modal select {
+        padding-right: 30px;
+    }
+
+    .modal-form button[type="submit"] {
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    /* REMOVIDO: Estilos para seleção de grupo em mobile
+    #select-group-modal-backdrop .modal {
+        max-width: 90%;
+        padding: 20px;
+    }
+
+    .invite-group-option {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+        padding: 10px;
+        gap: 6px;
+    }
+
+    .invite-group-option .player-item-avatar {
+        margin-bottom: 8px;
+    }
+
+    .invite-group-option .group-details {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .invite-group-option .groupname {
+        width: 100%;
+        font-size: 16px;
+    }
+
+    .invite-group-option .group-member-count {
+        font-size: 12px;
+    }
+
+    .invite-group-option .send-group-invite-btn {
+        margin-top: 8px;
+        width: 100%;
+        max-width: 120px;
+        padding: 8px 12px;
+        font-size: 13px;
+    } */
+
+    /* REMOVIDO: Estilos de chat de grupo para mobile
+    .group-chat-messages {
+        max-height: 180px;
+        padding-right: 5px;
+    }
+
+    .group-chat-input-area input {
+        padding: 10px;
+    } */
+}
+
+/* Estilos Mobile (Celulares em retrato) - Abaixo de 480px */
+@media (max-width: 480px) {
+    .modal {
+        padding: 15px;
+    }
+
+    .modal h2 {
+        font-size: 22px;
+    }
+
+    .modal select,
+    .modal input[type="number"],
+    .modal input[type="text"],
+    .modal textarea {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .modal select {
+        padding-right: 25px;
+    }
+
+    .modal-form button[type="submit"] {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .other-user-profile-modal .header-info h2 {
+        font-size: 24px;
+    }
+
+    .other-user-profile-modal .user-avatar-large {
+        width: 80px;
+        height: 80px;
+    }
+
+    .other-user-profile-modal .console-display {
+        font-size: 13px;
+    }
+
+    .other-user-profile-modal .profile-stats-summary {
+        font-size: 12px;
+        gap: 10px;
+    }
+
+    .other-user-profile-modal .profile-details-content,
+    .other-user-profile-modal .modal-actions-profile {
+        padding: 0 10px 10px 10px;
+    }
+
+    .other-user-profile-modal .profile-details-content h3 {
+        font-size: 15px;
+    }
+
+    .other-user-profile-modal .profile-details-content p {
+        font-size: 13px;
+    }
+
+    .other-user-profile-modal .modal-actions-profile .cta-button {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+
+    /* REMOVIDO: Estilos de seleção de grupo para mobile pequeno
+    #select-group-modal-backdrop .modal {
+        padding: 15px;
+    }
+
+    .invite-group-option .groupname {
+        font-size: 15px;
+    }
+
+    .invite-group-option .group-member-count {
+        font-size: 11px;
+    }
+
+    .invite-group-option .send-group-invite-btn {
+        font-size: 12px;
+        padding: 6px 10px;
+    } */
+
+    /* REMOVIDO: Estilos de chat de grupo para mobile pequeno
+    .group-chat-messages {
+        max-height: 150px;
+    }
+
+    .group-chat-input-area input {
+        padding: 8px;
+    } */
+}

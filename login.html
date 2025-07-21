@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Cadastro - GameRivals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/_cards.css">
+    <link rel="stylesheet" href="css/_chat-and-friends.css">
+    <link rel="stylesheet" href="css/_modals.css">
+    <link rel="stylesheet" href="css/_theme-and-utils.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><a href="index.html"><img src="img/logo-gamerivals.png" alt="Game Rivals Logo"></a></h1>
+            </div>
+            
+            <nav>
+                <ul id="main-nav-links">
+                    <li class="mobile-user-info-section" style="display: none;">
+                        <div class="mobile-user-profile-summary">
+                            <img src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar">
+                            <span class="username">Visitante</span>
+                        </div>
+                        <div class="mobile-user-stats-wallet">
+                             <div class="wallet-info">
+                                <span class="coin-icon">💰</span>
+                                <span class="coin-balance">0</span>
+                            </div>
+                            <div class="user-stats">
+                                <span>🏆<span>0</span></span>
+                                <span>☠️<span>0</span></span>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="#">Desafios</a></li>
+                    <li><a href="#">Ranking</a></li>
+                    <li><a href="login.html" class="nav-button">Login/Registrar</a></li>
+                </ul>
+            </nav>
+
+            <button class="hamburger-menu" aria-label="Abrir menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <div class="user-nav-desktop" style="display: none;"></div>
+        </div>
+    </header>
+
+    <main class="main-form">
+        <div class="form-container" id="auth-container">
+            <div class="form-wrapper" id="login-form">
+                <h2>Login</h2>
+                <form id="login-form-inner" novalidate>
+                    <div class="input-group">
+                        <label for="login-email">E-mail</label>
+                        <input type="email" id="login-email" name="login-email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="login-senha">Senha</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="login-senha" name="login-senha" required>
+                            <button type="button" class="toggle-password" aria-label="Mostrar senha">👁️</button>
+                        </div>
+                    </div>
+                    <p class="form-error-message" id="login-error"></p>
+                    <button type="submit" class="cta-button form-submit-btn">Entrar</button>
+                </form>
+                <p class="form-switch-link">
+                    <a href="#" id="forgot-password-link">Esqueceu sua senha?</a><br> Não tem uma conta? <a href="#" id="show-register-link">Crie uma agora</a>
+                </p>
+            </div>
+
+            <div class="form-wrapper" id="cadastro-form">
+                <h2>Crie sua Conta</h2>
+                <form id="cadastro-form-inner" novalidate>
+                    <div class="input-group">
+                        <label for="reg-username">Nome de Usuário</label>
+                        <input type="text" id="reg-username" name="username" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-email">E-mail</label>
+                        <input type="email" id="reg-email" name="email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-senha">Senha</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reg-senha" name="senha" required>
+                            <button type="button" class="toggle-password" aria-label="Mostrar senha">👁️</button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="reg-confirmar-senha">Confirmar Senha</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reg-confirmar-senha" name="confirmar-senha" required>
+                            <button type="button" class="toggle-password" aria-label="Mostrar senha">👁️</button>
+                        </div>
+                    </div>
+                    <p class="form-error-message" id="register-error"></p>
+                    <button type="submit" class="cta-button form-submit-btn">Criar Conta</button>
+                </form>
+                <p class="form-switch-link">
+                    Já tem uma conta? <a href="#" id="show-login-link">Faça login</a>
+                </p>
+            </div>
+
+            <div class="form-wrapper" id="forgot-password-form" style="position: absolute; top: 40px; left: 0; width: 100%; padding: 0 40px; opacity: 0; transform: translateX(100%); pointer-events: none;">
+                <h2>Esqueceu a Senha?</h2>
+                <form id="request-reset-form" novalidate>
+                    <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px;">
+                        Informe seu e-mail para receber um link de redefinição de senha.
+                    </p>
+                    <div class="input-group">
+                        <label for="forgot-email">E-mail</label>
+                        <input type="email" id="forgot-email" name="forgot-email" required>
+                    </div>
+                    <p class="form-error-message" id="forgot-password-error"></p>
+                    <button type="submit" class="cta-button form-submit-btn">Enviar Link</button>
+                </form>
+                <p class="form-switch-link">
+                    Lembrou? <a href="#" id="back-to-login-link">Voltar para Login</a>
+                </p>
+            </div>
+
+            <div class="form-wrapper" id="reset-password-form" style="position: absolute; top: 40px; left: 0; width: 100%; padding: 0 40px; opacity: 0; transform: translateX(100%); pointer-events: none;">
+                <h2>Redefinir Senha</h2>
+                <form id="do-reset-form" novalidate>
+                    <div class="input-group">
+                        <label for="new-password">Nova Senha</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="new-password" name="new-password" required>
+                            <button type="button" class="toggle-password" aria-label="Mostrar senha">👁️</button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="confirm-new-password">Confirmar Nova Senha</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="confirm-new-password" name="confirm-new-password" required>
+                            <button type="button" class="toggle-password" aria-label="Mostrar senha">👁️</button>
+                        </div>
+                    </div>
+                    <input type="hidden" id="reset-token-field">
+                    <p class="form-error-message" id="reset-password-error"></p>
+                    <button type="submit" class="cta-button form-submit-btn">Redefinir Senha</button>
+                </form>
+                <p class="form-switch-link">
+                    Voltar para <a href="#" id="back-to-login-from-reset-link">Login</a>
+                </p>
+            </div>
+
+            </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; <span id="currentYear"></span> GameRivals. Todos os direitos reservados.</p>
+            <ul>
+                <li><a href="#">Termos de Uso</a></li>
+                <li><a href="#">Política de Privacidade</a></li>
+                <li><a href="#">Contato</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+      <div id="notification-container"></div>
+</body>
+</html>

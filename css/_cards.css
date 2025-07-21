@@ -1,0 +1,328 @@
+/* arquivo: site_de_jogos/css/_cards.css */
+
+/* CARDS DE DESAFIO */
+.challenge-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--card-bg); /* Fundo branco */
+    padding: 15px 20px;
+    border-radius: 12px; /* Mais arredondado */
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05); /* Sombra suave */
+}
+
+.challenge-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1), var(--glow-hover-subtle-box); /* Sombra mais pronunciada no hover */
+    border-color: var(--primary-neon);
+}
+
+.game-info, .challenger-info, .bet-info {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Ajusta espaçamento */
+}
+
+.game-info img, .challenger-info img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px; /* Mais arredondado */
+    object-fit: cover;
+    border: 1px solid var(--border-color); /* Borda padrão */
+}
+.challenger-info img {
+    border-radius: 50%;
+    border-color: var(--primary-neon); /* Borda primária para avatares */
+}
+
+.game-details {
+    display: flex;
+    flex-direction: column;
+}
+.game-details h3 { font-size: 18px; margin: 0; color: var(--text-color); }
+.game-details span { font-size: 14px; color: var(--text-muted); }
+
+.bet-amount { font-size: 18px; font-weight: bold; color: #FFC107; } /* Amarelo para moedas */
+.coin-icon { text-shadow: none; }
+
+
+.accept-challenge-btn {
+    background: var(--primary-neon);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px; /* Mais arredondado */
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease, opacity 0.3s ease; /* Adicionado opacity */
+    box-shadow: var(--glow-soft); /* Brilho suave */
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo com min-height/width */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.accept-challenge-btn:hover {
+    background: #5E3A9F; /* Roxo mais escuro no hover */
+    transform: scale(1.03);
+    box-shadow: var(--glow-medium);
+}
+
+/* NOVO: Animação de sucesso/falha para botões de card */
+.accept-challenge-btn.action-success,
+.report-result-btn.action-success,
+.delete-challenge-btn.action-success {
+    background-color: var(--win-color) !important;
+    color: white !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px var(--win-color) !important;
+    opacity: 1; /* Garante visibilidade durante a animação */
+    animation: flashSuccess 0.4s ease-out;
+}
+
+.accept-challenge-btn.action-error,
+.report-result-btn.action-error,
+.delete-challenge-btn.action-error {
+    background-color: var(--loss-color) !important;
+    color: white !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px var(--loss-color) !important;
+    opacity: 1;
+    animation: flashError 0.4s ease-out;
+}
+
+@keyframes flashSuccess {
+    0% { background-color: var(--win-color); transform: scale(1); }
+    50% { background-color: var(--win-color); transform: scale(1.03); }
+    100% { background-color: var(--win-color); transform: scale(1); }
+}
+@keyframes flashError {
+    0% { background-color: var(--loss-color); transform: scale(1); }
+    50% { background-color: var(--loss-color); transform: scale(1.03); }
+    100% { background-color: var(--loss-color); transform: scale(1); }
+}
+
+
+.status-indicator {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.status-indicator.status-open {
+    background-color: var(--status-open-bg); /* Usando variáveis de status clean */
+    color: var(--status-open-text);
+}
+
+.status-indicator.status-accepted {
+    background-color: var(--status-accepted-bg);
+    color: var(--status-accepted-text);
+}
+
+.status-indicator.status-disputed {
+    background-color: var(--status-disputed-bg);
+    color: var(--status-disputed-text);
+}
+
+.status-indicator.status-completed {
+    background-color: var(--status-completed-bg);
+    color: var(--status-completed-text);
+}
+.status-indicator.status-cancelled {
+    background-color: var(--status-cancelled-bg);
+    color: var(--status-cancelled-text);
+}
+
+.my-challenge-card .action-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px; /* Espaçamento entre os botões de ação */
+}
+
+.report-result-btn {
+    background: var(--secondary-neon); /* Usando cor secundária */
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 25px; /* Más arredondado */
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+    text-align: center;
+    box-shadow: var(--glow-soft);
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo */
+    align-items: center;
+    justify-content: center;
+}
+.report-result-btn:hover {
+    background: #138D9E; /* Ciano más escuro no hover */
+    transform: scale(1.03);
+    box-shadow: var(--glow-medium);
+}
+.report-result-btn:disabled {
+    background-color: var(--border-color); /* Cinza claro cuando desabilitado */
+    color: var(--text-muted);
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Novo estilo para o botão de chat no card de desafio */
+.my-challenge-card .action-area .start-private-chat-from-challenge-btn {
+    background: var(--primary-neon); /* Ou outra cor que combine, ex: #17A2B8 (secondary-neon) */
+    color: #fff;
+    border: none;
+    width: 35px; /* Tamanho fixo para ícone */
+    height: 35px; /* Tamanho fixo para ícone */
+    border-radius: 50%; /* Circular */
+    cursor: pointer;
+    font-size: 18px; /* Tamanho do ícone */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: var(--glow-soft);
+    flex-shrink: 0; /* Impede que ele encolha */
+    padding: 0; /* Remove padding padrão */
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+}
+
+.my-challenge-card .action-area .start-private-chat-from-challenge-btn:hover {
+    background: #5E3A9F; /* Cor más escura no hover */
+    transform: scale(1.1);
+    box-shadow: var(--glow-medium);
+}
+
+
+.delete-challenge-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+    transition: color 0.2s ease, transform 0.2s ease, opacity 0.3s ease;
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo */
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-challenge-btn:hover {
+    color: var(--loss-color); /* Vermelho para exclusão */
+    transform: scale(1.1);
+}
+
+/* ======================================================= */
+/* RESPONSIVIDADE CARDS (Otimização Mobile) */
+/* ======================================================= */
+
+/* Estilos Mobile (Tablet em retrato e Celulares) - Abaixo de 768px */
+@media (max-width: 768px) {
+    .challenge-card {
+        flex-direction: column; /* Empilha itens verticalmente */
+        align-items: flex-start; /* Alinha à esquerda no mobile */
+        padding: 15px;
+        gap: 12px; /* Ajusta espaçamento */
+    }
+    .game-info, .challenger-info, .bet-info, .accept-challenge-btn {
+        width: 100%; /* Ocupa largura total */
+        justify-content: center; /* Centraliza o conteúdo dentro do item */
+    }
+    .game-info { 
+        flex-direction: column; 
+        text-align: center; 
+        margin-bottom: 5px; /* Ajusta margem */
+    }
+    .game-info img { margin-bottom: 5px; }
+
+    .challenger-info { margin-top: 5px; } /* Ajusta margem */
+    .bet-info { margin-top: 5px; } /* Ajusta margem */
+    .accept-challenge-btn { 
+        padding: 10px 18px; /* Ajusta padding */
+        font-size: 15px; /* Ajusta font-size */
+    }
+
+    .my-challenge-card {
+        grid-template-columns: 1fr; /* Uma coluna */
+        text-align: center;
+        padding: 15px;
+        gap: 12px; /* Ajusta espaçamento */
+    }
+
+    .my-challenge-card .game-info,
+    .my-challenge-card .players-info,
+    .my-challenge-card .status-indicator,
+    .my-challenge-card .action-area {
+        width: 100%; 
+        justify-content: center; 
+    }
+
+    .my-challenge-card .game-info { flex-direction: column; text-align: center; margin-bottom: 5px; }
+    .my-challenge-card .game-info img { margin-bottom: 5px; }
+
+    .my-challenge-card .players-info { flex-direction: column; margin-bottom: 5px; }
+    .my-challenge-card .players-info .username { font-size: 15px; }
+    .my-challenge-card .players-info .vs-text { margin: 3px 0; font-size: 11px; } /* Ajusta menores */
+
+    .report-result-btn, .delete-challenge-btn { 
+        width: 100%; 
+        max-width: 180px; /* Reduz largura máxima */
+        margin: 0 auto; 
+        padding: 10px 15px; 
+        font-size: 14px; /* Ajusta font-size */
+    }
+    /* Ajuste para o botão de chat em mobile para que ele não se estique muito */
+    .my-challenge-card .action-area .start-private-chat-from-challenge-btn {
+        width: 35px; /* Manter o tamanho fixo */
+        height: 35px;
+        margin: 0; /* Remover margem auto se presente para alinhamento */
+    }
+}
+
+/* Estilos Mobile (Celulares em retrato) - Abaixo de 480px */
+@media (max-width: 480px) {
+    .challenge-card {
+        padding: 12px 15px; /* Ainda menos padding */
+    }
+    .game-info img, .challenger-info img {
+        width: 35px; /* Imagens menores */
+        height: 35px;
+    }
+    .game-details h3 { font-size: 16px; }
+    .game-details span { font-size: 13px; }
+    .bet-amount { font-size: 16px; }
+    .accept-challenge-btn { 
+        padding: 8px 15px; 
+        font-size: 14px; 
+    }
+    .status-indicator { font-size: 12px; }
+
+    .my-challenge-card {
+        padding: 12px 15px; /* Ainda menos padding */
+    }
+    .my-challenge-card .players-info .username { font-size: 14px; }
+    .my-challenge-card .players-info .vs-text { font-size: 10px; }
+    .report-result-btn, .delete-challenge-btn { 
+        max-width: 150px; 
+        padding: 8px 12px; 
+        font-size: 13px; 
+    }
+    .my-challenge-card .action-area .start-private-chat-from-challenge-btn {
+        width: 30px; /* Ainda menor em telas muito pequenas */
+        height: 30px;
+        font-size: 16px;
+    }
+}

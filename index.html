@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nome do Seu Site de Jogos - Início</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/_cards.css">
+    <link rel="stylesheet" href="css/_chat-and-friends.css">
+    <link rel="stylesheet" href="css/_modals.css">
+    <link rel="stylesheet" href="css/_theme-and-utils.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1><a href="index.html"><img src="img/logo-gamerivals.png" alt="Game Rivals Logo"></a></h1>
+            </div>
+            
+            <nav>
+                <ul id="main-nav-links">
+                    <li class="mobile-user-info-section" style="display: none;">
+                        <div class="mobile-user-profile-summary">
+                            <img src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar">
+                            <span class="username">Visitante</span>
+                        </div>
+                        <div class="mobile-user-stats-wallet">
+                             <div class="wallet-info">
+                                <span class="coin-icon">💰</span>
+                                <span class="coin-balance">0</span>
+                            </div>
+                            <div class="user-stats">
+                                <span>🏆<span>0</span></span>
+                                <span>☠️<span>0</span></span>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li><a href="index.html">Início</a></li>
+                    <li><a href="#">Desafios</a></li>
+                    <li><a href="#">Ranking</a></li>
+                    <li><a href="login.html" class="nav-button">Login/Registrar</a></li>
+                </ul>
+            </nav>
+
+            <button class="hamburger-menu" aria-label="Abrir menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <div class="user-nav-desktop" style="display: none;"></div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-blob blob1"></div>
+            <div class="hero-blob blob2"></div>
+            <div class="container">
+                <h2>Bem-vindo ao Seu Universo de Jogos!</h2>
+                <p class="hero-subtitle">Desafie jogadores, aposte suas moedas e mostre quem é o melhor.</p>
+                <a href="login.html" class="cta-button">Crie sua Conta Agora!</a>
+            </div>
+        </section>
+
+        <section class="how-it-works">
+            <div class="container">
+                <h2>Como Funciona?</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-icon">🎮</div>
+                        <h3>1. Crie sua Conta</h3>
+                        <p>Registre-se rapidamente e faça seu primeiro depósito.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">💰</div>
+                        <h3>2. Adquira Moedas</h3>
+                        <p>Converta seu saldo em moedas do site para apostar.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">⚔️</div>
+                        <h3>3. Desafie e Jogue</h3>
+                        <p>Escolha seu jogo, defina o valor e desafie outros jogadores.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon">🏆</div>
+                        <h3>4. Vença e Ganhe</h3>
+                        <p>Mostre suas habilidades e aumente seu saldo de moedas!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="featured-games">
+            <div class="container">
+                <h2>Jogos em Destaque</h2>
+                <div class="games-grid">
+                    <div class="game-card">
+                        <img src="img/ea24.png" alt="Nome do Jogo 1">
+                        <div class="game-card-content">
+                            <h3>Ea Sports 24</h3>
+                            <p>P54/PS5; X One/X Series; PC; Switch</p>
+                        </div>
+                    </div>
+                    <div class="game-card">
+                        <img src="img/ea25.avif" alt="Nome do Jogo 2">
+                        <div class="game-card-content">
+                            <h3>Ea Sports 25</h3>
+                            <p>P54/PS5; X One/X Series; PC; Switch</p>
+                        </div>
+                    </div>
+                    <div class="game-card">
+                        <img src="img/rl.jpg" alt="Nome do Jogo 3">
+                        <div class="game-card-content">
+                            <h3>Rocket League</h3>
+                            <p>P54/PS5; X One/X Series; PC; Switch</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; <span id="currentYear"></span> GameRivals. Todos os direitos reservados.</p>
+            <ul>
+                <li><a href="#">Termos de Uso</a></li>
+                <li><a href="#">Política de Privacidade</a></li>
+                <li><a href="#">Contato</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <div id="notification-container"></div>
+</body>
+</html>

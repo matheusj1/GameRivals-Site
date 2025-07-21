@@ -1,0 +1,591 @@
+/* arquivo: site_de_jogos/css/_chat-and-friends.css */
+
+/* CHAT GERAL E PRIVADO */
+.emoji-toggle-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50% !important; 
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    background: var(--input-bg) !important;
+    color: var(--text-muted) !important;
+    border: 1px solid var(--border-color) !important;
+    transition: all 0.2s ease;
+    box-shadow: none;
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+}
+
+.emoji-toggle-btn:hover {
+    background: var(--primary-neon) !important;
+    border-color: var(--primary-neon) !important;
+    box-shadow: var(--glow-soft);
+    transform: scale(1.05);
+    color: #fff !important;
+}
+
+.emoji-palette {
+    position: absolute;
+    bottom: 50px;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-width: 250px; 
+    z-index: 100; 
+    display: none; 
+}
+
+.emoji-palette.active { display: flex; }
+
+.emoji-palette span {
+    cursor: pointer;
+    font-size: 24px;
+    padding: 5px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo */
+    align-items: center;
+    justify-content: center;
+}
+
+.emoji-palette span:hover {
+    background-color: rgba(111, 66, 193, 0.1);
+}
+
+.message {
+    max-width: 85%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.message p { margin: 0; line-height: 1.4; font-size: 15px;}
+.msg-author { font-size: 12px; font-weight: bold; display: block; margin-bottom: 3px; }
+
+.message-timestamp {
+    font-size: 0.75em;
+    color: var(--text-muted);
+    margin-left: 8px;
+    white-space: nowrap;
+    opacity: 0.8;
+}
+
+.message.received {
+    background-color: var(--input-bg);
+    align-self: flex-start;
+    border-top-left-radius: 0;
+    border: 1px solid var(--border-color);
+}
+.message.received .msg-author { color: var(--text-color); }
+
+.message.sent {
+    background-color: var(--primary-neon);
+    color: #fff;
+    align-self: flex-end;
+    border-top-right-radius: 0;
+    border: 1px solid var(--primary-neon);
+}
+.message.sent .msg-author { color: rgba(255,255,255,0.8); }
+.message.sent .message-timestamp { color: rgba(255,255,255,0.6); }
+
+.message.system-message {
+    background-color: var(--input-bg);
+    border-radius: 8px;
+    padding: 8px 15px;
+    text-align: center;
+    margin: 10px auto;
+    max-width: 90%;
+    border: 1px solid var(--border-color);
+}
+
+
+#private-chats-container {
+    position: fixed;
+    bottom: 0;
+    right: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    z-index: 1010;
+}
+
+.private-chat-window {
+    width: 320px;
+    height: 400px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+}
+
+.private-chat-window.active { opacity: 1; transform: translateY(0) scale(1); }
+
+.private-chat-header {
+    background-color: var(--primary-neon); /* Ajusta para cor primária */
+    padding: 10px 15px;
+    color: #fff;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.close-private-chat {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo */
+    align-items: center;
+    justify-content: center;
+}
+
+.private-chat-messages {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.private-chat-input-area {
+    position: relative; 
+    display: flex;
+    border-top: 1px solid var(--border-color);
+}
+
+.private-chat-input-area input {
+    flex-grow: 1;
+    border: none;
+    background: var(--input-bg);
+    padding: 12px;
+    color: var(--text-color);
+    outline: none;
+    box-shadow: none;
+}
+.private-chat-input-area input:focus { background-color: var(--card-bg); }
+
+
+.private-chat-input-area button {
+    background-color: var(--primary-neon);
+    color: #fff;
+    border: none;
+    padding: 0 20px;
+    cursor: pointer;
+    font-weight: bold;
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo */
+    align-items: center;
+    justify-content: center;
+}
+
+/* LISTAS DE AMIGOS/PLAYERS - Componentização */
+.player-list, .friends-list, .friend-requests-list, .sent-friend-requests-list, .search-results-list, .blocked-users-list { 
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    max-height: 200px; /* Manter se necessário um scroll interno */
+}
+
+/* --- Componente Base para Itens de Lista de Aplicação --- */
+.app-list-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-color); /* Traço para separar itens */
+    justify-content: space-between;
+    opacity: 0; /* NOVO: Para animação de entrada */
+    transform: translateY(10px); /* NOVO: Para animação de entrada */
+    animation: fadeInSlideUp 0.4s ease-out forwards; /* NOVO: Animação de entrada */
+}
+
+.app-list-item.fade-out { /* NOVO: Animação de saída */
+    animation: fadeOutSlideDown 0.4s ease-out forwards;
+}
+
+.app-list-item:last-child {
+    border-bottom: none;
+}
+
+.app-list-item-avatar { 
+    width: 35px; 
+    height: 35px; 
+    border-radius: 50%; 
+    object-fit: cover;
+    border: 1px solid var(--primary-neon); /* Borda padrão para avatares */
+    flex-shrink: 0; 
+    transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Transição para a borda */
+}
+
+/* NOVAS: Classes para a borda do avatar de status online/offline */
+.app-list-item.is-online .app-list-item-avatar {
+    border: 2px solid var(--win-color); /* Borda verde para online */
+    box-shadow: 0 0 5px var(--win-color); /* Brilho suave */
+}
+
+.app-list-item.is-offline .app-list-item-avatar {
+    border: 2px solid var(--loss-color); /* Borda vermelha para offline */
+    box-shadow: none; /* Sem brilho ou brilho bem sutil para offline */
+}
+
+.app-list-item-main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-list-item-username {
+    font-weight: 500;
+    font-size: 16px;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.app-list-item-sub-info {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.app-list-item-actions {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.app-list-item-actions button {
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-muted);
+    font-size: 16px;
+    width: 30px; 
+    height: 30px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease, background-color 0.3s ease; /* Adicionado background-color para transição */
+    box-shadow: none;
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+}
+
+.app-list-item-actions button:hover {
+    background: var(--primary-neon);
+    border-color: var(--primary-neon);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--glow-soft);
+}
+
+/* NOVO: Animação de sucesso/falha para botões de lista */
+.app-list-item-actions button.action-success {
+    background-color: var(--win-color) !important;
+    color: white !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px var(--win-color) !important;
+    animation: flashSuccess 0.4s ease-out; /* Reutiliza a animação de base.css */
+}
+
+.app-list-item-actions button.action-error {
+    background-color: var(--loss-color) !important;
+    color: white !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px var(--loss-color) !important;
+    animation: flashError 0.4s ease-out; /* Reutiliza a animação de base.css */
+}
+
+/* Animações de entrada e saída para itens de lista */
+@keyframes fadeInSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOutSlideDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(10px); /* Move para baixo ao sair */
+        /* height: 0; /* Colapsa o item, opcional */
+        /* padding-top: 0; /* Colapsa o item, opcional */
+        /* padding-bottom: 0; /* Colapsa o item, opcional */
+        margin-top: 0;
+        margin-bottom: 0;
+        border-bottom: none; /* Remove borda antes de sumir */
+    }
+}
+
+
+/* Adaptação das classes antigas para usar o novo componente base */
+/* (Estilos que complementam o .app-list-item ou sobrescrevem para casos específicos) */
+
+/* Removido: .player-item-avatar e .player-item span, pois agora usam .app-list-item-avatar e .app-list-item-username */
+
+.friend-details .console-icon,
+.request-details .console-icon,
+.app-list-item-username .console-icon { /* Usar a nova classe .app-list-item-username */
+    width: 18px; 
+    height: 18px;
+    vertical-align: middle; 
+    margin-left: 5px; 
+    border: none; 
+    border-radius: 0; 
+    display: inline-block; 
+    filter: none;
+}
+
+.online-status.online { /* MANTER POR ENQUANTO, PODE SER USADO EM OUTROS LUGARES */
+    color: var(--win-color); 
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.online-status.offline { /* MANTER POR ENQUANTO, PODE SER USADO EM OUTROS LUGARES */
+    color: var(--loss-color); 
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Ações específicas para botões de solicitação/amigos */
+.accept-friend-request-btn { background-color: rgba(40, 167, 69, 0.2) !important; color: var(--win-color) !important; border-color: var(--win-color) !important;}
+.accept-friend-request-btn:hover { background-color: var(--win-color) !important; color: white !important; }
+
+.reject-friend-request-btn, .cancel-friend-request-btn, .remove-friend-btn, .unblock-user-btn { background-color: rgba(220, 53, 69, 0.2) !important; color: var(--loss-color) !important; border-color: var(--loss-color) !important;}
+.reject-friend-request-btn:hover, .cancel-friend-request-btn:hover, .remove-friend-btn:hover, .unblock-user-btn:hover { background-color: var(--loss-color) !important; color: white !important; }
+
+.status-pending {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 8px;
+    background-color: rgba(255, 193, 7, 0.1);
+    color: var(--pending-color);
+    margin-right: 5px; 
+}
+
+/* DROPDOWN DO PERFIL DO USUÁRIO NO HEADER */
+.user-profile-dropdown {
+    position: absolute;
+    top: 100%; 
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    min-width: 150px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    visibility: hidden;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+.user-profile-dropdown.active {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+.user-profile-dropdown ul {
+    list-style: none;
+    padding: 10px 0;
+    margin: 0;
+}
+
+.user-profile-dropdown ul li a {
+    display: block;
+    padding: 10px 15px;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.user-profile-dropdown ul li a:hover {
+    background-color: var(--input-bg);
+    color: var(--primary-neon);
+}
+
+/* ======================================================= */
+/* RESPONSIVIDADE CHAT E AMIGOS (Otimização Mobile) */
+/* ======================================================= */
+
+/* Estilos Mobile (Tablet em retrato e Celulares) - Abaixo de 768px */
+@media (max-width: 768px) {
+    .player-actions { flex-direction: column; gap: 4px; } /* Menos gap */
+    .player-actions button { width: 35px; height: 35px; font-size: 18px;} /* Botões maiores */
+    
+    .chat-input-area, .private-chat-input-area { 
+        flex-wrap: wrap; 
+        justify-content: flex-end; 
+        gap: 8px; /* Ajusta gap */
+    }
+    .chat-input-area input, .private-chat-input-area input { 
+        width: calc(100% - 80px); /* Ajusta largura para acomodar emoji e enviar */
+        padding: 10px 15px; /* Ajusta padding */
+        font-size: 15px; /* Ajusta font-size */
+    }
+    .chat-input-area button, .private-chat-input-area button { 
+        flex-shrink: 0; 
+        padding: 0 15px; /* Ajusta padding */
+        font-size: 16px; /* Ajusta font-size */
+    }
+    .emoji-toggle-btn { 
+        margin-left: auto; 
+        width: 35px; /* Ajusta para menor */
+        height: 35px; 
+        font-size: 18px; /* Ajusta font-size */
+    }
+    .emoji-palette { 
+        bottom: 90px; /* Ajusta posição */
+        right: 15px; /* Ajusta posição */
+        max-width: unset; 
+        width: calc(100% - 30px); /* Ocupa mais largura */
+        padding: 8px; /* Menos padding */
+        gap: 4px; /* Menos gap */
+    }
+    .emoji-palette span { 
+        font-size: 22px; /* Emojis menores */
+        padding: 4px; /* Menos padding */
+    }
+
+    .private-chat-window { 
+        width: calc(100% - 30px); /* Ocupa mais largura */
+        max-width: 300px; /* Reduz largura máxima */
+        right: 15px; /* Ajusta posição */
+        height: 320px; /* Reduz altura */
+    }
+    .private-chat-header { 
+        font-size: 15px; 
+        padding: 8px 12px; 
+    }
+    .close-private-chat { font-size: 22px; }
+    .private-chat-messages { 
+        padding: 8px; 
+        gap: 6px; 
+    }
+    .message p { font-size: 14px; } /* Mensagens menores */
+
+
+    .player-list, .friends-list, .friend-requests-list, .sent-friend-requests-list, .search-results-list, .blocked-users-list { 
+        max-height: unset; 
+        overflow-y: visible; 
+    }
+
+    .friends-tabs { 
+        justify-content: flex-start; 
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch; 
+        padding-bottom: 5px; 
+        -ms-overflow-style: none; 
+        scrollbar-width: none; 
+    }
+    .friends-tabs::-webkit-scrollbar { display: none; }
+
+    .friends-tab-btn { 
+        flex-shrink: 0; 
+        font-size: 12px; 
+        padding: 8px 6px; /* Menos padding */
+    }
+
+    .friends-content { padding: 12px; } /* Menos padding */
+    .app-list-item { /* Usar a classe base */
+        flex-wrap: wrap; 
+        justify-content: flex-start;
+        gap: 6px; 
+        padding: 6px 0; 
+    }
+    /* MUDANÇA: Atualiza a borda do avatar no mobile */
+    .app-list-item-avatar { /* Usar a classe base */
+        margin-right: 4px; 
+        width: 28px; /* Avatares menores */
+        height: 28px; 
+        border: none; /* Garante que a borda padrão seja removida aqui se necessário */
+    }
+    .app-list-item-main-content { /* Usar a classe base */
+        flex-basis: calc(100% - 38px); 
+        margin-bottom: 4px; 
+    }
+    .app-list-item-username { /* Usar a classe base */
+        font-size: 14px; /* Nomes menores */
+    }
+    .app-list-item-sub-info { font-size: 11px; } /* Usar a classe base */
+
+    .app-list-item-actions { /* Usar a classe base */
+        width: 100%; 
+        justify-content: flex-end; 
+        margin-top: 4px; 
+        gap: 4px;
+    }
+    .app-list-item-actions button { /* Usar a classe base */
+        width: 28px; /* Botões menores */
+        height: 28px;
+        font-size: 14px;
+    }
+    .status-pending, .online-status { font-size: 11px; padding: 1px 5px; }
+
+    .chat-messages { max-height: 200px; } /* Reduz altura do chat */
+}
+
+/* Estilos Mobile (Celulares em retrato) - Abaixo de 480px */
+@media (max-width: 480px) {
+    .chat-input-area input, .private-chat-input-area input { 
+        width: calc(100% - 70px); 
+        padding: 8px 12px; 
+        font-size: 13px; 
+    }
+    .chat-input-area button, .private-chat-input-area button { 
+        padding: 0 12px; 
+        font-size: 14px; 
+    }
+    .emoji-toggle-btn { 
+        width: 32px; 
+        height: 32px; 
+        font-size: 16px; 
+    }
+    .private-chat-window { 
+        width: calc(100% - 20px); 
+        max-width: 280px; 
+        right: 10px; 
+        height: 300px; 
+    }
+    .message p { font-size: 13px; }
+}
