@@ -1,7 +1,7 @@
 // arquivo: site_de_jogos/js/friends_and_chat.js
 
 // Dependências importadas do utils.js
-import { showNotification, getConsoleIconPath } from './utils.js';
+import { showNotification, getConsoleIconPath, API_BASE_URL, FRONTEND_BASE_URL } from './utils.js'; // Adicionado API_BASE_URL e FRONTEND_BASE_URL
 // Importa a nova função para abrir o modal de desafio privado
 import { openPrivateChallengeModal } from './challenges.js'; //
 
@@ -39,7 +39,7 @@ let sendFriendRequestFromModalBtn;
 let startPrivateChatFromModalBtn;
 let blockUserFromModalBtn;
 
-let currentOnlineUsers = new Map(); 
+let currentOnlineUsers = new Map();
 let privateChatWindows = new Map();
 let unreadPrivateMessages = 0;
 const originalTitle = document.title;
@@ -183,7 +183,7 @@ export const openPrivateChat = (targetUser, socket, userId, privateChatsContaine
 export const fetchAndDisplayFriends = async (token) => {
     if (!friendsListUl) return;
     try {
-        const response = await fetch('http://localhost:3001/api/friends', {
+        const response = await fetch(`${API_BASE_URL}/api/friends`, { // Atualizado
             headers: { 'x-auth-token': token }
         });
         if (!response.ok) throw new Error('Erro ao buscar lista de amigos.');
@@ -210,8 +210,8 @@ export const fetchAndDisplayFriends = async (token) => {
                     console.warn(`[friends_and_chat] Amigo sem ID ao renderizar: ${friend.username}`);
                     return;
                 }
-                
-                friendItem.querySelector('.app-list-item-avatar').src = friend.avatarUrl || 'http://127.0.0.1:5500/img/avatar-placeholder.png';
+
+                friendItem.querySelector('.app-list-item-avatar').src = friend.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
                 const consoleIconHtml = getConsoleIconPath(friend.console) ? `<img src="${getConsoleIconPath(friend.console)}" alt="${friend.console}" class="console-icon">` : '';
                 friendItem.querySelector('.app-list-item-username').innerHTML = `${friend.username} ${consoleIconHtml}`;
                 friendItem.querySelector('.app-list-item-sub-info.console-name').textContent = friend.console || '';
@@ -243,7 +243,7 @@ export const fetchAndDisplayFriends = async (token) => {
 export const fetchAndDisplayFriendRequests = async (token) => {
     if (!receivedFriendRequestsListUl) return;
     try {
-        const response = await fetch('http://localhost:3001/api/friends/requests/received', {
+        const response = await fetch(`${API_BASE_URL}/api/friends/requests/received`, { // Atualizado
             headers: { 'x-auth-token': token }
         });
         if (!response.ok) throw new Error('Erro ao buscar solicitações de amizade recebidas.');
@@ -263,7 +263,7 @@ export const fetchAndDisplayFriendRequests = async (token) => {
                 const requestItem = requestItemTemplate.content.cloneNode(true).firstElementChild;
                 requestItem.dataset.requestId = request.requestId;
                 requestItem.dataset.senderId = request.senderId;
-                requestItem.querySelector('.app-list-item-avatar').src = request.senderAvatar || 'http://127.0.0.1:5500/img/avatar-placeholder.png';
+                requestItem.querySelector('.app-list-item-avatar').src = request.senderAvatar || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
                 const consoleIconHtml = getConsoleIconPath(request.senderConsole) ? `<img src="${getConsoleIconPath(request.senderConsole)}" alt="${request.senderConsole}" class="console-icon">` : '';
                 requestItem.querySelector('.app-list-item-username').innerHTML = `Solicitação De ${request.senderUsername} ${consoleIconHtml}`;
                 requestItem.querySelector('.app-list-item-sub-info.console-name').textContent = request.senderConsole || '';
@@ -280,7 +280,7 @@ export const fetchAndDisplayFriendRequests = async (token) => {
 export const fetchAndDisplaySentFriendRequests = async (token) => {
     if (!sentFriendRequestsListUl) return;
     try {
-        const response = await fetch('http://localhost:3001/api/friends/requests/sent', {
+        const response = await fetch(`${API_BASE_URL}/api/friends/requests/sent`, { // Atualizado
             headers: { 'x-auth-token': token }
         });
         if (!response.ok) throw new Error('Erro ao buscar solicitações de amizade enviadas.');
@@ -299,7 +299,7 @@ export const fetchAndDisplaySentFriendRequests = async (token) => {
                 const requestItem = sentRequestItemTemplate.content.cloneNode(true).firstElementChild;
                 requestItem.dataset.requestId = invite.requestId;
                 requestItem.dataset.receiverId = invite.receiverId;
-                requestItem.querySelector('.app-list-item-avatar').src = invite.receiverAvatar || 'http://127.0.0.1:5500/img/avatar-placeholder.png';
+                requestItem.querySelector('.app-list-item-avatar').src = invite.receiverAvatar || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
                 const consoleIconHtml = getConsoleIconPath(invite.receiverConsole) ? `<img src="${getConsoleIconPath(invite.receiverConsole)}" alt="${invite.receiverConsole}" class="console-icon">` : '';
                 requestItem.querySelector('.app-list-item-username').innerHTML = `Enviado Para ${invite.receiverUsername} ${consoleIconHtml}`;
                 requestItem.querySelector('.app-list-item-sub-info.console-name').textContent = invite.receiverConsole || '';
@@ -315,7 +315,7 @@ export const fetchAndDisplaySentFriendRequests = async (token) => {
 export const fetchAndDisplayBlockedUsers = async (token) => {
     if (!blockedUsersListUl) return;
     try {
-        const response = await fetch('http://localhost:3001/api/users/me/blocked', {
+        const response = await fetch(`${API_BASE_URL}/api/users/me/blocked`, { // Atualizado
             headers: { 'x-auth-token': token }
         });
         if (!response.ok) throw new Error('Erro ao buscar usuários bloqueados.');
@@ -334,7 +334,7 @@ export const fetchAndDisplayBlockedUsers = async (token) => {
                 const blockedItem = blockedUserItemTemplate.content.cloneNode(true).firstElementChild;
                 blockedItem.dataset.id = user._id;
                 blockedItem.dataset.username = user.username;
-                blockedItem.querySelector('.app-list-item-avatar').src = user.avatarUrl || 'http://127.0.0.1:5500/img/avatar-placeholder.png';
+                blockedItem.querySelector('.app-list-item-avatar').src = user.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
                 const consoleIconHtml = getConsoleIconPath(user.console) ? `<img src="${getConsoleIconPath(user.console)}" alt="${user.console}" class="console-icon">` : '';
                 blockedItem.querySelector('.app-list-item-username').innerHTML = `${user.username} ${consoleIconHtml}`;
                 blockedItem.querySelector('.app-list-item-sub-info.console-name').textContent = user.console || '';
@@ -366,7 +366,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
     socket = socketInstance;
     const privateChatsContainer = document.getElementById('private-chats-container');
     const chatTemplate = document.getElementById('private-chat-template');
-    
+
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
             unreadPrivateMessages = 0;
@@ -393,7 +393,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                 const searchResultItemTemplate = document.getElementById('search-result-item-template');
                 otherUsers.forEach(user => {
                     if (user.id && user.username) {
-                        const avatarSrc = user.avatarUrl || 'http://127.0.0.1:5500/img/avatar-placeholder.png';
+                        const avatarSrc = user.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
                         const consoleIconHtml = getConsoleIconPath(user.console) ? `<img src="${getConsoleIconPath(user.console)}" alt="${user.console}" class="console-icon">` : '';
                         const playerItem = searchResultItemTemplate.content.cloneNode(true).firstElementChild;
                         playerItem.dataset.id = user.id;
@@ -497,7 +497,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                 const targetButton = sendFriendRequestFromModalBtn; // O botão clicado
 
                 try {
-                    const response = await fetch(`http://localhost:3001/api/friends/request/${targetUserId}`, {
+                    const response = await fetch(`${API_BASE_URL}/api/friends/request/${targetUserId}`, { // Atualizado
                         method: 'POST',
                         headers: { 'x-auth-token': token }
                     });
@@ -528,7 +528,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
 
                 if (confirm('Tem certeza que deseja bloquear este usuário? Você não verá mais desafios, mensagens ou solicitações dele, e ele também não verá os seus.')) {
                     try {
-                        const response = await fetch(`http://localhost:3001/api/users/${targetUserId}/block`, {
+                        const response = await fetch(`${API_BASE_URL}/api/users/${targetUserId}/block`, { // Atualizado
                             method: 'POST',
                             headers: { 'x-auth-token': token }
                         });
@@ -556,7 +556,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
     document.addEventListener('click', async (e) => {
         const loggedInUserId = localStorage.getItem('userId');
 
-        const playerItem = e.target.closest('.app-list-item'); 
+        const playerItem = e.target.closest('.app-list-item');
         if (playerItem) {
             let targetUserId;
             let targetUsername;
@@ -575,7 +575,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                 targetUserId = playerItem.dataset.receiverId;
                 targetUsername = playerItem.querySelector('.app-list-item-username').textContent.replace('Enviado Para ', '').trim();
             }
-           
+
             if (!targetUserId) {
                 console.error('[friends_and_chat] Não foi possível obter ID do usuário para interação. Abortando. Item:', playerItem);
                 return;
@@ -591,8 +591,8 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
             const targetButton = e.target;
             if (targetButton.classList.contains('view-profile-btn')) {
                 try {
-                   
-                    const response = await fetch(`http://localhost:3001/api/users/${targetUserId}`, {
+
+                    const response = await fetch(`${API_BASE_URL}/api/users/${targetUserId}`, { // Atualizado
                         headers: { 'x-auth-token': token }
                     });
                     if (!response.ok) {
@@ -602,12 +602,12 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                     const userData = await response.json();
 
                     document.getElementById('other-user-profile-username').textContent = userData.username;
-                    document.getElementById('other-user-avatar-preview').src = userData.avatarUrl || 'http://127.0.0.1:5500/img/avatar-placeholder.png';
+                    document.getElementById('other-user-avatar-preview').src = userData.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
                     document.getElementById('other-user-wins').textContent = userData.wins;
                     document.getElementById('other-user-losses').textContent = userData.losses;
                     document.getElementById('other-user-bio').textContent = userData.bio || 'N/A';
                     document.getElementById('other-user-description').textContent = userData.description || 'N/A';
-                    
+
                     const consoleIconHtml = getConsoleIconPath(userData.console) ? `<img src="${getConsoleIconPath(userData.console)}" alt="${userData.console}" class="console-icon">` : '';
                     const otherUserConsoleIcon = document.getElementById('other-user-console-icon-profile');
                     if (otherUserConsoleIcon) {
@@ -626,24 +626,24 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                     startPrivateChatFromModalBtn.dataset.userId = userData._id;
                     blockUserFromModalBtn.dataset.userId = userData._id;
                     sendFriendRequestFromModalBtn.dataset.userId = userData._id;
-                    
+
                     const inviteToGroupFromModalBtn = document.getElementById('invite-to-group-from-modal');
                     if (inviteToGroupFromModalBtn) {
-                        inviteToGroupFromModalBtn.style.display = 'none'; 
+                        inviteToGroupFromModalBtn.style.display = 'none';
                     }
 
                     // Verifica o status de amizade/bloqueio para exibir os botões corretos
-                    const friendsResponse = await fetch(`http://localhost:3001/api/friends`, { headers: { 'x-auth-token': token } });
+                    const friendsResponse = await fetch(`${API_BASE_URL}/api/friends`, { headers: { 'x-auth-token': token } }); // Atualizado
                     const friendsList = await friendsResponse.json();
                     const isFriend = friendsList.some(f => String(f._id) === String(userData._id));
 
-                    const sentRequestsResponse = await fetch(`http://localhost:3001/api/friends/requests/sent`, { headers: { 'x-auth-token': token } });
+                    const sentRequestsResponse = await fetch(`${API_BASE_URL}/api/friends/requests/sent`, { headers: { 'x-auth-token': token } }); // Atualizado
                     const hasSentRequest = (await sentRequestsResponse.json()).some(r => String(r.receiverId) === String(userData._id));
 
-                    const receivedRequestsResponse = await fetch(`http://localhost:3001/api/friends/requests/received`, { headers: { 'x-auth-token': token } });
+                    const receivedRequestsResponse = await fetch(`${API_BASE_URL}/api/friends/requests/received`, { headers: { 'x-auth-token': token } }); // Atualizado
                     const hasReceivedRequest = (await receivedRequestsResponse.json()).some(r => String(r.senderId) === String(userData._id));
 
-                    const blockedUsersResponse = await fetch(`http://localhost:3001/api/users/me/blocked`, { headers: { 'x-auth-token': token } });
+                    const blockedUsersResponse = await fetch(`${API_BASE_URL}/api/users/me/blocked`, { headers: { 'x-auth-token': token } }); // Atualizado
                     const isBlocked = (await blockedUsersResponse.json()).some(b => String(b._id) === String(userData._id));
 
                     // Lógica para exibir/ocultar botões no modal de perfil de outro usuário
@@ -655,24 +655,24 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                     } else if (isBlocked) {
                         sendFriendRequestFromModalBtn.style.display = 'none';
                         startPrivateChatFromModalBtn.style.display = 'none';
-                        blockUserFromModalBtn.style.display = 'inline-block'; 
-                        blockUserFromModalBtn.textContent = 'Desbloquear Usuário'; 
-                        blockUserFromModalBtn.style.backgroundColor = '#28a745'; 
+                        blockUserFromModalBtn.style.display = 'inline-block';
+                        blockUserFromModalBtn.textContent = 'Desbloquear Usuário';
+                        blockUserFromModalBtn.style.backgroundColor = '#28a745';
                         if (inviteToGroupFromModalBtn) inviteToGroupFromModalBtn.style.display = 'none';
                     }
                     else if (isFriend || hasSentRequest || hasReceivedRequest) {
                         sendFriendRequestFromModalBtn.style.display = 'none';
                         startPrivateChatFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.style.display = 'inline-block';
-                        blockUserFromModalBtn.textContent = 'Bloquear Usuário'; 
-                        blockUserFromModalBtn.style.backgroundColor = '#e74c3c'; 
+                        blockUserFromModalBtn.textContent = 'Bloquear Usuário';
+                        blockUserFromModalBtn.style.backgroundColor = '#e74c3c';
                         if (inviteToGroupFromModalBtn) inviteToGroupFromModalBtn.style.display = 'none';
                     } else {
                         sendFriendRequestFromModalBtn.style.display = 'inline-block';
                         startPrivateChatFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.style.display = 'inline-block';
-                        blockUserFromModalBtn.textContent = 'Bloquear Usuário'; 
-                        blockUserFromModalBtn.style.backgroundColor = '#e74c3c'; 
+                        blockUserFromModalBtn.textContent = 'Bloquear Usuário';
+                        blockUserFromModalBtn.style.backgroundColor = '#e74c3c';
                         if (inviteToGroupFromModalBtn) inviteToGroupFromModalBtn.style.display = 'none';
                     }
 
@@ -689,18 +689,18 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                 openPrivateChat({ id: targetUserId, username: targetUsername }, socket, userId, privateChatsContainer, chatTemplate);
             } else if (targetButton.classList.contains('send-friend-request-btn')) {
                 try {
-                    const response = await fetch(`http://localhost:3001/api/friends/request/${targetUserId}`, {
+                    const response = await fetch(`${API_BASE_URL}/api/friends/request/${targetUserId}`, { // Atualizado
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
                     });
                     const data = await response.json();
                     if (!response.ok) {
                         showNotification(data.message || 'Erro ao enviar solicitação.', 'error');
-                        applyButtonFeedback(targetButton, false); 
+                        applyButtonFeedback(targetButton, false);
                         throw new Error(data.message || 'Erro ao enviar solicitação.');
                     }
                     showNotification(data.message, 'success');
-                    applyButtonFeedback(targetButton, true); 
+                    applyButtonFeedback(targetButton, true);
                     refreshFriendsAndRequests(token);
                 } catch (error) {
                     console.error('[friends_and_chat] Erro ao enviar solicitação de amizade:', error.message);
@@ -735,7 +735,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
             } else if (targetButton.classList.contains('remove-friend-btn')) {
                 if (confirm("Tem certeza que deseja remover este amigo?")) {
                     try {
-                        const response = await fetch(`http://localhost:3001/api/friends/${friendId}`, {
+                        const response = await fetch(`${API_BASE_URL}/api/friends/${friendId}`, { // Atualizado
                             method: 'DELETE',
                             headers: { 'x-auth-token': token }
                         });
@@ -773,7 +773,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
             const targetButton = e.target;
             if (targetButton.classList.contains('accept-friend-request-btn')) {
                 try {
-                    const response = await fetch(`http://localhost:3001/api/friends/request/${requestId}/accept`, {
+                    const response = await fetch(`${API_BASE_URL}/api/friends/request/${requestId}/accept`, { // Atualizado
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
                     });
@@ -798,7 +798,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
 
             if (targetButton.classList.contains('reject-friend-request-btn')) {
                 try {
-                    const response = await fetch(`http://localhost:3001/api/friends/request/${requestId}/reject`, {
+                    const response = await fetch(`${API_BASE_URL}/api/friends/request/${requestId}/reject`, { // Atualizado
                         method: 'PATCH',
                         headers: { 'x-auth-token': token }
                     });
@@ -824,7 +824,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
             if (targetButton.classList.contains('cancel-friend-request-btn')) {
                 if (confirm("Tem certeza que deseja cancelar esta solicitação de amizade?")) {
                     try {
-                        const response = await fetch(`http://localhost:3001/api/friends/request/${requestId}/reject`, {
+                        const response = await fetch(`${API_BASE_URL}/api/friends/request/${requestId}/reject`, { // Atualizado
                             method: 'PATCH',
                             headers: { 'x-auth-token': token }
                         });
@@ -860,7 +860,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
 
             if (confirm("Tem certeza que deseja desbloquear este usuário?")) {
                 try {
-                    const response = await fetch(`http://localhost:3001/api/users/${blockedUserId}/unblock`, {
+                    const response = await fetch(`${API_BASE_URL}/api/users/${blockedUserId}/unblock`, { // Atualizado
                         method: 'DELETE',
                         headers: { 'x-auth-token': token }
                     });
@@ -974,7 +974,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                     fetchAndDisplayFriendRequests(token);
                     fetchAndDisplaySentFriendRequests(token);
                 } else if (targetTabId === 'online-players-tab') {
-                    
+
                 } else if (targetTabId === 'search-friends-tab') {
                     searchResultsListUl.innerHTML = '';
                     friendSearchInput.value = '';
@@ -982,9 +982,9 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                 } else if (targetTabId === 'blocked-users-tab') {
                     fetchAndDisplayBlockedUsers(token);
                 }
-               
+
                 else if (targetTabId === 'matchmaking-tab') {
-                    
+
                 }
             }
         });
@@ -1005,7 +1005,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
             }
 
             try {
-                const response = await fetch(`http://localhost:3001/api/search?q=${encodeURIComponent(query)}`, {
+                const response = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`, { // Atualizado
                     headers: { 'x-auth-token': token }
                 });
                 const data = await response.json();
@@ -1020,7 +1020,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                     searchResultsListUl.innerHTML = '<p class="no-challenges-message">Nenhum resultado encontrado com este nome.</p>';
                 } else {
                     const searchResultItemTemplate = document.getElementById('search-result-item-template');
-                    
+
                     const currentUserId = localStorage.getItem('userId');
 
                     data.forEach(result => {
@@ -1036,14 +1036,14 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                             const searchItem = searchResultItemTemplate.content.cloneNode(true).firstElementChild;
                             searchItem.dataset.id = result._id;
                             searchItem.dataset.username = result.username;
-                            searchItem.querySelector('.app-list-item-avatar').src = result.avatarUrl || 'http://127.0.0.1:5500/img/avatar-placeholder.png';
+                            searchItem.querySelector('.app-list-item-avatar').src = result.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
                             const consoleIconHtml = getConsoleIconPath(result.console) ? `<img src="${getConsoleIconPath(result.console)}" alt="${result.console}" class="console-icon">` : '';
                             searchItem.querySelector('.app-list-item-username').innerHTML = `${result.username} ${consoleIconHtml}`; // Use a nova classe de username
                             searchItem.querySelector('.app-list-item-sub-info.console-name').textContent = result.console || ''; // Adiciona o console
 
                             searchResultsListUl.appendChild(searchItem);
                         }
-                       
+
                     });
                 }
             } catch (error) {
@@ -1069,7 +1069,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
             const targetUsername = document.getElementById('other-user-profile-username').textContent;
 
             otherUserProfileModalBackdrop.classList.remove('active');
-            
+
             showNotification('A funcionalidade de grupos foi desativada.', 'info');
         });
     }

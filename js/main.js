@@ -1,15 +1,7 @@
 // arquivo: site_de_jogos/js/main.js
-import { API_BASE_URL, showNotification } from './utils.js';
+import { API_BASE_URL, showNotification } from './utils.js'; // showNotification importado de utils.js
 
-function showNotification(message, type = 'info') {
-    const container = document.getElementById('notification-container');
-    if (!container) return;
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    container.appendChild(notification);
-    setTimeout(() => { notification.remove(); }, 4000);
-}
+// A função showNotification duplicada foi removida daqui, pois já é importada de utils.js
 
 // Função para aplicar o tema (light ou dark) - Mantida para compatibilidade, embora o tema seja fixo agora
 function applyTheme(theme) {
@@ -385,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch(`http://localhost:3001/api/reset-password/${resetToken}`, {
+                const response = await fetch(`${API_BASE_URL}/api/reset-password/${resetToken}`, { // Atualizado
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ newPassword })

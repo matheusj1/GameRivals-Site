@@ -1,9 +1,6 @@
 // arquivo: site_de_jogos/js/utils.js
-export const API_BASE_URL = 'https://gamerivals-site.onrender.com'; // URL fixa do backend
-// NOVO: Define a URL base da API dinamicamente para desenvolvimento local e Render
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:3001' // Para desenvolvimento local
-    : 'https://gamerivals-site.onrender.com'; // **MUDE PARA A URL DO SEU SERVIÇO DE BACKEND NO RENDER**
+export const API_BASE_URL = 'https://gamerivals-site.onrender.com';
+export const FRONTEND_BASE_URL = 'https://matheusj1.github.io/GameRivals-Site'; // Adicionado para uso em URLs de frontend
 
 // Função de Notificação Reutilizável
 export function showNotification(message, type = 'info') {
@@ -38,13 +35,10 @@ export const getConsoleIconPath = (consoleName) => {
         case 'Xbox One':
             return 'img/xbox-icon.png';
         case 'PC':
-        return 'img/pc-icon.png';
+            return 'img/pc-icon.png';
         case 'Nintendo Switch':
             return 'img/nintendo-icon.png';
         default:
             return ''; // Retorna vazio se não houver correspondência
     }
 };
-
-// NOVO: Exporte a URL base da API para que outros módulos possam usá-la
-export { API_BASE_URL };

@@ -1,7 +1,7 @@
 // arquivo: site_de_jogos/js/challenges.js
 
 // Dependências importadas
-import { showNotification } from './utils.js';
+import { showNotification, API_BASE_URL, FRONTEND_BASE_URL } from './utils.js'; // Importado API_BASE_URL e FRONTEND_BASE_URL
 import { openPrivateChat } from './friends_and_chat.js'; // Importar a função de chat privado
 
 const challengesListContainer = document.querySelector('.challenges-list');
@@ -64,7 +64,7 @@ function applyButtonFeedback(button, isSuccess) {
 export const fetchAndDisplayChallenges = async (token, userId) => {
     if (!challengesListContainer) return;
     try {
-        const response = await fetch('http://localhost:3001/api/challenges', {
+        const response = await fetch(`${API_BASE_URL}/api/challenges`, { // Atualizado
             headers: { 'x-auth-token': token }
         });
         if (!response.ok) throw new Error('Erro ao buscar desafios.');
@@ -76,7 +76,7 @@ export const fetchAndDisplayChallenges = async (token, userId) => {
         } else {
             openChallenges.forEach(challenge => {
                 const challengerUsername = challenge.createdBy ? challenge.createdBy.username : 'Usuário Deletado';
-                const challengerAvatar = challenge.createdBy && challenge.createdBy.avatarUrl ? challenge.createdBy.avatarUrl : 'http://127.0.0.1:5500/img/avatar-placeholder.png';
+                const challengerAvatar = challenge.createdBy && challenge.createdBy.avatarUrl ? challenge.createdBy.avatarUrl : `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
 
                 let gameIconSrc = 'img/game-icon-placeholder.png';
                 if (challenge.game === 'Ea Sports 24') {
@@ -123,7 +123,7 @@ export const fetchAndDisplayChallenges = async (token, userId) => {
 export const fetchAndDisplayMyChallenges = async (token, userId) => {
     if (!myChallengesListContainer) return;
     try {
-        const response = await fetch('http://localhost:3001/api/my-challenges', {
+        const response = await fetch(`${API_BASE_URL}/api/my-challenges`, { // Atualizado
             headers: { 'x-auth-token': token }
         });
         if (!response.ok) throw new Error('Erro ao buscar meus desafios.');
@@ -256,7 +256,7 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
                 if (!challengeId) return;
 
                 try {
-                    const response = await fetch(`http://localhost:3001/api/challenges/${challengeId}/accept`, {
+                    const response = await fetch(`${API_BASE_URL}/api/challenges/${challengeId}/accept`, { // Atualizado
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
                     });
@@ -321,7 +321,7 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
             } else if (target.classList.contains('delete-challenge-btn')) {
                 const targetButton = target;
                 if (confirm("Tem certeza que deseja arquivar este desafio? Ele sumirá da sua lista.")) {
-                    fetch(`http://localhost:3001/api/challenges/${challengeId}/archive`, {
+                    fetch(`${API_BASE_URL}/api/challenges/${challengeId}/archive`, { // Atualizado
                         method: 'PATCH',
                         headers: { 'x-auth-token': token }
                     })
@@ -377,7 +377,7 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
                 const submitButton = reportForm.querySelector('button[type="submit"]');
 
                 try {
-                    const response = await fetch(`http://localhost:3001/api/challenges/${challengeId}/result`, {
+                    const response = await fetch(`${API_BASE_URL}/api/challenges/${challengeId}/result`, { // Atualizado
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
                         body: JSON.stringify({ winnerId })
@@ -441,7 +441,7 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
                 const submitButton = createChallengeForm.querySelector('button[type="submit"]');
 
                 try {
-                    const response = await fetch('http://localhost:3001/api/challenges', {
+                    const response = await fetch(`${API_BASE_URL}/api/challenges`, { // Atualizado
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
                         body: JSON.stringify({ game: game.value, console: consoleValue.value, betAmount: Number(betAmount.value), scheduledTime: scheduledTime.value }), // Include scheduledTime
@@ -502,7 +502,7 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
             const submitButton = createPrivateChallengeForm.querySelector('button[type="submit"]');
 
             try {
-                const response = await fetch('http://localhost:3001/api/challenges/private', { // Nova rota no backend
+                const response = await fetch(`${API_BASE_URL}/api/challenges/private`, { // Atualizado
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
                     body: JSON.stringify({ opponentId, game: game.value, console: consoleValue.value, betAmount: Number(betAmount.value) }),

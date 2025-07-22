@@ -1,7 +1,7 @@
 // arquivo: site_de_jogos/js/dashboard.js
 
 // Importa as funções utilitárias
-import { showNotification, getConsoleIconPath } from './utils.js';
+import { showNotification, getConsoleIconPath, API_BASE_URL, FRONTEND_BASE_URL } from './utils.js'; // Adicionado FRONTEND_BASE_URL
 // Importa as funções de desafios
 import { fetchAndDisplayChallenges, fetchAndDisplayMyChallenges, renderMyChallenges, setupChallengeListeners } from './challenges.js';
 // Importa as funções de amigos e chat
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FUNÇÕES PARA CARREGAR E EXIBIR DADOS DO USUÁRIO E AVATAR ---
     const fetchUserProfile = async () => {
         try {
-            const response = await fetch(`http://localhost:3001/api/users/me`, {
+            const response = await fetch(`${API_BASE_URL}/api/users/me`, { // Atualizado
                 headers: { 'x-auth-token': token }
             });
             if (!response.ok) {
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentUserAvatarDesktop && userData.avatarUrl) {
                 currentUserAvatarDesktop.src = userData.avatarUrl;
             } else if (currentUserAvatarDesktop) {
-                currentUserAvatarDesktop.src = 'http://127.0.0.1:5500/img/avatar-placeholder.png';
+                currentUserAvatarDesktop.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
             }
 
             if (usernameDesktop && userData.username) {
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentUserAvatarMobile && userData.avatarUrl) {
                 currentUserAvatarMobile.src = userData.avatarUrl;
             } else if (currentUserAvatarMobile) {
-                currentUserAvatarMobile.src = 'http://127.0.0.1:5500/img/avatar-placeholder.png';
+                currentUserAvatarMobile.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
             }
             if (usernameMobile && userData.username) {
                 usernameMobile.textContent = userData.username;
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchAndDisplayStats = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/users/me/stats', {
+            const response = await fetch(`${API_BASE_URL}/api/users/me/stats`, { // Atualizado
                 headers: { 'x-auth-token': token }
             });
             if (!response.ok) return;
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- LÓGICA DO CHAT E JOGADORES ONLINE (Socket.IO) ---
     if (typeof io !== 'undefined') {
-        socket = io('http://localhost:3001', {
+        socket = io(API_BASE_URL, { // Atualizado
             auth: { token: token },
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
         emitUserConnected = () => {
             if (socket.connected && username && userId && readyToConnectUser) {
                 const userConsole = document.getElementById('current-user-console-icon') ? (document.getElementById('current-user-console-icon').dataset.consoleName || '') : ''; // Pega o console do elemento desktop
-                const avatarUrl = document.getElementById('current-user-avatar-desktop')?.src || 'http://127.0.0.1:5500/img/avatar-placeholder.png'; // Pega o avatar do elemento desktop
+                const avatarUrl = document.getElementById('current-user-avatar-desktop')?.src || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Pega o avatar do elemento desktop - Atualizado
                 console.log('Emitindo user connected:', { username, id: userId, avatarUrl, console: userConsole });
                 socket.emit('user connected', {
                     username,

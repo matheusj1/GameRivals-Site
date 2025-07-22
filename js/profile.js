@@ -1,18 +1,7 @@
-// Função de Notificação Reutilizável
-function showNotification(message, type = 'info') {
-    const container = document.getElementById('notification-container');
-    if (!container) {
-        console.error('Container de notificação não encontrado.');
-        return;
-    }
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    container.appendChild(notification);
-    setTimeout(() => {
-        notification.remove();
-    }, 4000);
-}
+// arquivo: site_de_jogos/js/profile.js
+
+// Função de Notificação Reutilizável (Importada de utils.js, a declaração local foi removida)
+import { showNotification, API_BASE_URL, FRONTEND_BASE_URL } from './utils.js'; // Adicionado API_BASE_URL e FRONTEND_BASE_URL
 
 document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
@@ -58,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Preencher campos com dados existentes do usuário
     const fetchUserProfile = async () => {
         try {
-            const response = await fetch(`http://localhost:3001/api/users/me`, {
+            const response = await fetch(`${API_BASE_URL}/api/users/me`, { // Atualizado
                 headers: {
                     'x-auth-token': token
                 }
@@ -83,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (userData.avatarUrl) {
                 avatarPreview.src = userData.avatarUrl;
             } else {
-                avatarPreview.src = 'http://127.0.0.1:5500/img/avatar-placeholder.png'; // Garante o placeholder correto
+                avatarPreview.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
             }
         } catch (error) {
             console.error('Erro ao buscar perfil:', error);
@@ -95,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // NOVA FUNÇÃO: Buscar e exibir saldo da carteira
     const fetchWalletBalance = async () => {
         try {
-            const response = await fetch('http://localhost:3001/api/users/me/stats', {
+            const response = await fetch(`${API_BASE_URL}/api/users/me/stats`, { // Atualizado
                 headers: { 'x-auth-token': token }
             });
             if (!response.ok) throw new Error('Erro ao buscar saldo da carteira.');
@@ -133,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
             reader.readAsDataURL(file);
         } else {
-            avatarPreview.src = 'http://127.0.0.1:5500/img/avatar-placeholder.png'; // Retorna ao placeholder se nenhum arquivo for selecionado
+            avatarPreview.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Retorna ao placeholder se nenhum arquivo for selecionado
         }
     });
 
@@ -155,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:3001/api/users/profile`, {
+            const response = await fetch(`${API_BASE_URL}/api/users/profile`, { // Atualizado
                 method: 'PATCH',
                 headers: {
                     'x-auth-token': token
@@ -214,7 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             showNotification(`Iniciando pagamento de ${amount} moedas...`, 'info');
 
             try {
-                const response = await fetch('http://localhost:3001/api/payment/deposit-mp', {
+                const response = await fetch(`${API_BASE_URL}/api/payment/deposit-mp`, { // Atualizado
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -295,7 +284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             try {
-                const response = await fetch('http://localhost:3001/api/wallet/withdraw', {
+                const response = await fetch(`${API_BASE_URL}/api/wallet/withdraw`, { // Atualizado
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
