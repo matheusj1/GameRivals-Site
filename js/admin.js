@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- SOCKET.IO para atualização de usuários online (apenas a contagem) ---
-    if (typeof window.io !== 'undefined') { // MODIFICADO AQUI
-        const socket = window.io(API_BASE_URL); // ATUALIZADO: Usando API_BASE_URL // MODIFICADO AQUI
+    if (typeof io !== 'undefined') {
+        const socket = io(API_BASE_URL); // ATUALIZADO: Usando API_BASE_URL
 
         socket.on('connect', () => {
             console.log('Admin Frontend: Conectado ao Socket.IO.');

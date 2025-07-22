@@ -188,8 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- LÓGICA DO CHAT E JOGADORES ONLINE (Socket.IO) ---
-    if (typeof window.io !== 'undefined') { // MODIFICADO AQUI
-        socket = window.io(API_BASE_URL, { // MODIFICADO AQUI
+    if (typeof io !== 'undefined') {
+        socket = io(API_BASE_URL, { // Atualizado
             auth: { token: token },
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
