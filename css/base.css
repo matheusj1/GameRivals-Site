@@ -518,29 +518,36 @@ textarea[readonly] {
     } 
     
     /* Menu de navegação mobile como sidebar (Gaveta Lateral) */
-    header nav ul#main-nav-links { 
-        position: fixed; /* Fixa na tela */
-        top: 0;
-        right: -280px; /* Escondido à direita, 280px para permitir um pouco de "puxada" */
-        width: 250px; /* Largura da sidebar */
-        height: 100vh; /* Altura total da viewport */
-        background-color: var(--card-bg); /* Fundo branco do menu */
-        box-shadow: -5px 0 15px rgba(0,0,0,0.1); /* Sombra à esquerda */
-        flex-direction: column;
-        justify-content: flex-start; /* Alinha itens ao topo */
-        padding: 20px; /* Padding geral */
-        transition: right 0.3s ease-in-out; /* Transição para deslizar */
-        z-index: 1006; /* NOVO: Aumentado z-index para garantir que esteja acima de tudo */
-        overflow-y: auto; /* Adiciona scroll se o conteúdo for muito grande */
-        -webkit-overflow-scrolling: touch; /* Melhora o scroll em iOS */
-        display: none; /* NOVO: Oculta por padrão no mobile */
-    }
-    
-    /* Estado ativo da sidebar */
-    header nav ul#main-nav-links.mobile-nav-active { 
-        right: 0; /* Desliza para a posição visível */
-        display: flex; /* NOVO: Mostra quando ativo */
-    }
+header nav ul#main-nav-links {
+    position: fixed; /* Fixa na tela */
+    top: 0;
+    right: -280px; /* Escondido à direita, 280px para permitir um pouco de "puxada" */
+    width: 250px; /* Largura da sidebar */
+    height: 100vh; /* Altura total da viewport */
+    background-color: var(--card-bg); /* Fundo branco do menu */
+    box-shadow: -5px 0 15px rgba(0,0,0,0.1); /* Sombra à esquerda */
+    flex-direction: column;
+    justify-content: flex-start; /* Alinha itens ao topo */
+    padding: 20px; /* Padding geral */
+    z-index: 1006; /* NOVO: Aumentado z-index para garantir que esteja acima de tudo */
+    overflow-y: auto; /* Adiciona scroll se o conteúdo for muito grande */
+    -webkit-overflow-scrolling: touch; /* Melhora o scroll em iOS */
+
+    /* Alterações para transição suave */
+    visibility: hidden; /* Esconde visualmente mas mantém no layout para transição */
+    opacity: 0; /* Começa transparente */
+    transform: translateX(100%); /* Começa fora da tela à direita */
+    transition: right 0.3s ease-in-out, opacity 0.3s ease-in-out, transform 0.3s ease-in-out, visibility 0s 0.3s; /* Transição para todas as propriedades */
+}
+
+/* Estado ativo da sidebar */
+header nav ul#main-nav-links.mobile-nav-active {
+    right: 0; /* Desliza para a posição visível */
+    visibility: visible; /* Torna visível */
+    opacity: 1; /* Torna opaco */
+    transform: translateX(0); /* Retorna à posição original */
+    transition: right 0.3s ease-in-out, opacity 0.3s ease-in-out, transform 0.3s ease-in-out; /* Transição para todas as propriedades */
+}
 
     header nav ul#main-nav-links li { 
         display: block; 
