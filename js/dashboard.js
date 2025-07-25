@@ -1,7 +1,7 @@
 // arquivo: site_de_jogos/js/dashboard.js
 
 // Importa as funções utilitárias
-import { showNotification, getConsoleIconPath, API_BASE_URL, FRONTEND_BASE_URL } from './utils.js'; // Adicionado FRONTEND_BASE_URL
+import { showNotification, getConsoleIconPath, API_BASE_URL, FRONTEND_BASE_URL } from './utils.js';
 // Importa as funções de desafios
 import { fetchAndDisplayChallenges, fetchAndDisplayMyChallenges, renderMyChallenges, setupChallengeListeners } from './challenges.js';
 // Importa as funções de amigos e chat
@@ -32,21 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- SELETORES DE ELEMENTOS DO DASHBOARD ---
-    // Seletores para DESKTOP (permanecem onde estavam)
+    // Seletores para DESKTOP
     const usernameDesktop = document.getElementById('username-desktop');
-    const userConsoleIconDesktop = document.getElementById('current-user-console-icon'); // Este ID não mudou no HTML
+    const userConsoleIconDesktop = document.getElementById('current-user-console-icon');
     const currentUserAvatarDesktop = document.getElementById('current-user-avatar-desktop');
     const userWinsDesktop = document.getElementById('user-wins-desktop');
     const userLossesDesktop = document.getElementById('user-losses-desktop');
     const coinBalanceDesktop = document.getElementById('coin-balance-desktop');
-    const userProfileMenuDesktop = document.getElementById('user-profile-menu-desktop'); // Novo ID para o menu de desktop
+    const userProfileMenuDesktop = document.getElementById('user-profile-menu-desktop');
 
-    // NOVO: Seletores para MOBILE (dentro do menu hambúrguer)
-    const usernameMobile = document.getElementById('username-mobile');
-    const currentUserAvatarMobile = document.getElementById('current-user-avatar-mobile');
-    const coinBalanceMobile = document.getElementById('coin-balance-mobile');
-    const userWinsMobile = document.getElementById('user-wins-mobile');
-    const userLossesMobile = document.getElementById('user-losses-mobile');
+    // Seletores para MOBILE (dentro do menu hambúrguer)
+    const usernameMobile = document.getElementById('username-mobile'); // Adicione este ID ao seu HTML no menu mobile
+    const currentUserAvatarMobile = document.getElementById('current-user-avatar-mobile'); // Adicione este ID ao seu HTML no menu mobile
+    const coinBalanceMobile = document.getElementById('coin-balance-mobile'); // Adicione este ID ao seu HTML no menu mobile
+    const userWinsMobile = document.getElementById('user-wins-mobile'); // Adicione este ID ao seu HTML no menu mobile
+    const userLossesMobile = document.getElementById('user-losses-mobile'); // Adicione este ID ao seu HTML no menu mobile
 
 
     // --- VARIÁVEIS E FUNÇÕES GLOBAIS (PARA O SOCKET.IO E NOTIFICAÇÕES) ---
@@ -57,9 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FUNÇÕES PARA CARREGAR E EXIBIR DADOS DO USUÁRIO E AVATAR ---
     const fetchUserProfile = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/users/me`, { // Atualizado
+            const response = await fetch(`${API_BASE_URL}/api/users/me`, {
                 headers: { 'x-auth-token': token }
             });
+
             if (!response.ok) {
                 if (response.status === 401 || response.status === 403) {
                     showNotification('Sessão expirada. Faça login novamente.', 'error');
@@ -69,17 +70,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 throw new Error('Erro ao carregar perfil do usuário.');
             }
+
             const userData = await response.json();
 
             // Atualiza elementos DESKTOP
-            if (currentUserAvatarDesktop && userData.avatarUrl) {
-                currentUserAvatarDesktop.src = userData.avatarUrl;
-            } else if (currentUserAvatarDesktop) {
-                currentUserAvatarDesktop.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
+            if (currentUserAvatarDesktop) {
+                currentUserAvatarDesktop.src = userData.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`;
             }
 
-            if (usernameDesktop && userData.username) {
-                usernameDesktop.textContent = userData.username;
+            if (usernameDesktop) {
+                usernameDesktop.textContent = userData.username || 'Usuário';
                 localStorage.setItem('username', userData.username);
             }
 
@@ -99,14 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 userConsoleIconDesktop.dataset.consoleName = '';
             }
 
-            // NOVO: Atualiza elementos MOBILE
-            if (currentUserAvatarMobile && userData.avatarUrl) {
-                currentUserAvatarMobile.src = userData.avatarUrl;
-            } else if (currentUserAvatarMobile) {
-                currentUserAvatarMobile.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
+            // Atualiza elementos MOBILE
+            if (currentUserAvatarMobile) {
+                currentUserAvatarMobile.src = userData.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`;
             }
-            if (usernameMobile && userData.username) {
-                usernameMobile.textContent = userData.username;
+
+            if (usernameMobile) {
+                usernameMobile.textContent = userData.username || 'Usuário';
             }
 
 
@@ -122,21 +121,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchAndDisplayStats = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/users/me/stats`, { // Atualizado
+            const response = await fetch(`${API_BASE_URL}/api/users/me/stats`, {
                 headers: { 'x-auth-token': token }
             });
+
             if (!response.ok) return;
+
             const stats = await response.json();
 
             // Atualiza elementos DESKTOP
-            if (userWinsDesktop && stats.wins !== undefined) userWinsDesktop.textContent = stats.wins;
-            if (userLossesDesktop && stats.losses !== undefined) userLossesDesktop.textContent = stats.losses;
-            if (coinBalanceDesktop && stats.coins !== undefined) coinBalanceDesktop.textContent = stats.coins.toLocaleString('pt-BR');
+            if (userWinsDesktop) userWinsDesktop.textContent = stats.wins || '0';
+            if (userLossesDesktop) userLossesDesktop.textContent = stats.losses || '0';
+            if (coinBalanceDesktop) coinBalanceDesktop.textContent = stats.coins ? stats.coins.toLocaleString('pt-BR') : '0';
 
-            // NOVO: Atualiza elementos MOBILE
-            if (userWinsMobile && stats.wins !== undefined) userWinsMobile.textContent = stats.wins;
-            if (userLossesMobile && stats.losses !== undefined) userLossesMobile.textContent = stats.losses;
-            if (coinBalanceMobile && stats.coins !== undefined) coinBalanceMobile.textContent = stats.coins.toLocaleString('pt-BR');
+            // Atualiza elementos MOBILE
+            if (userWinsMobile) userWinsMobile.textContent = stats.wins || '0';
+            if (userLossesMobile) userLossesMobile.textContent = stats.losses || '0';
+            if (coinBalanceMobile) coinBalanceMobile.textContent = stats.coins ? stats.coins.toLocaleString('pt-BR') : '0';
 
         } catch (error) {
             console.error('Erro ao buscar stats:', error);
@@ -150,56 +151,61 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- INICIALIZAÇÃO DA INTERFACE ---
-    // Removido preenchimento inicial de usernameDesktop, pois fetchUserProfile já faz isso.
-
     fetchUserProfile();
     refreshDashboard(); // Inicializa o dashboard
 
     // Lógica do dropdown de perfil para DESKTOP
-    if (userProfileMenuDesktop) { // Usar o novo ID
+    if (userProfileMenuDesktop) {
         const dropdownTemplate = document.getElementById('user-profile-dropdown-template');
         if (dropdownTemplate) {
-            const dropdown = dropdownTemplate.content.cloneNode(true).firstElementChild;
-            userProfileMenuDesktop.appendChild(dropdown);
+            const dropdownContent = dropdownTemplate.content.cloneNode(true);
+            const dropdown = dropdownContent.querySelector('.user-profile-dropdown-content');
+            if (dropdown) { // Certifica-se de que o conteúdo foi encontrado
+                userProfileMenuDesktop.appendChild(dropdown);
 
-            userProfileMenuDesktop.addEventListener('click', (e) => {
-                e.stopPropagation();
-                dropdown.classList.toggle('active');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (dropdown.classList.contains('active') && !userProfileMenuDesktop.contains(e.target)) {
-                    dropdown.classList.remove('active');
-                }
-            });
-
-            const dropdownLogoutButton = dropdown.querySelector('#dropdown-logout-button');
-            if (dropdownLogoutButton) {
-                dropdownLogoutButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    localStorage.clear();
-                    showNotification('Você foi desconectado com sucesso.', 'info');
-                    setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+                userProfileMenuDesktop.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('active');
                 });
+
+                document.addEventListener('click', (e) => {
+                    if (dropdown.classList.contains('active') && !userProfileMenuDesktop.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                    }
+                });
+
+                const dropdownLogoutButton = dropdown.querySelector('#dropdown-logout-button');
+                if (dropdownLogoutButton) {
+                    dropdownLogoutButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        localStorage.clear();
+                        showNotification('Você foi desconectado com sucesso.', 'info');
+                        setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+                    });
+                }
+            } else {
+                console.error('Conteúdo do dropdown do perfil não encontrado dentro do template.');
             }
         } else {
             console.error('Template do dropdown do perfil não encontrado. Verifique dashboard.html.');
         }
     }
 
-    const logoutButton = document.getElementById('logout-button');
-if (logoutButton) {
-    logoutButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.clear();
-        showNotification('Você foi desconectado com sucesso.', 'info');
-        setTimeout(() => { window.location.href = 'login.html'; }, 1500);
-    });
-}
+    // Lógica do botão de logout no menu mobile (se existir um botão separado para mobile)
+    const logoutButtonMobile = document.getElementById('logout-button');
+    if (logoutButtonMobile) {
+        logoutButtonMobile.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.clear();
+            showNotification('Você foi desconectado com sucesso.', 'info');
+            setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+        });
+    }
+
 
     // --- LÓGICA DO CHAT E JOGADORES ONLINE (Socket.IO) ---
     if (typeof io !== 'undefined') {
-        socket = io(API_BASE_URL, { // Atualizado
+        socket = io(API_BASE_URL, {
             auth: { token: token },
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
@@ -210,8 +216,8 @@ if (logoutButton) {
 
         emitUserConnected = () => {
             if (socket.connected && username && userId && readyToConnectUser) {
-                const userConsole = document.getElementById('current-user-console-icon') ? (document.getElementById('current-user-console-icon').dataset.consoleName || '') : ''; // Pega o console do elemento desktop
-                const avatarUrl = document.getElementById('current-user-avatar-desktop')?.src || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Pega o avatar do elemento desktop - Atualizado
+                const userConsole = document.getElementById('current-user-console-icon') ? (document.getElementById('current-user-console-icon').dataset.consoleName || '') : '';
+                const avatarUrl = document.getElementById('current-user-avatar-desktop')?.src || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`;
                 console.log('Emitindo user connected:', { username, id: userId, avatarUrl, console: userConsole });
                 socket.emit('user connected', {
                     username,
@@ -247,7 +253,7 @@ if (logoutButton) {
             if (reason === 'io server disconnect') {
                 socket.connect();
             }
-            setupMatchmaking(socket, userId, refreshDashboard);
+            // Não chame setupMatchmaking aqui, ele já é chamado na inicialização
         });
 
         socket.on('error', (err) => {
@@ -256,39 +262,52 @@ if (logoutButton) {
         });
 
         initFriendsAndChat(socket, token, userId, refreshDashboard);
-        setupChallengeListeners(token, userId, refreshDashboard, socket); // Pass socket instance
+        setupChallengeListeners(token, userId, refreshDashboard, socket);
         setupMatchmaking(socket, userId, refreshDashboard);
 
     } else {
         console.error('Biblioteca Socket.IO não carregada. O chat e a lista de jogadores não funcionarão.');
     }
-});
 
-// --- LÓGICA DO MENU HAMBÚRGUER (Mobile) ---
-const hamburgerButton = document.querySelector('.hamburger-menu');
-const mobileNav = document.querySelector('#main-nav-links');
+    // --- LÓGICA DO MENU HAMBÚRGUER (Mobile) ---
+    const setupMobileMenu = () => {
+        const hamburgerButton = document.querySelector('.hamburger-menu');
+        const mobileNav = document.querySelector('#main-nav-links');
 
-if (hamburgerButton && mobileNav) {
-    hamburgerButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        hamburgerButton.classList.toggle('active');
-        mobileNav.classList.toggle('mobile-nav-active');
-        document.body.classList.toggle('mobile-nav-open');
-        
-        // Atualiza o atributo ARIA para acessibilidade
-        const isExpanded = hamburgerButton.classList.contains('active');
-        hamburgerButton.setAttribute('aria-expanded', isExpanded);
-    });
+        if (hamburgerButton && mobileNav) {
+            hamburgerButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                hamburgerButton.classList.toggle('active');
+                mobileNav.classList.toggle('mobile-nav-active');
+                document.body.classList.toggle('mobile-nav-open');
 
-    // Fecha ao clicar fora (em dispositivos touch especialmente)
-    document.addEventListener('click', (e) => {
-        if (mobileNav.classList.contains('mobile-nav-active') && 
-            !mobileNav.contains(e.target) && 
-            !hamburgerButton.contains(e.target)) {
-            hamburgerButton.classList.remove('active');
-            mobileNav.classList.remove('mobile-nav-active');
-            document.body.classList.remove('mobile-nav-open');
-            hamburgerButton.setAttribute('aria-expanded', 'false');
+                const isExpanded = hamburgerButton.getAttribute('aria-expanded') === 'true';
+                hamburgerButton.setAttribute('aria-expanded', !isExpanded);
+            });
+
+            // Fecha ao clicar em links ou fora do menu
+            mobileNav.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') {
+                    hamburgerButton.classList.remove('active');
+                    mobileNav.classList.remove('mobile-nav-active');
+                    document.body.classList.remove('mobile-nav-open');
+                    hamburgerButton.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (mobileNav.classList.contains('mobile-nav-active') &&
+                    !mobileNav.contains(e.target) &&
+                    !hamburgerButton.contains(e.target)) {
+                    hamburgerButton.classList.remove('active');
+                    mobileNav.classList.remove('mobile-nav-active');
+                    document.body.classList.remove('mobile-nav-open');
+                    hamburgerButton.setAttribute('aria-expanded', 'false');
+                }
+            });
         }
-    });
-}
+    };
+
+    // Chame a função de setup do menu mobile
+    setupMobileMenu();
+});

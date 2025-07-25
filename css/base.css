@@ -651,6 +651,56 @@ textarea[readonly] {
         font-size: 13px;
     }
 
+    /* Adicione isso na seção de responsividade (max-width: 768px) */
+    .dashboard-main {
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .challenges-column {
+        width: 100%;
+        order: 1;
+    }
+    
+    .sidebar-column {
+        width: 100%;
+        order: 2;
+    }
+    
+    .friends-section-container, 
+    .chat-container {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .challenges-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .challenges-header h2 {
+        margin-bottom: 0;
+    }
+    
+    .challenges-header #create-challenge-btn {
+        width: 100%;
+    }
+    
+    .friends-tabs {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .friends-tab-btn {
+        padding: 8px 12px;
+        font-size: 14px;
+        flex: 1 0 calc(50% - 10px);
+    }
+    
+    .chat-input-area input {
+        width: 70%;
+    }
+
 
     /* Ajustes gerais para telas menores */
     section { padding: 40px 0; }
@@ -674,7 +724,7 @@ textarea[readonly] {
     }
 }
 
-/* Estilos para Celulares Pequenos */
+/* Para telas muito pequenas */
 @media (max-width: 480px) {
     .container {
         padding: 0 10px;
@@ -701,8 +751,24 @@ textarea[readonly] {
         width: 80%;
         right: -80%;
     }
+    .friends-tab-btn {
+        flex: 1 0 100%;
+        font-size: 13px;
+    }
+    
+    .app-list-item-actions {
+        gap: 5px;
+    }
+    
+    .app-list-item-actions button {
+        padding: 5px;
+        font-size: 14px;
+    }
+    
+    .chat-input-area input {
+        width: 65%;
+    }
 }
-
 /* Adicione isso no final do arquivo base.css */
 header nav ul#main-nav-links.mobile-nav-active {
     visibility: visible;
