@@ -530,7 +530,7 @@ textarea[readonly] {
         flex-direction: column;
         justify-content: flex-start; /* Alinha itens ao topo */
         padding: 20px; /* Padding geral */
-        z-index: 1006; /* Aumentado z-index para garantir que esteja acima de tudo */
+        z-index: 1000 !important; /* Aumentado z-index para garantir que esteja acima de tudo */
         overflow-y: auto; /* Adiciona scroll se o conteúdo for muito grande */
         -webkit-overflow-scrolling: touch; /* Melhora o scroll em iOS */
 
