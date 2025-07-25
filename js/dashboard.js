@@ -187,6 +187,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const logoutButton = document.getElementById('logout-button');
+if (logoutButton) {
+    logoutButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        showNotification('Você foi desconectado com sucesso.', 'info');
+        setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+    });
+}
+
     // --- LÓGICA DO CHAT E JOGADORES ONLINE (Socket.IO) ---
     if (typeof io !== 'undefined') {
         socket = io(API_BASE_URL, { // Atualizado
