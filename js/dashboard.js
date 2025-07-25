@@ -253,3 +253,25 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Biblioteca Socket.IO não carregada. O chat e a lista de jogadores não funcionarão.');
     }
 });
+
+// --- LÓGICA DO MENU HAMBÚRGUER (Mobile) ---
+const hamburgerButton = document.querySelector('.hamburger-menu');
+const mobileNav = document.querySelector('#main-nav-links');
+
+if (hamburgerButton && mobileNav) {
+    hamburgerButton.addEventListener('click', () => {
+        hamburgerButton.classList.toggle('active'); // animação dos traços
+        mobileNav.classList.toggle('mobile-nav-active'); // mostra/esconde menu
+        document.body.classList.toggle('mobile-nav-open'); // aplica overlay e bloqueia scroll
+    });
+
+    // Fecha ao clicar fora (em dispositivos touch especialmente)
+    document.addEventListener('click', (e) => {
+        const isClickInsideMenu = mobileNav.contains(e.target) || hamburgerButton.contains(e.target);
+        if (!isClickInsideMenu && mobileNav.classList.contains('mobile-nav-active')) {
+            hamburgerButton.classList.remove('active');
+            mobileNav.classList.remove('mobile-nav-active');
+            document.body.classList.remove('mobile-nav-open');
+        }
+    });
+}
