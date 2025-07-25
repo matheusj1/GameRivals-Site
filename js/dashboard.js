@@ -158,8 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Lógica do dropdown de perfil para DESKTOP
     if (userProfileMenuDesktop && dropdownTemplate) {
         const dropdownContent = dropdownTemplate.content.cloneNode(true);
-        const dropdown = dropdownContent.querySelector('.user-profile-dropdown'); // Corrigido nome da classe
-        if (dropdown) { // Certifica-se de que o conteúdo foi encontrado
+        const dropdown = dropdownContent.firstElementChild; // Corrigido!
+        if (dropdown) {
             userProfileMenuDesktop.appendChild(dropdown);
 
             userProfileMenuDesktop.addEventListener('click', (e) => {
