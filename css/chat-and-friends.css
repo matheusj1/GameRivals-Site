@@ -20,8 +20,8 @@
 }
 
 .emoji-toggle-btn:hover {
-    background: var(--primary-neon) !important;
-    border-color: var(--primary-neon) !important;
+    background: var(--primary-color) !important; /* Usar primary-color */
+    border-color: var(--primary-color) !important;
     box-shadow: var(--glow-soft);
     transform: scale(1.05);
     color: #fff !important;
@@ -60,7 +60,7 @@
 }
 
 .emoji-palette span:hover {
-    background-color: rgba(111, 66, 193, 0.1);
+    background-color: rgba(106, 13, 173, 0.1); /* Usar primary-color com opacidade */
 }
 
 .message {
@@ -90,11 +90,11 @@
 .message.received .msg-author { color: var(--text-color); }
 
 .message.sent {
-    background-color: var(--primary-neon);
+    background-color: var(--primary-color); /* Usar primary-color */
     color: #fff;
     align-self: flex-end;
     border-top-right-radius: 0;
-    border: 1px solid var(--primary-neon);
+    border: 1px solid var(--primary-color);
 }
 .message.sent .msg-author { color: rgba(255,255,255,0.8); }
 .message.sent .message-timestamp { color: rgba(255,255,255,0.6); }
@@ -139,7 +139,7 @@
 .private-chat-window.active { opacity: 1; transform: translateY(0) scale(1); }
 
 .private-chat-header {
-    background-color: var(--primary-neon); /* Ajusta para cor primária */
+    background-color: var(--primary-color); /* Ajusta para cor primária */
     padding: 10px 15px;
     color: #fff;
     font-weight: bold;
@@ -191,7 +191,7 @@
 
 
 .private-chat-input-area button {
-    background-color: var(--primary-neon);
+    background-color: var(--primary-color);
     color: #fff;
     border: none;
     padding: 0 20px;
@@ -212,8 +212,9 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    overflow-y: auto;
-    max-height: 200px; /* Manter se necessário um scroll interno */
+    /* Remover overflow-y e max-height para permitir que o conteúdo se expanda na página rolavel */
+    /* overflow-y: auto; */
+    /* max-height: 200px; */
 }
 
 /* --- Componente Base para Itens de Lista de Aplicação --- */
@@ -242,7 +243,7 @@
     height: 35px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid var(--primary-neon); /* Borda padrão para avatares */
+    border: 1px solid var(--primary-color); /* Borda padrão para avatares */
     flex-shrink: 0;
     transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Transição para a borda */
 }
@@ -303,8 +304,8 @@
 }
 
 .app-list-item-actions button:hover {
-    background: var(--primary-neon);
-    border-color: var(--primary-neon);
+    background: var(--primary-color);
+    border-color: var(--primary-color);
     color: white;
     transform: translateY(-2px);
     box-shadow: var(--glow-soft);
@@ -441,7 +442,7 @@
 
 .user-profile-dropdown ul li a:hover {
     background-color: var(--input-bg);
-    color: var(--primary-neon);
+    color: var(--primary-color);
 }
 
 /* ======================================================= */
@@ -505,9 +506,8 @@
     .message p { font-size: 14px; } /* Mensagens menores */
 
 
-
-
-    .friends-tabs {
+    /* Remover estes estilos porque as abas são removidas na navegação inferior */
+    /* .friends-tabs {
         justify-content: flex-start;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -520,8 +520,8 @@
     .friends-tab-btn {
         flex-shrink: 0;
         font-size: 12px;
-        padding: 8px 6px; /* Menos padding */
-    }
+        padding: 8px 6px;
+    } */
 
     .friends-content { padding: 12px; } /* Menos padding */
     .app-list-item { /* Usar a classe base */
@@ -535,7 +535,7 @@
         margin-right: 4px;
         width: 28px; /* Avatares menores */
         height: 28px;
-        /* border: none; /* Garante que a borda padrão seja removida aqui se necessário */ /* REMOVIDO PARA PRESERVAR BORDAS DE STATUS */
+        border: none; /* Garante que a borda padrão seja removida aqui se necessário */
     }
     .app-list-item-main-content { /* Usar a classe base */
         flex-basis: calc(100% - 38px);

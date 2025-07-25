@@ -13,14 +13,14 @@
     <link rel="stylesheet" href="css/chat-and-friends.css">
     <link rel="stylesheet" href="css/modals.css">
     <link rel="stylesheet" href="css/theme-and-utils.css">
-    </head>
+</head>
 <body>
     <header>
         <div class="container">
             <div class="logo">
                 <h1><a href="dashboard.html"><img src="img/logo-gamerivals.png" alt="Game Rivals Logo"></a></h1>
             </div>
-            
+
             <nav>
                 <ul id="main-nav-links">
                     <li class="mobile-user-info-section">
@@ -50,7 +50,7 @@
                 <span></span>
                 <span></span>
             </button>
-            
+
             <div class="user-nav-desktop" style="display: none;"></div>
         </div>
     </header>
@@ -105,7 +105,7 @@
             <hr style="width: 80%; border-color: var(--border-color); margin: 30px 0;">
 
             <div style="text-align: center; width: 100%;">
-                <button type="button" class="cta-button" id="open-theme-modal-btn" style="background-color: var(--secondary-neon);">Escolher Tema do Site</button>
+                <button type="button" class="cta-button" id="open-theme-modal-btn" style="background-color: var(--secondary-color);">Escolher Tema do Site</button>
             </div>
 
             <hr style="width: 80%; border-color: var(--border-color); margin: 30px 0;">
@@ -127,7 +127,7 @@
                     </div>
 
                     <div id="pix-payment-details" style="margin-top: 20px; display: none; background-color: var(--input-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
-                        <h5 style="color: var(--primary-neon); margin-bottom: 15px;">Escaneie para Pagar via Pix</h5>
+                        <h5 style="color: var(--primary-color); margin-bottom: 15px;">Escaneie para Pagar via Pix</h5>
                         <img id="pix-qr-code" src="" alt="QR Code Pix" style="width: 180px; height: 180px; display: block; margin: 0 auto 15px auto; border: 1px solid var(--border-color);">
                         <p style="color: var(--text-muted); font-size: 0.9em; margin-bottom: 10px;">Ou copie e cole:</p>
                         <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
@@ -157,7 +157,8 @@
                 <li><a href="#">Política de Privacidade</a></li>
                 <li><a href="#">Contato</a></li>
             </ul>
-        </footer>
+        </div>
+    </footer>
 
         <div id="notification-container"></div>
 
@@ -183,30 +184,7 @@
                 <button type="button" class="cta-button form-submit-btn" id="save-theme-button">Salvar Tema</button>
             </div>
         </div>
-    <div class="modal-backdrop" id="theme-selection-modal-backdrop">
-        <div class="modal">
-            <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
-            <h2>Escolha seu Tema</h2>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px;">
-                Selecione o tema de sua preferência para o site.
-            </p>
-            <div class="theme-selection-options" id="profile-theme-selector">
-                <label class="theme-option light" id="profile-light-theme-option">
-                    <input type="radio" name="theme" value="light">
-                    <div class="preview-box"></div>
-                    <span>Tema Claro</span>
-                </label>
-                <label class="theme-option dark" id="profile-dark-theme-option">
-                    <input type="radio" name="theme" value="dark">
-                    <div class="preview-box"></div>
-                    <span>Tema Escuro</span>
-                </label>
-            </div>
-            <button type="button" class="cta-button form-submit-btn" id="save-theme-button">Salvar Tema</button>
-        </div>
-    </div>
-
-        <script src="js/main.js"></script>
-        <script src="js/profile.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/profile.js"></script>
     </body>
     </html>

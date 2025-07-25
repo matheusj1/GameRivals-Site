@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/chat-and-friends.css">
     <link rel="stylesheet" href="css/modals.css">
     <link rel="stylesheet" href="css/theme-and-utils.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <header>
@@ -65,11 +66,11 @@
                     <img src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar" id="current-user-avatar-desktop">
                 </div>
             </div>
-            </div>
+        </div>
     </header>
 
     <main class="dashboard-main">
-        <div class="challenges-column">
+        <div id="dashboard-content" class="main-tab-content active">
             <div class="challenges-header">
                 <h2>Desafios Abertos</h2>
                 <button class="cta-button" id="create-challenge-btn">Criar Novo Desafio</button>
@@ -87,31 +88,29 @@
             </div>
         </div>
 
-        <aside class="sidebar-column">
+        <div id="friends-tab-content" class="main-tab-content" style="display:none;">
             <div class="friends-section-container">
-                <div class="friends-tabs">
-                    <button class="friends-tab-btn active" data-tab="online-players-tab">Online (<span id="player-count">0</span>)</button>
+                <div class="friends-tabs" style="display: flex;"> <button class="friends-tab-btn active" data-tab="online-players-tab">Online (<span id="player-count">0</span>)</button>
                     <button class="friends-tab-btn" data-tab="my-friends-tab">Amigos (<span id="friends-count">0</span>)</button>
                     <button class="friends-tab-btn" data-tab="friend-requests-tab">Solicitações (<span id="friend-requests-count">0</span>)</button>
                     <button class="friends-tab-btn" data-tab="search-friends-tab">Pesquisar</button>
-                    <button class="friends-tab-btn" data-tab="matchmaking-tab">Procurar Partida</button>
                     <button class="friends-tab-btn" data-tab="blocked-users-tab">Bloqueados</button>
                 </div>
                 <div class="friends-content">
                     <div id="online-players-tab" class="friends-tab-content active">
                         <ul class="player-list">
-                            </ul>
+                        </ul>
                     </div>
                     <div id="my-friends-tab" class="friends-tab-content">
                         <ul class="friends-list">
-                            </ul>
+                        </ul>
                     </div>
                     <div id="friend-requests-tab" class="friends-tab-content">
                         <ul class="friend-requests-list">
-                            </ul>
+                        </ul>
                         <h4 style="color: var(--text-muted); margin-top: 20px; border-top: 1px dashed var(--border-color); padding-top: 15px;">Solicitações Enviadas</h4>
                         <ul class="sent-friend-requests-list">
-                            </ul>
+                        </ul>
                     </div>
                     <div id="search-friends-tab" class="friends-tab-content">
                         <div class="search-input-group">
@@ -119,64 +118,18 @@
                             <button id="friend-search-btn">🔍</button>
                         </div>
                         <ul class="search-results-list">
-                            </ul>
+                        </ul>
                         <p class="form-error-message" id="friend-search-error"></p>
-                    </div>
-                    <div id="matchmaking-tab" class="friends-tab-content">
-                        <h3 class="matchmaking-title">Procurar Partida Rápida</h3>
-                        <p class="matchmaking-description">Selecione o jogo e o valor da aposta para entrar na fila de espera. O sistema encontrará um oponente automaticamente!</p>
-                        <form id="matchmaking-form" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
-                            <div class="input-group">
-                                <label for="matchmaking-game-select">Jogo</label>
-                                <select id="matchmaking-game-select" name="game" required>
-                                    <option value="" disabled selected>Selecione um jogo</option>
-                                    <option value="Ea Sports 24">Ea Sports 24</option>
-                                    <option value="Ea Sports 25">Ea Sports 25</option>
-                                    <option value="Rocket League">Rocket League</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label for="matchmaking-console-select">Console</label>
-                                <select id="matchmaking-console-select" name="console" required>
-                                    <option value="" disabled selected>Selecione um console</option>
-                                    <option value="PS5">PlayStation 5</option>
-                                    <option value="PS4">PlayStation 4</option>
-                                    <option value="XBOX Series">Xbox Series S/X</option>
-                                    <option value="Xbox One">Xbox One</option>
-                                    <option value="PC">PC</option>
-                                    <option value="Nintendo Switch">Nintendo Switch</option>
-                                </select>
-                            </div>
-                            <div class="input-group">
-                                <label for="matchmaking-bet-amount">Valor da Aposta (em moedas)</label>
-                                <div class="bet-amount-options">
-                                    <label class="bet-option">
-                                        <input type="radio" name="matchmaking-bet" value="10" required> 10 💰 <span class="queue-count" data-bet="10">(0)</span>
-                                    </label>
-                                    <label class="bet-option">
-                                        <input type="radio" name="matchmaking-bet" value="20"> 20 💰 <span class="queue-count" data-bet="20">(0)</span>
-                                    </label>
-                                    <label class="bet-option">
-                                        <input type="radio" name="matchmaking-bet" value="50"> 50 💰 <span class="queue-count" data-bet="50">(0)</span>
-                                    </label>
-                                    <label class="bet-option">
-                                        <input type="radio" name="matchmaking-bet" value="100"> 100 💰 <span class="queue-count" data-bet="100">(0)</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <p class="form-error-message" id="matchmaking-error"></p>
-                            <button type="submit" class="cta-button form-submit-btn" id="join-matchmaking-btn">Entrar na Fila</button>
-                            <button type="button" class="cta-button form-submit-btn" id="leave-matchmaking-btn" style="background-color: #e74c3c; display: none;">Sair da Fila</button>
-                            <p id="matchmaking-status-message" style="text-align: center; color: var(--secondary-neon); font-weight: bold; margin-top: 10px;"></p>
-                        </form>
                     </div>
                     <div id="blocked-users-tab" class="friends-tab-content">
                         <ul class="blocked-users-list">
-                            </ul>
+                        </ul>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <div id="chat-tab-content" class="main-tab-content" style="display:none;">
             <div class="chat-container">
                 <h3>Chat Universal</h3>
                 <div class="chat-messages">
@@ -192,8 +145,83 @@
                     </div>
                 </form>
             </div>
-        </aside>
+        </div>
+
+        <div id="matchmaking-tab-content" class="main-tab-content" style="display:none;">
+             <div class="friends-section-container"> <h3 class="matchmaking-title">Procurar Partida Rápida</h3>
+                <p class="matchmaking-description">Selecione o jogo e o valor da aposta para entrar na fila de espera. O sistema encontrará um oponente automaticamente!</p>
+                <form id="matchmaking-form" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                    <div class="input-group">
+                        <label for="matchmaking-game-select">Jogo</label>
+                        <select id="matchmaking-game-select" name="game" required>
+                            <option value="" disabled selected>Selecione um jogo</option>
+                            <option value="Ea Sports 24">Ea Sports 24</option>
+                            <option value="Ea Sports 25">Ea Sports 25</option>
+                            <option value="Rocket League">Rocket League</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="matchmaking-console-select">Console</label>
+                        <select id="matchmaking-console-select" name="console" required>
+                            <option value="" disabled selected>Selecione um console</option>
+                            <option value="PS5">PlayStation 5</option>
+                            <option value="PS4">PlayStation 4</option>
+                            <option value="XBOX Series">Xbox Series S/X</option>
+                            <option value="Xbox One">Xbox One</option>
+                            <option value="PC">PC</option>
+                            <option value="Nintendo Switch">Nintendo Switch</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="matchmaking-bet-amount">Valor da Aposta (em moedas)</label>
+                        <div class="bet-amount-options">
+                            <label class="bet-option">
+                                <input type="radio" name="matchmaking-bet" value="10" required> 10 💰 <span class="queue-count" data-bet="10">(0)</span>
+                            </label>
+                            <label class="bet-option">
+                                <input type="radio" name="matchmaking-bet" value="20"> 20 💰 <span class="queue-count" data-bet="20">(0)</span>
+                            </label>
+                            <label class="bet-option">
+                                <input type="radio" name="matchmaking-bet" value="50"> 50 💰 <span class="queue-count" data-bet="50">(0)</span>
+                            </label>
+                            <label class="bet-option">
+                                <input type="radio" name="matchmaking-bet" value="100"> 100 💰 <span class="queue-count" data-bet="100">(0)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <p class="form-error-message" id="matchmaking-error"></p>
+                    <button type="submit" class="cta-button form-submit-btn" id="join-matchmaking-btn">Entrar na Fila</button>
+                    <button type="button" class="cta-button form-submit-btn" id="leave-matchmaking-btn" style="background-color: #e74c3c; display: none;">Sair da Fila</button>
+                    <p id="matchmaking-status-message" style="text-align: center; color: var(--secondary-color); font-weight: bold; margin-top: 10px;"></p>
+                </form>
+            </div>
+        </div>
+
     </main>
+
+    <nav class="bottom-nav">
+        <a href="#" class="bottom-nav-item active" data-target-tab="dashboard-content">
+            <i class="fas fa-home icon"></i>
+            <span>Início</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-target-tab="friends-tab-content">
+            <i class="fas fa-users icon"></i>
+            <span>Amigos</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-target-tab="chat-tab-content">
+            <i class="fas fa-comments icon"></i>
+            <span>Chat</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-target-tab="matchmaking-tab-content">
+            <i class="fas fa-crosshairs icon"></i>
+            <span>Match</span>
+        </a>
+        <a href="profile.html" class="bottom-nav-item">
+            <i class="fas fa-user-circle icon"></i>
+            <span>Perfil</span>
+        </a>
+    </nav>
+
 
     <div class="modal-backdrop" id="challenge-modal-backdrop">
         <div class="modal" id="challenge-modal">
@@ -232,7 +260,7 @@
             <h2>Partida Encontrada!</h2>
             <p style="text-align: center; font-size: 1.1em; margin-bottom: 20px;">Seu desafio foi aceito!</p>
             <div style="text-align: center; margin-bottom: 25px;">
-                <p style="font-size: 1.2em; font-weight: bold; color: var(--primary-neon);"><span id="match-found-game"></span> - <span id="match-found-console"></span></p>
+                <p style="font-size: 1.2em; font-weight: bold; color: var(--primary-color);"><span id="match-found-game"></span> - <span id="match-found-console"></span></p>
                 <p style="font-size: 1.1em; color: var(--text-muted);">Aposta: <span class="coin-icon">💰</span> <span id="match-found-bet"></span> moedas</p>
                 <p style="margin-top: 15px; font-size: 1.1em;">Contra: <strong id="match-found-opponent-username"></strong></p>
             </div>
@@ -369,7 +397,7 @@
             <button class="close-private-chat">&times;</button>
         </div>
         <div class="private-chat-messages">
-            </div>
+        </div>
         <form class="private-chat-input-area">
             <input type="text" placeholder="Digite sua mensagem..." autocomplete="off">
             <button type="button" class="emoji-toggle-btn">😀</button>
@@ -387,13 +415,13 @@
     <div class="modal-backdrop">
         <div class="modal other-user-profile-modal">
             <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
-            
+
             <div class="profile-header">
                 <img id="other-user-avatar-preview" src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar-large">
                 <div class="header-info">
                     <h2 id="other-user-profile-username">Nome do Usuário</h2>
                     <p class="console-display">
-                        <img id="other-user-console-icon-profile" src="" alt="Console Icon" class="console-icon"> 
+                        <img id="other-user-console-icon-profile" src="" alt="Console Icon" class="console-icon">
                         <span id="other-user-console">N/A</span>
                     </p>
                     <div class="profile-stats-summary">
@@ -409,24 +437,78 @@
 
                 <h3>Sobre Mim</h3>
                 <p id="other-user-description">N/A</p>
-                
+
             </div>
 
             <div class="modal-actions-profile">
                 <button class="cta-button view-profile-chat-btn" id="start-private-chat-from-modal">Iniciar Chat Privado</button>
-                <button class="cta-button" id="send-friend-request-from-modal" style="background-color: var(--secondary-neon);">Enviar Solicitação de Amizade</button>
+                <button class="cta-button" id="send-friend-request-from-modal" style="background-color: var(--secondary-color);">Enviar Solicitação de Amizade</button>
                 <button class="cta-button" id="block-user-from-modal" style="background-color: #e74c3c; margin-top: 10px;">Bloquear Usuário</button>
             </div>
         </div>
     </div>
 </template>
 
-        <script src="https://gamerivals-site.onrender.com/socket.io/socket.io.js"></script> <script src="js/utils.js" type="module"></script>
-        <script src="js/challenges.js" type="module"></script>
-        <script src="js/friends_and_chat.js" type="module"></script>
-        <script src="js/matchmaking.js" type="module"></script>
-        <script src="js/dashboard.js" type="module"></script>
-        <div id="private-chats-container"></div>
+    <script src="https://gamerivals-site.onrender.com/socket.io/socket.io.js"></script>
+    <script src="js/utils.js" type="module"></script>
+    <script src="js/challenges.js" type="module"></script>
+    <script src="js/friends_and_chat.js" type="module"></script>
+    <script src="js/matchmaking.js" type="module"></script>
+    <script src="js/dashboard.js" type="module"></script>
+    <div id="private-chats-container"></div>
 
-    </body>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+            const mainTabContents = document.querySelectorAll('.main-tab-content');
+            const friendsTabs = document.querySelector('.friends-tabs'); // Seleciona as tabs de amigos
+
+            bottomNavItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    // Previne a navegação padrão para links internos
+                    if (item.dataset.targetTab) {
+                        e.preventDefault();
+
+                        // Remove 'active' de todos os itens da barra de navegação inferior
+                        bottomNavItems.forEach(navItem => navItem.classList.remove('active'));
+                        // Adiciona 'active' ao item clicado
+                        item.classList.add('active');
+
+                        // Esconde todos os conteúdos principais
+                        mainTabContents.forEach(content => content.style.display = 'none');
+
+                        // Mostra o conteúdo da aba alvo
+                        const targetTabId = item.dataset.targetTab;
+                        const targetTabContent = document.getElementById(targetTabId);
+                        if (targetTabContent) {
+                            targetTabContent.style.display = 'block';
+                        }
+
+                        // Se a aba de amigos for ativada, garante que suas sub-abas estejam visíveis
+                        if (targetTabId === 'friends-tab-content') {
+                             if (friendsTabs) friendsTabs.style.display = 'flex';
+                             // Opcional: ativar a primeira sub-aba de amigos se não houver uma ativa
+                             const activeFriendsSubTab = document.querySelector('.friends-tabs .friends-tab-btn.active');
+                             if (!activeFriendsSubTab) {
+                                 const defaultFriendsTabBtn = document.querySelector('.friends-tabs .friends-tab-btn[data-tab="online-players-tab"]');
+                                 const defaultFriendsTabContent = document.getElementById('online-players-tab');
+                                 if (defaultFriendsTabBtn) defaultFriendsTabBtn.classList.add('active');
+                                 if (defaultFriendsTabContent) defaultFriendsTabContent.classList.add('active');
+                             }
+                        } else {
+                            // Se não for a aba de amigos, esconde as tabs internas dela
+                            if (friendsTabs) friendsTabs.style.display = 'none';
+                        }
+                    }
+                });
+            });
+
+            // Inicializa: Garante que a primeira aba (Dashboard) esteja ativa e as outras escondidas
+            const defaultDashboardTab = document.querySelector('.bottom-nav-item[data-target-tab="dashboard-content"]');
+            if (defaultDashboardTab) {
+                defaultDashboardTab.click(); // Simula um clique para ativar a aba inicial
+            }
+        });
+    </script>
+</body>
 </html>

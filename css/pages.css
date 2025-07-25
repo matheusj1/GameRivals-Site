@@ -2,7 +2,7 @@
 
 /* PÁGINA INÍCIO (index.html) */
 .hero {
-    background: linear-gradient(135deg, var(--bg-color) 0%, #E0E0E0 100%);
+    background: linear-gradient(135deg, var(--bg-color) 0%, var(--card-bg) 100%); /* Ajustado para nova paleta */
     color: var(--text-color);
     padding: 100px 0;
     text-align: center;
@@ -27,13 +27,13 @@
 }
 .blob1 {
     width: 350px; height: 350px;
-    background: radial-gradient(circle, rgba(111, 66, 193, 0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%); /* Usar primary-color */
     top: 10%; left: 15%;
     animation: pulseBlob1 10s infinite alternate ease-in-out;
 }
 .blob2 {
     width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(23, 162, 184, 0.25) 0%, transparent 70%);
+    background: radial-gradient(circle, var(--secondary-color) 0%, transparent 70%); /* Usar secondary-color */
     bottom: 5%; right: 10%;
     animation: pulseBlob2 12s infinite alternate ease-in-out;
 }
@@ -84,7 +84,7 @@
     width: 22%;
     min-width: 230px;
     text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05), inset 0 0 10px rgba(111, 66, 193, 0.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05), inset 0 0 10px rgba(106, 13, 173, 0.05); /* Usar primary-color */
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
     cursor: pointer;
     position: relative;
@@ -94,9 +94,9 @@
 
 .step:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1), inset 0 0 15px rgba(111, 66, 193, 0.1);
-    border-color: var(--primary-neon);
-    background-color: #FFFFFF;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1), inset 0 0 15px rgba(106, 13, 173, 0.1); /* Usar primary-color */
+    border-color: var(--primary-color);
+    background-color: var(--card-bg);
 }
 .step:hover::before { content: none; }
 
@@ -104,7 +104,7 @@
 .step-icon {
     font-size: 48px;
     margin-bottom: 15px;
-    color: var(--primary-neon);
+    color: var(--primary-color);
     text-shadow: var(--glow-soft);
     position: relative;
     z-index: 1;
@@ -124,7 +124,7 @@
     border: 1px solid var(--border-color);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05), inset 0 0 8px rgba(23, 162, 184, 0.03);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05), inset 0 0 8px rgba(0, 188, 212, 0.03); /* Usar secondary-color */
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     cursor: pointer;
     position: relative;
@@ -134,8 +134,8 @@
 
 .game-card:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1), inset 0 0 10px rgba(111, 66, 193, 0.08);
-    border-color: var(--primary-neon);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1), inset 0 0 10px rgba(106, 13, 173, 0.08); /* Usar primary-color */
+    border-color: var(--primary-color);
 }
 .game-card:hover::after { content: none; }
 
@@ -148,7 +148,7 @@
     opacity: 1;
     transition: opacity 0.3s ease;
 }
-.game-card:hover img { opacity: 0.9; border-bottom-color: var(--primary-neon); }
+.game-card:hover img { opacity: 0.9; border-bottom-color: var(--primary-color); }
 .game-card-content { padding: 20px; }
 .game-card h3 {
     font-size: 20px;
@@ -181,7 +181,7 @@
 
     position: relative;
     overflow: hidden;
-    height: 520px;
+    height: 520px; /* Ajustado para o novo layout */
     transition: height 0.4s ease-in-out, box-shadow 0.4s ease;
     box-shadow: 0 8px 20px rgba(0,0,0,0.1), var(--glow-soft);
 }
@@ -208,7 +208,7 @@
 }
 
 .form-container h2 {
-    color: var(--primary-neon);
+    color: var(--primary-color);
     text-shadow: var(--glow-soft);
     margin-bottom: 30px;
     font-size: clamp(26px, 6vw, 32px); /* NOVO: Tipografia fluida */
@@ -266,7 +266,7 @@
 }
 
 .toggle-password:hover {
-    color: var(--primary-neon);
+    color: var(--primary-color);
 }
 
 .form-submit-btn {
@@ -283,7 +283,7 @@
 }
 
 .form-switch-link a {
-    color: var(--secondary-neon);
+    color: var(--secondary-color);
     font-weight: bold;
     text-decoration: none;
     text-shadow: none;
@@ -292,7 +292,7 @@
 
 .form-switch-link a:hover {
     text-decoration: underline;
-    color: var(--primary-neon);
+    color: var(--primary-color);
 }
 
 .form-error-message {
@@ -327,7 +327,7 @@
 .coin-balance {
     font-size: 18px;
     font-weight: bold;
-    color: #FFC107;
+    color: var(--pending-color); /* Amarelo para moedas */
     text-shadow: none;
 }
 
@@ -359,7 +359,7 @@
     width: 45px;
     height: 45px;
     border-radius: 50%;
-    border: 2px solid var(--primary-neon);
+    border: 2px solid var(--primary-color);
     object-fit: cover;
     box-shadow: var(--glow-soft);
 }
@@ -392,7 +392,7 @@
 
 .challenges-header h2 {
     margin: 0;
-    color: var(--primary-neon);
+    color: var(--primary-color);
     text-shadow: var(--glow-soft);
     font-size: clamp(20px, 4vw, 24px); /* NOVO: Tipografia fluida */
 }
@@ -424,7 +424,7 @@
 
 .friends-section-container h3, .chat-container h3 {
     margin: 0 0 15px 0;
-    color: var(--primary-neon);
+    color: var(--primary-color);
     padding-bottom: 10px;
     border-bottom: 1px solid var(--border-color);
     font-size: clamp(18px, 4vw, 20px); /* NOVO: Tipografia fluida */
@@ -459,13 +459,13 @@
     box-shadow: none;
 }
 .chat-input-area input:focus {
-    border-color: var(--primary-neon);
-    box-shadow: 0 0 0 2px rgba(111, 66, 193, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(106, 13, 173, 0.1);
     background-color: var(--card-bg);
 }
 
 .chat-input-area button {
-    background: var(--primary-neon);
+    background: var(--primary-color);
     color: #fff;
     border: none;
     border-radius: 20px;
@@ -480,13 +480,13 @@
     justify-content: center;
 }
 .chat-input-area button:hover {
-    background-color: #5E3A9F;
+    background-color: var(--secondary-color);
 }
 
 .my-challenges-section { margin-top: 40px; }
 
 .my-challenges-section h2 {
-    color: var(--primary-neon);
+    color: var(--primary-color);
     font-size: clamp(20px, 4vw, 24px); /* NOVO: Tipografia fluida */
     margin-bottom: 20px;
     padding-bottom: 10px;
@@ -507,7 +507,7 @@
     gap: 20px;
     background: var(--card-bg);
     padding: 15px 20px;
-    border-left: 5px solid var(--secondary-neon);
+    border-left: 5px solid var(--secondary-color);
     border-radius: 12px;
     box-shadow: 0 5px 10px rgba(0,0,0,0.05);
 }
@@ -528,7 +528,7 @@
 .players-info .username { color: var(--text-color); }
 
 .players-info .vs-text {
-    color: var(--primary-neon);
+    color: var(--primary-color);
     margin: 0 10px;
     font-size: 14px;
     font-weight: bold;
@@ -539,8 +539,8 @@
 
 .show-more-btn {
     background: transparent;
-    border: 2px solid var(--primary-neon);
-    color: var(--primary-neon);
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
     padding: 10px 30px;
     font-size: 16px;
     font-weight: bold;
@@ -556,7 +556,7 @@
 }
 
 .show-more-btn:hover {
-    background: var(--primary-neon);
+    background: var(--primary-color);
     color: #fff;
     box-shadow: var(--glow-medium);
     text-shadow: none;
@@ -628,13 +628,13 @@
 }
 
 .friends-tab-btn:hover {
-    color: var(--primary-neon);
+    color: var(--primary-color);
     text-shadow: var(--glow-hover-subtle-text);
 }
 
 .friends-tab-btn.active {
-    color: var(--primary-neon);
-    border-bottom-color: var(--primary-neon);
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
     text-shadow: var(--glow-soft);
 }
 
@@ -673,13 +673,13 @@
     box-shadow: none;
 }
 .search-input-group input:focus {
-    border-color: var(--primary-neon);
-    box-shadow: 0 0 0 2px rgba(111, 66, 193, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(106, 13, 173, 0.1);
     background-color: var(--card-bg);
 }
 
 .search-input-group button {
-    background: var(--primary-neon);
+    background: var(--primary-color);
     color: #fff;
     border: none;
     border-radius: 20px;
@@ -696,12 +696,12 @@
     justify-content: center;
 }
 .search-input-group button:hover {
-    background: #5E3A9F;
+    background: var(--secondary-color);
     transform: scale(1.05);
 }
 
 .matchmaking-title {
-    color: var(--primary-neon);
+    color: var(--primary-color);
     text-shadow: var(--glow-soft);
     font-size: clamp(20px, 4vw, 24px); /* NOVO: Tipografia fluida */
     text-align: center;
@@ -741,21 +741,21 @@
 }
 
 .bet-option:hover {
-    border-color: var(--primary-neon);
+    border-color: var(--primary-color);
     background-color: var(--card-bg);
-    box-shadow: inset 0 0 5px rgba(111, 66, 193, 0.1);
+    box-shadow: inset 0 0 5px rgba(106, 13, 173, 0.1);
 }
 
 .bet-option input[type="radio"] { display: none; }
 
 .bet-option input[type="radio"]:checked + span {
-    color: var(--primary-neon);
+    color: var(--primary-color);
     text-shadow: var(--glow-soft);
 }
 
 .bet-option input[type="radio"]:checked {
-    background-color: var(--primary-neon);
-    border-color: var(--primary-neon);
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
     color: #fff;
     box-shadow: var(--glow-medium);
 }
@@ -798,7 +798,7 @@
 
 
 .profile-main h2 {
-    color: var(--primary-neon);
+    color: var(--primary-color);
     text-align: center;
     margin-bottom: 20px;
     font-size: clamp(28px, 5vw, 32px); /* NOVO: Tipografia fluida */
@@ -825,7 +825,7 @@
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid var(--primary-neon);
+    border: 3px solid var(--primary-color);
     box-shadow: var(--glow-medium);
     transition: all 0.3s ease;
 }
@@ -838,14 +838,14 @@
 .upload-avatar-btn {
     padding: 10px 25px !important;
     font-size: 16px !important;
-    background: var(--secondary-neon);
+    background: var(--secondary-color);
     box-shadow: var(--glow-medium);
-    border-color: var(--secondary-neon);
+    border-color: var(--secondary-color);
     color: #fff;
 }
 
 .upload-avatar-btn:hover {
-    background: #138D9E;
+    background: var(--primary-color); /* Altera para primary-color no hover */
     box-shadow: var(--glow-strong);
 }
 
@@ -902,7 +902,7 @@ hr {
 }
 
 .admin-main h2 {
-    color: var(--primary-neon);
+    color: var(--primary-color);
     text-align: center;
     margin-bottom: 30px;
     font-size: clamp(28px, 5vw, 32px); /* NOVO: Tipografia fluida */
@@ -940,7 +940,7 @@ hr {
 .stat-card p {
     font-size: 36px;
     font-weight: bold;
-    color: var(--primary-neon);
+    color: var(--primary-color);
     text-shadow: var(--glow-soft);
 }
 
@@ -960,7 +960,7 @@ th, td {
 
 th {
     background-color: var(--input-bg);
-    color: var(--primary-neon);
+    color: var(--primary-color);
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 0;
@@ -971,12 +971,12 @@ tr:nth-child(even) {
     background-color: rgba(0, 0, 0, 0.02);
 }
 tr:hover {
-    background-color: rgba(111, 66, 193, 0.05);
+    background-color: rgba(106, 13, 173, 0.05); /* Usar primary-color */
     box-shadow: none;
 }
 
 .table-actions button {
-    background-color: var(--primary-neon);
+    background-color: var(--primary-color);
     color: #fff;
     border: none;
     padding: 8px 12px;
@@ -993,8 +993,8 @@ tr:hover {
     justify-content: center;
 }
 
-.table-actions button.edit { background-color: var(--secondary-neon); }
-.table-actions button.toggle-active { background-color: #FFC107; }
+.table-actions button.edit { background-color: var(--secondary-color); }
+.table-actions button.toggle-active { background-color: var(--pending-color); }
 .table-actions button.resolve { background-color: var(--win-color); }
 .table-actions button.cancel { background-color: var(--loss-color); }
 
@@ -1014,6 +1014,7 @@ tr:hover {
     .dashboard-main {
         grid-template-columns: 1fr;
         padding: 20px;
+        padding-bottom: 80px; /* Adiciona espaço para a nova barra de navegação inferior */
         gap: 30px;
     }
 
@@ -1060,21 +1061,20 @@ tr:hover {
     .show-more-btn { width: 100%; padding: 12px 20px; font-size: 15px; }
 
     .sidebar-column { gap: 25px; }
-    .friends-section-container, .chat-container { padding: 18px; }
-    .friends-section-container h3, .chat-container h3 { font-size: 18px; }
-    .player-list, .friends-list, .friend-requests-list, .sent-friend-requests-list, .search-results-list, .blocked-users-list { /* max-height: unset; overflow-y: visible; */ }
-    .friends-tabs {
-        justify-content: flex-start;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 5px;
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    .friends-section-container, .chat-container {
+        padding: 18px;
+        height: auto; /* Permite que o conteúdo se expanda */
+        max-height: none; /* Remove limitação de altura */
     }
-    .friends-tabs::-webkit-scrollbar { display: none; }
+    .friends-section-container h3, .chat-container h3 { font-size: 18px; }
 
-    .friends-tab-btn { flex-shrink: 0; font-size: 13px; padding: 10px 8px; }
-    .friends-content { padding: 15px; }
+    /* Remove as abas superiores, pois a navegação inferior será usada */
+    .friends-tabs { display: none; }
+    .friends-tab-content {
+        height: auto !important; /* Conteúdo das abas se ajusta à altura */
+        overflow-y: visible !important; /* Desativa o scroll interno para a lista principal */
+    }
+
     .app-list-item {
         flex-wrap: wrap;
         justify-content: flex-start;
@@ -1085,7 +1085,6 @@ tr:hover {
         margin-right: 5px;
         width: 30px;
         height: 30px;
-        /* border: none; REMOVIDO PARA PRESERVAR BORDAS DE STATUS */
     }
     .app-list-item-main-content {
         flex-basis: calc(100% - 45px);
@@ -1108,7 +1107,7 @@ tr:hover {
 
     /* Admin responsividade */
     .admin-main { padding: 20px; }
-    .admin-main .stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* NOVO: Ajuste minmax */ gap: 10px; }
+    .admin-main .stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
     .admin-main .stat-card { padding: 15px; }
     .admin-main .stat-card p { font-size: 32px; }
     table, thead, tbody, th, td, tr { display: block; }
@@ -1130,7 +1129,7 @@ tr:hover {
         white-space: nowrap;
         text-align: left;
         font-weight: bold;
-        color: var(--primary-neon);
+        color: var(--primary-color);
     }
     td:nth-of-type(1):before { content: "ID:"; }
     td:nth-of-type(2):before { content: "Nome:"; }
@@ -1157,7 +1156,7 @@ tr:hover {
 @media (max-width: 480px) {
     .hero .container h2 { font-size: 38px; }
     .hero .container p.hero-subtitle { font-size: 16px; }
-    section h2 { font-size: 28px; }
+    section h2 { font-size: 26px; }
     .cta-button { padding: 10px 20px !important; font-size: 14px; }
     .step { width: 100%; min-width: unset; }
     .games-grid { grid-template-columns: 1fr; }
