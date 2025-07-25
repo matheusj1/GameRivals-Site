@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userLossesDesktop = document.getElementById('user-losses-desktop');
     const coinBalanceDesktop = document.getElementById('coin-balance-desktop');
     const userProfileMenuDesktop = document.getElementById('user-profile-menu-desktop');
+    const dropdownTemplate = document.getElementById('user-profile-dropdown-template');
 
     // Seletores para MOBILE (dentro do menu hambúrguer)
     const usernameMobile = document.getElementById('username-mobile'); // Adicione este ID ao seu HTML no menu mobile
@@ -155,40 +156,37 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshDashboard(); // Inicializa o dashboard
 
     // Lógica do dropdown de perfil para DESKTOP
-    if (userProfileMenuDesktop) {
-        const dropdownTemplate = document.getElementById('user-profile-dropdown-template');
-        if (dropdownTemplate) {
-            const dropdownContent = dropdownTemplate.content.cloneNode(true);
-            const dropdown = dropdownContent.querySelector('.user-profile-dropdown-content');
-            if (dropdown) { // Certifica-se de que o conteúdo foi encontrado
-                userProfileMenuDesktop.appendChild(dropdown);
+    if (userProfileMenuDesktop && dropdownTemplate) {
+        const dropdownContent = dropdownTemplate.content.cloneNode(true);
+        const dropdown = dropdownContent.querySelector('.user-profile-dropdown'); // Corrigido nome da classe
+        if (dropdown) { // Certifica-se de que o conteúdo foi encontrado
+            userProfileMenuDesktop.appendChild(dropdown);
 
-                userProfileMenuDesktop.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    dropdown.classList.toggle('active');
-                });
+            userProfileMenuDesktop.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('active');
+            });
 
-                document.addEventListener('click', (e) => {
-                    if (dropdown.classList.contains('active') && !userProfileMenuDesktop.contains(e.target)) {
-                        dropdown.classList.remove('active');
-                    }
-                });
-
-                const dropdownLogoutButton = dropdown.querySelector('#dropdown-logout-button');
-                if (dropdownLogoutButton) {
-                    dropdownLogoutButton.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        localStorage.clear();
-                        showNotification('Você foi desconectado com sucesso.', 'info');
-                        setTimeout(() => { window.location.href = 'login.html'; }, 1500);
-                    });
+            document.addEventListener('click', (e) => {
+                if (dropdown.classList.contains('active') && !userProfileMenuDesktop.contains(e.target)) {
+                    dropdown.classList.remove('active');
                 }
-            } else {
-                console.error('Conteúdo do dropdown do perfil não encontrado dentro do template.');
+            });
+
+            const dropdownLogoutButton = dropdown.querySelector('#dropdown-logout-button');
+            if (dropdownLogoutButton) {
+                dropdownLogoutButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    localStorage.clear();
+                    showNotification('Você foi desconectado com sucesso.', 'info');
+                    setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+                });
             }
         } else {
-            console.error('Template do dropdown do perfil não encontrado. Verifique dashboard.html.');
+            console.error('Conteúdo do dropdown do perfil não encontrado dentro do template.');
         }
+    } else {
+        console.error('Template do dropdown do perfil não encontrado. Verifique dashboard.html.');
     }
 
     // Lógica do botão de logout no menu mobile (se existir um botão separado para mobile)
