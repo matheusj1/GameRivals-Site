@@ -702,3 +702,20 @@ textarea[readonly] {
         right: -80%;
     }
 }
+
+/* Adicione isso no final do arquivo base.css */
+header nav ul#main-nav-links.mobile-nav-active {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+header nav ul#main-nav-links.mobile-nav-active li {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Garanta que a seção de informações do usuário móvel seja visível */
+header nav ul#main-nav-links.mobile-nav-active .mobile-user-info-section {
+    display: flex;
+}
