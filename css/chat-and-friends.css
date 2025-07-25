@@ -4,7 +4,7 @@
 .emoji-toggle-btn {
     width: 40px;
     height: 40px;
-    border-radius: 50% !important;
+    border-radius: 50% !important; 
     padding: 0 !important;
     display: flex;
     align-items: center;
@@ -20,8 +20,8 @@
 }
 
 .emoji-toggle-btn:hover {
-    background: var(--primary-color) !important; /* Usar primary-color */
-    border-color: var(--primary-color) !important;
+    background: var(--primary-neon) !important;
+    border-color: var(--primary-neon) !important;
     box-shadow: var(--glow-soft);
     transform: scale(1.05);
     color: #fff !important;
@@ -39,9 +39,9 @@
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
-    max-width: 250px;
-    z-index: 100;
-    display: none;
+    max-width: 250px; 
+    z-index: 100; 
+    display: none; 
 }
 
 .emoji-palette.active { display: flex; }
@@ -60,7 +60,7 @@
 }
 
 .emoji-palette span:hover {
-    background-color: rgba(106, 13, 173, 0.1); /* Usar primary-color com opacidade */
+    background-color: rgba(111, 66, 193, 0.1);
 }
 
 .message {
@@ -90,11 +90,11 @@
 .message.received .msg-author { color: var(--text-color); }
 
 .message.sent {
-    background-color: var(--primary-color); /* Usar primary-color */
+    background-color: var(--primary-neon);
     color: #fff;
     align-self: flex-end;
     border-top-right-radius: 0;
-    border: 1px solid var(--primary-color);
+    border: 1px solid var(--primary-neon);
 }
 .message.sent .msg-author { color: rgba(255,255,255,0.8); }
 .message.sent .message-timestamp { color: rgba(255,255,255,0.6); }
@@ -133,13 +133,13 @@
     overflow: hidden;
     opacity: 0;
     transform: translateY(20px) scale(0.95);
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
 }
 
 .private-chat-window.active { opacity: 1; transform: translateY(0) scale(1); }
 
 .private-chat-header {
-    background-color: var(--primary-color); /* Ajusta para cor primária */
+    background-color: var(--primary-neon); /* Ajusta para cor primária */
     padding: 10px 15px;
     color: #fff;
     font-weight: bold;
@@ -173,7 +173,7 @@
 }
 
 .private-chat-input-area {
-    position: relative;
+    position: relative; 
     display: flex;
     border-top: 1px solid var(--border-color);
 }
@@ -191,7 +191,7 @@
 
 
 .private-chat-input-area button {
-    background-color: var(--primary-color);
+    background-color: var(--primary-neon);
     color: #fff;
     border: none;
     padding: 0 20px;
@@ -205,16 +205,15 @@
 }
 
 /* LISTAS DE AMIGOS/PLAYERS - Componentização */
-.player-list, .friends-list, .friend-requests-list, .sent-friend-requests-list, .search-results-list, .blocked-users-list {
+.player-list, .friends-list, .friend-requests-list, .sent-friend-requests-list, .search-results-list, .blocked-users-list { 
     list-style: none;
     padding: 0;
     margin: 0;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    /* Remover overflow-y e max-height para permitir que o conteúdo se expanda na página rolavel */
-    /* overflow-y: auto; */
-    /* max-height: 200px; */
+    overflow-y: auto;
+    max-height: 200px; /* Manter se necessário um scroll interno */
 }
 
 /* --- Componente Base para Itens de Lista de Aplicação --- */
@@ -238,13 +237,13 @@
     border-bottom: none;
 }
 
-.app-list-item-avatar {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
+.app-list-item-avatar { 
+    width: 35px; 
+    height: 35px; 
+    border-radius: 50%; 
     object-fit: cover;
-    border: 1px solid var(--primary-color); /* Borda padrão para avatares */
-    flex-shrink: 0;
+    border: 1px solid var(--primary-neon); /* Borda padrão para avatares */
+    flex-shrink: 0; 
     transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Transição para a borda */
 }
 
@@ -291,8 +290,8 @@
     border-radius: 5px;
     color: var(--text-muted);
     font-size: 16px;
-    width: 30px;
-    height: 30px;
+    width: 30px; 
+    height: 30px; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -304,8 +303,8 @@
 }
 
 .app-list-item-actions button:hover {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
+    background: var(--primary-neon);
+    border-color: var(--primary-neon);
     color: white;
     transform: translateY(-2px);
     box-shadow: var(--glow-soft);
@@ -366,23 +365,23 @@
 .friend-details .console-icon,
 .request-details .console-icon,
 .app-list-item-username .console-icon { /* Usar a nova classe .app-list-item-username */
-    width: 18px;
+    width: 18px; 
     height: 18px;
-    vertical-align: middle;
-    margin-left: 5px;
-    border: none;
-    border-radius: 0;
-    display: inline-block;
+    vertical-align: middle; 
+    margin-left: 5px; 
+    border: none; 
+    border-radius: 0; 
+    display: inline-block; 
     filter: none;
 }
 
 .online-status.online { /* MANTER POR ENQUANTO, PODE SER USADO EM OUTROS LUGARES */
-    color: var(--win-color);
+    color: var(--win-color); 
     background-color: rgba(40, 167, 69, 0.1);
 }
 
 .online-status.offline { /* MANTER POR ENQUANTO, PODE SER USADO EM OUTROS LUGARES */
-    color: var(--loss-color);
+    color: var(--loss-color); 
     background-color: rgba(220, 53, 69, 0.1);
 }
 
@@ -400,13 +399,13 @@
     border-radius: 8px;
     background-color: rgba(255, 193, 7, 0.1);
     color: var(--pending-color);
-    margin-right: 5px;
+    margin-right: 5px; 
 }
 
 /* DROPDOWN DO PERFIL DO USUÁRIO NO HEADER */
 .user-profile-dropdown {
     position: absolute;
-    top: 100%;
+    top: 100%; 
     right: 0;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -442,7 +441,7 @@
 
 .user-profile-dropdown ul li a:hover {
     background-color: var(--input-bg);
-    color: var(--primary-color);
+    color: var(--primary-neon);
 }
 
 /* ======================================================= */
@@ -453,93 +452,97 @@
 @media (max-width: 768px) {
     .player-actions { flex-direction: column; gap: 4px; } /* Menos gap */
     .player-actions button { width: 35px; height: 35px; font-size: 18px;} /* Botões maiores */
-
-    .chat-input-area, .private-chat-input-area {
-        flex-wrap: wrap;
-        justify-content: flex-end;
+    
+    .chat-input-area, .private-chat-input-area { 
+        flex-wrap: wrap; 
+        justify-content: flex-end; 
         gap: 8px; /* Ajusta gap */
     }
-    .chat-input-area input, .private-chat-input-area input {
+    .chat-input-area input, .private-chat-input-area input { 
         width: calc(100% - 80px); /* Ajusta largura para acomodar emoji e enviar */
         padding: 10px 15px; /* Ajusta padding */
         font-size: 15px; /* Ajusta font-size */
     }
-    .chat-input-area button, .private-chat-input-area button {
-        flex-shrink: 0;
+    .chat-input-area button, .private-chat-input-area button { 
+        flex-shrink: 0; 
         padding: 0 15px; /* Ajusta padding */
         font-size: 16px; /* Ajusta font-size */
     }
-    .emoji-toggle-btn {
-        margin-left: auto;
+    .emoji-toggle-btn { 
+        margin-left: auto; 
         width: 35px; /* Ajusta para menor */
-        height: 35px;
+        height: 35px; 
         font-size: 18px; /* Ajusta font-size */
     }
-    .emoji-palette {
+    .emoji-palette { 
         bottom: 90px; /* Ajusta posição */
         right: 15px; /* Ajusta posição */
-        max-width: unset;
+        max-width: unset; 
         width: calc(100% - 30px); /* Ocupa mais largura */
         padding: 8px; /* Menos padding */
         gap: 4px; /* Menos gap */
     }
-    .emoji-palette span {
+    .emoji-palette span { 
         font-size: 22px; /* Emojis menores */
         padding: 4px; /* Menos padding */
     }
 
-    .private-chat-window {
+    .private-chat-window { 
         width: calc(100% - 30px); /* Ocupa mais largura */
         max-width: 300px; /* Reduz largura máxima */
         right: 15px; /* Ajusta posição */
         height: 320px; /* Reduz altura */
     }
-    .private-chat-header {
-        font-size: 15px;
-        padding: 8px 12px;
+    .private-chat-header { 
+        font-size: 15px; 
+        padding: 8px 12px; 
     }
     .close-private-chat { font-size: 22px; }
-    .private-chat-messages {
-        padding: 8px;
-        gap: 6px;
+    .private-chat-messages { 
+        padding: 8px; 
+        gap: 6px; 
     }
     .message p { font-size: 14px; } /* Mensagens menores */
 
 
-    /* Remover estes estilos porque as abas são removidas na navegação inferior */
-    /* .friends-tabs {
-        justify-content: flex-start;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 5px;
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    .player-list, .friends-list, .friend-requests-list, .sent-friend-requests-list, .search-results-list, .blocked-users-list { 
+        max-height: unset; 
+        overflow-y: visible; 
+    }
+
+    .friends-tabs { 
+        justify-content: flex-start; 
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch; 
+        padding-bottom: 5px; 
+        -ms-overflow-style: none; 
+        scrollbar-width: none; 
     }
     .friends-tabs::-webkit-scrollbar { display: none; }
 
-    .friends-tab-btn {
-        flex-shrink: 0;
-        font-size: 12px;
-        padding: 8px 6px;
-    } */
+    .friends-tab-btn { 
+        flex-shrink: 0; 
+        font-size: 12px; 
+        padding: 8px 6px; /* Menos padding */
+    }
 
     .friends-content { padding: 12px; } /* Menos padding */
     .app-list-item { /* Usar a classe base */
-        flex-wrap: wrap;
+        flex-wrap: wrap; 
         justify-content: flex-start;
-        gap: 6px;
-        padding: 6px 0;
+        gap: 6px; 
+        padding: 6px 0; 
     }
     /* MUDANÇA: Atualiza a borda do avatar no mobile */
     .app-list-item-avatar { /* Usar a classe base */
-        margin-right: 4px;
+        margin-right: 4px; 
         width: 28px; /* Avatares menores */
-        height: 28px;
+        height: 28px; 
         border: none; /* Garante que a borda padrão seja removida aqui se necessário */
     }
     .app-list-item-main-content { /* Usar a classe base */
-        flex-basis: calc(100% - 38px);
-        margin-bottom: 4px;
+        flex-basis: calc(100% - 38px); 
+        margin-bottom: 4px; 
     }
     .app-list-item-username { /* Usar a classe base */
         font-size: 14px; /* Nomes menores */
@@ -547,9 +550,9 @@
     .app-list-item-sub-info { font-size: 11px; } /* Usar a classe base */
 
     .app-list-item-actions { /* Usar a classe base */
-        width: 100%;
-        justify-content: flex-end;
-        margin-top: 4px;
+        width: 100%; 
+        justify-content: flex-end; 
+        margin-top: 4px; 
         gap: 4px;
     }
     .app-list-item-actions button { /* Usar a classe base */
@@ -564,25 +567,25 @@
 
 /* Estilos Mobile (Celulares em retrato) - Abaixo de 480px */
 @media (max-width: 480px) {
-    .chat-input-area input, .private-chat-input-area input {
-        width: calc(100% - 70px);
-        padding: 8px 12px;
-        font-size: 13px;
+    .chat-input-area input, .private-chat-input-area input { 
+        width: calc(100% - 70px); 
+        padding: 8px 12px; 
+        font-size: 13px; 
     }
-    .chat-input-area button, .private-chat-input-area button {
-        padding: 0 12px;
-        font-size: 14px;
+    .chat-input-area button, .private-chat-input-area button { 
+        padding: 0 12px; 
+        font-size: 14px; 
     }
-    .emoji-toggle-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 16px;
+    .emoji-toggle-btn { 
+        width: 32px; 
+        height: 32px; 
+        font-size: 16px; 
     }
-    .private-chat-window {
-        width: calc(100% - 20px);
-        max-width: 280px;
-        right: 10px;
-        height: 300px;
+    .private-chat-window { 
+        width: calc(100% - 20px); 
+        max-width: 280px; 
+        right: 10px; 
+        height: 300px; 
     }
     .message p { font-size: 13px; }
 }

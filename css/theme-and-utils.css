@@ -13,7 +13,7 @@
 
 /* SELEÇÃO DE TEMA (Estilos para o modal de seleção, que ainda existe no profile.html) */
 #theme-selection-modal-backdrop {
-    z-index: 2001;
+    z-index: 2001; 
 }
 
 .theme-selection-options {
@@ -31,7 +31,7 @@
     border-radius: 8px;
     border: 2px solid var(--border-color);
     transition: all 0.3s ease;
-    flex: 1;
+    flex: 1; 
     background-color: var(--card-bg);
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
@@ -51,14 +51,14 @@
 .theme-option:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    border-color: var(--primary-color); /* Usar primary-color */
+    border-color: var(--primary-neon);
 }
 
 .theme-option input[type="radio"] { display: none; }
 
 .theme-option input[type="radio"]:checked + span {
     font-weight: bold;
-    color: var(--primary-color); /* Usar primary-color */
+    color: var(--primary-neon);
     text-shadow: var(--glow-soft);
 }
 
@@ -86,8 +86,8 @@
     pointer-events: none;
     cursor: default;
     color: transparent !important;
-    background-color: var(--primary-color) !important; /* Usar primary-color */
-    border-color: var(--primary-color) !important;
+    background-color: var(--primary-neon) !important;
+    border-color: var(--primary-neon) !important;
     box-shadow: var(--glow-medium);
     transition: none;
 }

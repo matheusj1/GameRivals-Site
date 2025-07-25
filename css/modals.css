@@ -53,9 +53,9 @@
 }
 
 .group-members-list {
-    max-height: 150px;
-    overflow-y: auto;
-    margin-bottom: 15px;
+    max-height: 150px; 
+    overflow-y: auto; 
+    margin-bottom: 15px; 
 } */
 
 
@@ -79,12 +79,12 @@
 }
 
 .close-modal-btn:hover {
-    color: var(--primary-color);
+    color: var(--primary-neon);
     transform: scale(1.1);
 }
 
 .modal h2 {
-    color: var(--primary-color);
+    color: var(--primary-neon);
     text-shadow: var(--glow-soft);
     margin-bottom: 25px;
     font-size: 28px;
@@ -113,8 +113,8 @@
 .modal input[type="text"]:focus,
 .modal textarea:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(106, 13, 173, 0.1);
+    border-color: var(--primary-neon);
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
     background-color: var(--card-bg);
 }
 
@@ -158,9 +158,9 @@
 }
 
 .winner-option:hover {
-    border-color: var(--primary-color);
+    border-color: var(--primary-neon);
     background-color: var(--card-bg);
-    box-shadow: inset 0 0 5px rgba(106, 13, 173, 0.1);
+    box-shadow: inset 0 0 5px rgba(111, 66, 193, 0.1);
 }
 
 .winner-option input[type="radio"] {
@@ -177,7 +177,7 @@
 }
 
 .winner-option input[type="radio"]:checked+label {
-    color: var(--primary-color);
+    color: var(--primary-neon);
     font-weight: bold;
     text-shadow: var(--glow-soft);
 }
@@ -206,7 +206,7 @@
 }
 
 .table-actions button {
-    background-color: var(--primary-color);
+    background-color: var(--primary-neon);
     color: #fff;
     border: none;
     padding: 8px 12px;
@@ -219,11 +219,11 @@
 }
 
 .table-actions button.edit {
-    background-color: var(--secondary-color);
+    background-color: var(--secondary-neon);
 }
 
 .table-actions button.toggle-active {
-    background-color: var(--pending-color);
+    background-color: #FFC107;
 }
 
 .table-actions button.resolve {
@@ -251,7 +251,7 @@
 }
 
 .other-user-profile-modal .profile-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    background: linear-gradient(135deg, var(--primary-neon) 0%, var(--secondary-neon) 100%);
     padding: 30px 20px;
     display: flex;
     flex-direction: column;
@@ -323,7 +323,7 @@
 
 .other-user-profile-modal .profile-details-content h3 {
     font-size: 20px;
-    color: var(--primary-color);
+    color: var(--primary-neon);
     text-shadow: var(--glow-soft);
     margin-top: 25px;
     margin-bottom: 10px;
@@ -353,7 +353,138 @@
 }
 
 /* REMOVIDO: Estilos para o Modal de Seleção de Grupo (select-group-modal-backdrop) */
+/* #select-group-modal-backdrop .modal h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+#select-group-modal-backdrop .modal p {
+    font-size: 16px;
+}
+
+.invite-group-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    border-bottom: 1px dashed var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 8px;
+}
+
+.invite-group-option:last-child {
+    border-bottom: none;
+}
+
+.invite-group-option:hover {
+    background-color: var(--input-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.invite-group-option .group-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+.invite-group-option .groupname {
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 17px;
+}
+
+.invite-group-option .group-member-count {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.invite-group-option .player-item-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--primary-neon);
+}
+
+.invite-group-option .send-group-invite-btn {
+    background-color: var(--primary-neon);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: var(--glow-soft);
+}
+
+.invite-group-option .send-group-invite-btn:hover {
+    background-color: #5E3A9F;
+    transform: scale(1.03);
+    box-shadow: var(--glow-medium);
+} */
+
 /* REMOVIDO: Estilos para o chat dentro do modal de grupo (group-details-modal) */
+/* .group-chat-section {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.group-chat-section h3 {
+    text-align: center;
+    font-size: 20px;
+    color: var(--primary-neon);
+    margin-bottom: 15px;
+    text-shadow: var(--glow-soft);
+}
+
+.group-chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 250px;
+    padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.group-chat-input-area {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.group-chat-input-area input {
+    flex-grow: 1;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    border-radius: 20px;
+    padding: 10px 15px;
+    color: var(--text-color);
+    outline: none;
+}
+
+.group-chat-input-area button {
+    background: var(--primary-neon);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 0 15px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: var(--glow-soft);
+    flex-shrink: 0;
+} */
 
 
 /* ======================================================= */
@@ -362,7 +493,25 @@
 
 /* MUDANÇA: Estilos para Telas Maiores (Desktop Web) - Acima de 768px */
 @media (min-width: 769px) { /* Aplica-se a partir de tablets em paisagem e desktops */
-    /* REMOVIDO: Regras de modal de grupo para desktop */
+    /* REMOVIDO: Regras de modal de grupo para desktop
+    #group-details-modal-backdrop .modal {
+        max-width: 700px; 
+        max-height: 80vh; 
+        padding: 40px 50px; 
+    }
+
+    #group-details-modal-backdrop .group-members-list {
+        max-height: 200px; 
+    }
+
+    #group-details-modal-backdrop .group-chat-messages {
+        max-height: 300px; 
+    } */
+
+    /* Opcional: Ajustes finos para layout em colunas se desejar no futuro, mas por enquanto, mantém flex-direction: column */
+    /* .group-members-section, .group-chat-section {
+        flex-direction: row; // Exemplo para layout em colunas
+    } */
 }
 
 
@@ -447,8 +596,55 @@
         font-size: 15px;
     }
 
-    /* REMOVIDO: Estilos para seleção de grupo em mobile */
-    /* REMOVIDO: Estilos de chat de grupo para mobile */
+    /* REMOVIDO: Estilos para seleção de grupo em mobile
+    #select-group-modal-backdrop .modal {
+        max-width: 90%;
+        padding: 20px;
+    }
+
+    .invite-group-option {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+        padding: 10px;
+        gap: 6px;
+    }
+
+    .invite-group-option .player-item-avatar {
+        margin-bottom: 8px;
+    }
+
+    .invite-group-option .group-details {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .invite-group-option .groupname {
+        width: 100%;
+        font-size: 16px;
+    }
+
+    .invite-group-option .group-member-count {
+        font-size: 12px;
+    }
+
+    .invite-group-option .send-group-invite-btn {
+        margin-top: 8px;
+        width: 100%;
+        max-width: 120px;
+        padding: 8px 12px;
+        font-size: 13px;
+    } */
+
+    /* REMOVIDO: Estilos de chat de grupo para mobile
+    .group-chat-messages {
+        max-height: 180px;
+        padding-right: 5px;
+    }
+
+    .group-chat-input-area input {
+        padding: 10px;
+    } */
 }
 
 /* Estilos Mobile (Celulares em retrato) - Abaixo de 480px */
@@ -514,6 +710,30 @@
         padding: 8px 10px;
     }
 
-    /* REMOVIDO: Estilos de seleção de grupo para mobile pequeno */
-    /* REMOVIDO: Estilos de chat de grupo para mobile pequeno */
+    /* REMOVIDO: Estilos de seleção de grupo para mobile pequeno
+    #select-group-modal-backdrop .modal {
+        padding: 15px;
+    }
+
+    .invite-group-option .groupname {
+        font-size: 15px;
+    }
+
+    .invite-group-option .group-member-count {
+        font-size: 11px;
+    }
+
+    .invite-group-option .send-group-invite-btn {
+        font-size: 12px;
+        padding: 6px 10px;
+    } */
+
+    /* REMOVIDO: Estilos de chat de grupo para mobile pequeno
+    .group-chat-messages {
+        max-height: 150px;
+    }
+
+    .group-chat-input-area input {
+        padding: 8px;
+    } */
 }

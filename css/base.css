@@ -7,40 +7,37 @@
     box-sizing: border-box;
 }
 
-/* NOVO TEMA: Clean & Vibrante (com tons de Azul, Roxo e Verde) */
+/* NOVO TEMA: CLEAN / MODERNO */
 :root {
-    --bg-color: #F0F2F5; /* Fundo mais suave e claro */
-    --primary-color: #6A0DAD; /* Um roxo profundo e vibrante (Royal Purple) */
-    --secondary-color: #00BCD4; /* Um azul turquesa vibrante (Cyan) */
-    --text-color: #212529; /* Quase preto para legibilidade */
-    --text-muted: #6C757D; /* Cinza médio para textos secundários */
+    --bg-color: #F8F9FA; /* Fundo muito claro */
+    --primary-neon: #6F42C1; /* Roxo vibrante (clean neon) */
+    --secondary-neon: #17A2B8; /* Ciano (clean neon) */
+    --text-color: #343A40; /* Texto escuro padrão */
+    --text-muted: #6C757D; /* Texto cinza suave */
     --card-bg: #FFFFFF; /* Fundo de card branco puro */
-    --border-color: #E0E0E0; /* Borda cinza bem clara */
-    --input-bg: #F8F9FA; /* Fundo de input quase branco */
-    --input-bg-disabled: #E9ECEF; /* Fundo para inputs desabilitados */
+    --border-color: #E9ECEF; /* Borda cinza muito clara */
+    --glow-strong: 0 0 15px rgba(111, 66, 193, 0.5), 0 0 30px rgba(111, 66, 193, 0.3); /* Brilho suave */
+    --glow-medium: 0 0 10px rgba(111, 66, 193, 0.4);
+    --glow-soft: 0 0 5px rgba(111, 66, 193, 0.2);
+    --glow-hover-subtle-text: 0 0 5px rgba(111, 66, 193, 0.5);
+    --glow-hover-subtle-box: 0 0 10px rgba(111, 66, 193, 0.2);
+    --input-bg: #F0F2F5; /* Fundo de input levemente cinza */
+    --input-bg-disabled: #E9ECEF; /* NOVO: Cor de fundo para inputs desabilitados/readonly */
+    
+    --win-color: #28A745; /* Verde para vitória */
+    --loss-color: #DC3545; /* Vermelho para derrota */
+    --pending-color: #FFC107; /* Amarelo para pendente */
 
-    /* Sombras e Brilhos mais suaves e integrados com as cores do tema */
-    --glow-strong: 0 0 20px rgba(106, 13, 173, 0.4), 0 0 40px rgba(106, 13, 173, 0.2);
-    --glow-medium: 0 0 12px rgba(106, 13, 173, 0.3);
-    --glow-soft: 0 0 6px rgba(106, 13, 173, 0.15);
-    --glow-hover-subtle-text: 0 0 3px rgba(106, 13, 173, 0.6);
-    --glow-hover-subtle-box: 0 5px 15px rgba(0,0,0,0.08), inset 0 0 8px rgba(106, 13, 173, 0.1);
-
-    /* Cores de status mais expressivas */
-    --win-color: #28A745; /* Verde de sucesso */
-    --loss-color: #DC3545; /* Vermelho de perigo */
-    --pending-color: #FFC107; /* Amarelo de atenção */
-
-    /* Cores de status para cards/indicadores */
-    --status-open-bg: rgba(0, 188, 212, 0.1); /* Cyan light */
-    --status-open-text: #00BCD4;
-    --status-accepted-bg: rgba(255, 193, 7, 0.1); /* Amber light */
+    /* Cores de status mais clean */
+    --status-open-bg: rgba(23, 162, 184, 0.1);
+    --status-open-text: #17A2B8;
+    --status-accepted-bg: rgba(255, 193, 7, 0.1);
     --status-accepted-text: #FFC107;
-    --status-disputed-bg: rgba(220, 53, 69, 0.1); /* Red light */
+    --status-disputed-bg: rgba(220, 53, 69, 0.1);
     --status-disputed-text: #DC3545;
-    --status-completed-bg: rgba(40, 167, 69, 0.1); /* Green light */
+    --status-completed-bg: rgba(40, 167, 69, 0.1);
     --status-completed-text: #28A745;
-    --status-cancelled-bg: rgba(108, 117, 125, 0.1); /* Grey light */
+    --status-cancelled-bg: rgba(108, 117, 125, 0.1);
     --status-cancelled-text: #6C757D;
 }
 
@@ -50,7 +47,7 @@ body {
     color: var(--text-color);
     background-color: var(--bg-color);
     cursor: auto;
-    overflow-x: hidden; /* Previne scroll horizontal */
+    overflow-x: hidden; /* CRÍTICO: Previne scroll horizontal */
 }
 
 /* NOVO: Classe para impedir scroll no body quando a sidebar mobile está aberta */
@@ -156,16 +153,12 @@ header nav ul#main-nav-links li a {
 
 header nav ul#main-nav-links li a:not(.nav-button):hover,
 header nav ul#main-nav-links li a.active:not(.nav-button) {
-    color: var(--primary-color);
+    color: var(--primary-neon);
     text-shadow: var(--glow-hover-subtle-text);
 }
 
 .nav-button {
-    display: inline-flex; /* Para alinhar conteúdo com min-height/width */
-    align-items: center;
-    justify-content: center;
-    text-align: center; /* Garante que o texto se alinhe dentro do botão */
-    background: var(--primary-color);
+    background: var(--primary-neon);
     color: #fff !important;
     padding: 10px 25px !important;
     border-radius: 25px;
@@ -174,15 +167,16 @@ header nav ul#main-nav-links li a.active:not(.nav-button) {
     box-shadow: var(--glow-medium);
     transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease, color 0.3s ease;
     border: none;
-    letter-spacing: 0.5px;
-    overflow: hidden; /* Garante que o flash não vaze */
-    position: relative; /* Para posicionar o ::after */
-    min-width: 44px; /* Garante tamanho mínimo para toque */
-    min-height: 44px; /* Garante tamanho mínimo para toque */
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo com min-height/width */
+    align-items: center;
+    justify-content: center;
+    text-align: center; /* NOVO: Garante que o texto se alinhe dentro do botão */
 }
 
 .nav-button:hover {
-    background: var(--secondary-color);
+    background: #5E3A9F;
     box-shadow: var(--glow-hover-subtle-box);
     transform: translateY(-2px);
     color: #fff !important;
@@ -199,60 +193,18 @@ header nav ul#main-nav-links li a.active:not(.nav-button) {
     cursor: pointer;
     padding: 0;
     z-index: 1005; /* Acima da sidebar */
-    min-width: 44px; /* Garante tamanho mínimo para toque */
-    min-height: 44px; /* Garante tamanho mínimo para toque */
-    align-items: center; /* Centraliza spans */
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    align-items: center; /* NOVO: Centraliza spans */
 }
 
 .hamburger-menu span {
     display: block;
     width: 100%;
     height: 3px;
-    background-color: var(--primary-color);
+    background-color: var(--primary-neon);
     border-radius: 3px;
     transition: all 0.3s ease-in-out;
-}
-
-/* NOVO: Bottom Navigation Bar (apenas para mobile no Dashboard) */
-.bottom-nav {
-    display: none; /* Escondido por padrão, visível apenas em mobile */
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: var(--card-bg);
-    border-top: 1px solid var(--border-color);
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
-    z-index: 1000;
-    padding: 10px 0;
-    justify-content: space-around;
-    align-items: center;
-}
-
-.bottom-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 5px 0;
-    flex-grow: 1;
-    transition: color 0.2s ease, transform 0.2s ease;
-    min-width: 44px;
-    min-height: 44px;
-}
-
-.bottom-nav-item .icon {
-    font-size: 24px;
-    margin-bottom: 4px;
-}
-
-.bottom-nav-item.active, .bottom-nav-item:hover {
-    color: var(--primary-color);
-    transform: translateY(-3px);
 }
 
 /* FOOTER GLOBAL */
@@ -263,7 +215,7 @@ footer {
     padding: 30px 0;
     margin-top: 50px;
     border-top: 1px solid var(--border-color);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* Ajustado: era 0 -2px, agora 0 2px para consistência */
 }
 footer ul { list-style: none; margin-top: 10px; }
 footer ul li { display: inline; margin: 0 15px; }
@@ -271,14 +223,14 @@ footer ul li a {
     color: #fff;
     text-decoration: none;
     transition: color 0.3s ease, text-shadow 0.3s ease;
-    min-width: 44px; /* Garante tamanho mínimo para toque */
-    min-height: 44px; /* Garante tamanho mínimo para toque */
-    display: inline-flex; /* Para alinhar conteúdo */
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo */
     align-items: center;
     justify-content: center;
-    padding: 5px 10px; /* Ajuste de padding para não distorcer */
+    padding: 5px 10px; /* NOVO: Ajuste de padding para não distorcer */
 }
-footer ul li a:hover { color: var(--primary-color); text-shadow: var(--glow-hover-subtle-text); }
+footer ul li a:hover { color: var(--primary-neon); text-shadow: var(--glow-hover-subtle-text); }
 
 /* UTILITÁRIOS GLOBAIS */
 section { padding: 60px 0; position: relative; }
@@ -294,11 +246,8 @@ section h2 {
     font-weight: 700;
 }
 .cta-button {
-    display: inline-flex; /* Para alinhar conteúdo com min-height/width */
-    align-items: center;
-    justify-content: center;
-    text-align: center; /* Garante que o texto se alinhe dentro do botão */
-    background: var(--primary-color);
+    display: inline-block;
+    background: var(--primary-neon);
     color: #fff;
     padding: 15px 35px;
     text-decoration: none;
@@ -312,14 +261,18 @@ section h2 {
     letter-spacing: 0.5px;
     overflow: hidden; /* Garante que o flash não vaze */
     position: relative; /* Para posicionar o ::after */
-    min-width: 44px; /* Garante tamanho mínimo para toque */
-    min-height: 44px; /* Garante tamanho mínimo para toque */
+    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    display: inline-flex; /* NOVO: Para alinhar conteúdo com min-height/width */
+    align-items: center;
+    justify-content: center;
+    text-align: center; /* NOVO: Garante que o texto se alinhe dentro do botão */
 }
 .cta-button.proximity-glow {
-    box-shadow: 0 0 10px rgba(106, 13, 173, 0.3), 0 0 20px rgba(106, 13, 173, 0.2);
+    box-shadow: 0 0 10px rgba(111, 66, 193, 0.3), 0 0 20px rgba(111, 66, 193, 0.2);
 }
 .cta-button:hover {
-    background: var(--secondary-color); /* Altera para a cor secundária no hover */
+    background: #5E3A9F;
     box-shadow: var(--glow-hover-subtle-box);
     transform: translateY(-2px) scale(1.01);
     color: #fff;
@@ -386,7 +339,7 @@ textarea.standard-input {
     -webkit-appearance: none; /* Remover estilos padrão do navegador */
     -moz-appearance: none;
     appearance: none;
-    min-height: 44px; /* Garante tamanho mínimo para toque */
+    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
 }
 
 .input-group input[type="text"]:focus,
@@ -402,8 +355,8 @@ input[type="number"].standard-input:focus,
 select.standard-input:focus,
 textarea.standard-input:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(106, 13, 173, 0.1);
+    border-color: var(--primary-neon);
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
     background-color: var(--card-bg); /* Fundo branco no foco */
 }
 
@@ -419,7 +372,7 @@ textarea.standard-input:focus {
 /* Readonly fields */
 input[readonly],
 textarea[readonly] {
-    background-color: var(--input-bg-disabled) !important;
+    background-color: var(--input-bg-disabled) !important; /* Uma nova variável pode ser criada */
     color: var(--text-muted) !important;
     cursor: not-allowed !important;
     border-color: var(--border-color) !important;
@@ -465,7 +418,7 @@ textarea[readonly] {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 9999;
+    z-index: 9999; 
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -481,7 +434,8 @@ textarea[readonly] {
     border-left: 5px solid #fff;
     opacity: 0;
     transform: translateX(100%);
-    animation: slideIn 0.5s ease-out;
+    /* Removido forwards para controlar a remoção via JS */
+    animation: slideIn 0.5s ease-out; 
     text-shadow: none;
     display: flex; /* Para ícone */
     align-items: center; /* Para ícone */
@@ -491,7 +445,7 @@ textarea[readonly] {
 .notification::before {
     /* É necessário importar uma biblioteca de ícones como Font Awesome no HTML, se ainda não o fez */
     /* Ex: <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> */
-    font-family: 'Font Awesome 5 Free';
+    font-family: 'Font Awesome 5 Free'; 
     font-weight: 900;
     font-size: 1.2em;
     content: ''; /* Conteúdo padrão vazio */
@@ -514,8 +468,8 @@ textarea[readonly] {
 }
 
 .notification.info {
-    background: #00BCD4; /* Usar secondary-color para info */
-    border-left-color: #00BCD4;
+    background: #17A2B8;
+    border-left-color: #17A2B8;
 }
 
 @keyframes slideIn {
@@ -551,7 +505,7 @@ textarea[readonly] {
         padding: 0 15px;
     }
 
-    .logo h1 a img {
+    .logo h1 a img { 
         max-width: 130px;
     }
 
@@ -560,72 +514,66 @@ textarea[readonly] {
         display: none;
     }
 
-    .hamburger-menu {
+    .hamburger-menu { 
         display: flex; /* Mostra o hambúrguer */
-    }
-
-    /* Menu de navegação mobile como OVERLAY (Tela Cheia) */
-    header nav ul#main-nav-links {
+    } 
+    
+    /* Menu de navegação mobile como sidebar (Gaveta Lateral) */
+    header nav ul#main-nav-links { 
         position: fixed; /* Fixa na tela */
         top: 0;
-        left: 0; /* Começa à esquerda para ocupar toda a largura */
-        width: 100vw; /* Ocupa toda a largura da viewport */
-        height: 100vh; /* Ocupa toda a altura da viewport */
+        right: 0; /* Alinha a direita e usa transform para esconder */
+        width: 250px; /* Largura da sidebar */
+        height: 100vh; /* Altura total da viewport */
         background-color: var(--card-bg); /* Fundo branco do menu */
-        box-shadow: none; /* Remove sombra lateral */
+        box-shadow: -5px 0 15px rgba(0,0,0,0.1); /* Sombra à esquerda */
         flex-direction: column;
         justify-content: flex-start; /* Alinha itens ao topo */
-        padding: 40px 20px; /* Mais padding para o overlay */
-        z-index: 1000;
+        padding: 20px; /* Padding geral */
+        z-index: 1000 !important; /* Aumentado z-index para garantir que esteja acima de tudo */
         overflow-y: auto; /* Adiciona scroll se o conteúdo for muito grande */
         -webkit-overflow-scrolling: touch; /* Melhora o scroll em iOS */
 
-        visibility: hidden;
-        opacity: 0;
-        transform: translateY(-100%); /* Desliza para cima para esconder */
-        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, visibility 0s 0.3s;
+        /* Alterações para transição suave e ocultamento eficaz */
+        visibility: hidden; /* Esconde visualmente mas mantém no layout para transição */
+        opacity: 0; /* Começa transparente */
+        transform: translateX(100%); /* Move completamente para fora da tela à direita (100% da própria largura) */
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, visibility 0s 0.3s; /* Transição para todas as propriedades, visibilidade atrasada */
+    }
+    
+    /* Estado ativo da sidebar */
+    header nav ul#main-nav-links.mobile-nav-active { 
+        visibility: visible; /* Torna visível */
+        opacity: 1; /* Torna opaco */
+        transform: translateX(0); /* Retorna à posição original */
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; /* Transição para todas as propriedades */
     }
 
-    /* Estado ativo do overlay */
-    header nav ul#main-nav-links.mobile-nav-active {
-        visibility: visible;
-        opacity: 1;
-        transform: translateY(0); /* Desliza para baixo para mostrar */
-        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    }
-
-    header nav ul#main-nav-links li {
-        display: block;
-        margin: 0;
-        width: 100%;
-        text-align: center; /* Centraliza links no overlay */
+    header nav ul#main-nav-links li { 
+        display: block; 
+        margin: 0; 
+        width: 100%; 
+        text-align: left; /* Alinha links à esquerda */
         border-bottom: 1px solid var(--border-color); /* Borda para separar links */
-        padding: 15px 0; /* Ajusta padding para itens */
+        padding: 12px 0; /* Ajusta padding para itens */
     }
 
     header nav ul#main-nav-links li:last-child {
         border-bottom: none; /* Último item sem borda */
     }
 
-    header nav ul#main-nav-links li a {
+    header nav ul#main-nav-links li a { 
         display: block; /* Links ocupam a largura total do item */
-        font-size: 18px; /* Links maiores no overlay */
-        color: var(--text-color); /* Cor de texto mais escura */
+        font-size: 16px; 
     }
 
-    header nav ul#main-nav-links li a:not(.nav-button):hover,
-    header nav ul#main-nav-links li a.active:not(.nav-button) {
-        color: var(--primary-color);
-        text-shadow: var(--glow-hover-subtle-text);
-    }
-
-    header nav ul#main-nav-links li a.nav-button {
-        border-bottom: none;
-        margin: 20px auto; /* Centraliza e adiciona margem vertical */
-        display: block;
-        width: 80%; /* Ocupa mais largura no overlay */
-        padding: 12px 25px !important;
-        font-size: 16px !important;
+    header nav ul#main-nav-links li a.nav-button { 
+        border-bottom: none; 
+        margin: 15px 0; /* Margem vertical */
+        display: block; /* Ocupa largura total na sidebar */
+        width: 100%;
+        padding: 10px 20px !important;
+        font-size: 15px !important;
         text-align: center;
     }
 
@@ -634,7 +582,7 @@ textarea[readonly] {
     .hamburger-menu.active span:nth-child(2) { opacity: 0; }
     .hamburger-menu.active span:nth-child(3) { transform: translateY(-8.5px) rotate(-45deg); }
 
-    /* Overlay escuro quando a sidebar está aberta (opcional com overlay) */
+    /* Overlay escuro quando a sidebar está aberta */
     body::after {
         content: '';
         position: fixed;
@@ -643,7 +591,7 @@ textarea[readonly] {
         width: 100vw;
         height: 100vh;
         background-color: rgba(0, 0, 0, 0.4);
-        z-index: 999; /* Abaixo do overlay */
+        z-index: 1003; /* Abaixo da sidebar */
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s ease-in-out;
@@ -660,7 +608,7 @@ textarea[readonly] {
         align-items: center;
         padding-bottom: 20px; /* Espaço abaixo */
         border-bottom: 1px solid var(--border-color);
-        margin-bottom: 20px; /* Espaço após a borda */
+        margin-bottom: 15px; /* Espaço após a borda */
         width: 100%; /* Ocupa a largura total */
     }
 
@@ -669,16 +617,16 @@ textarea[readonly] {
         flex-direction: column;
         align-items: center;
         gap: 8px;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
     .mobile-user-profile-summary .user-avatar {
-        width: 80px; /* Avatar maior no menu */
-        height: 80px;
-        border: 4px solid var(--primary-color);
-        box-shadow: var(--glow-medium);
+        width: 60px; /* Avatar maior no menu */
+        height: 60px;
+        border: 3px solid var(--primary-neon);
+        box-shadow: var(--glow-soft);
     }
     .mobile-user-profile-summary .username {
-        font-size: 20px; /* Nome de usuário maior */
+        font-size: 18px; /* Nome de usuário maior */
         font-weight: 700;
         color: var(--text-color);
     }
@@ -687,206 +635,150 @@ textarea[readonly] {
         display: flex;
         flex-wrap: wrap; /* Permite quebra de linha */
         justify-content: center;
-        gap: 20px; /* Maior espaçamento */
+        gap: 15px;
         width: 100%;
     }
     .mobile-user-stats-wallet .wallet-info,
     .mobile-user-stats-wallet .user-stats {
-        padding: 8px 15px;
-        font-size: 15px;
-        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 14px;
+        border-radius: 15px;
         background-color: var(--input-bg);
         border: 1px solid var(--border-color);
-        box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+        box-shadow: inset 0 0 3px rgba(0,0,0,0.05);
     }
     .mobile-user-stats-wallet .user-stats span {
-        font-size: 14px;
+        font-size: 13px;
     }
 
     /* Adicione isso na seção de responsividade (max-width: 768px) */
     .dashboard-main {
-        grid-template-columns: 1fr;
-        padding: 20px;
-        padding-bottom: 80px; /* Espaço extra para a barra de navegação inferior */
+        flex-direction: column;
         gap: 30px;
     }
-
+    
     .challenges-column {
+        width: 100%;
         order: 1;
     }
-
+    
     .sidebar-column {
+        width: 100%;
         order: 2;
     }
-
-    .friends-section-container,
+    
+    .friends-section-container, 
     .chat-container {
         width: 100%;
         margin-left: 0;
     }
-
+    
     .challenges-header {
         flex-direction: column;
         gap: 15px;
-        padding: 18px 25px;
     }
-
+    
     .challenges-header h2 {
-        font-size: 24px;
         margin-bottom: 0;
     }
-
+    
     .challenges-header #create-challenge-btn {
         width: 100%;
-        text-align: center;
-        padding: 12px 20px !important;
+    }
+    
+    .friends-tabs {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .friends-tab-btn {
+        padding: 8px 12px;
+        font-size: 14px;
+        flex: 1 0 calc(50% - 10px);
+    }
+    
+    .chat-input-area input {
+        width: 70%;
+    }
+
+
+    /* Ajustes gerais para telas menores */
+    section { padding: 40px 0; }
+    section h2 { 
+        font-size: 30px;
+        margin-bottom: 30px; 
+    }
+    .cta-button {
+        padding: 12px 25px !important;
         font-size: 15px;
     }
 
-    .my-challenge-card {
-        grid-template-columns: 1fr;
-        text-align: center;
-        padding: 15px;
-        gap: 15px;
+    footer {
+        padding: 25px 0;
     }
-    .my-challenge-card .game-info,
-    .my-challenge-card .players-info,
-    .my-challenge-card .status-indicator,
-    .my-challenge-card .action-area {
-        width: 100%;
-        justify-content: center;
+    footer ul li {
+        margin: 0 10px;
     }
-
-    .my-challenge-card .game-info { flex-direction: column; text-align: center; margin-bottom: 5px; }
-    .my-challenge-card .game-info img { margin-bottom: 5px; }
-
-    .my-challenge-card .players-info { flex-direction: column; margin-bottom: 5px; }
-    .my-challenge-card .players-info .username { font-size: 15px; }
-    .my-challenge-card .players-info .vs-text { margin: 3px 0; font-size: 11px; }
-
-    .report-result-btn, .delete-challenge-btn { width: 100%; max-width: 180px; margin: 0 auto; padding: 10px 15px; font-size: 14px; }
-    .show-more-btn { width: 100%; padding: 12px 20px; font-size: 15px; }
-
-    .sidebar-column { gap: 25px; }
-    .friends-section-container, .chat-container {
-        padding: 18px;
-        height: auto; /* Permite que o conteúdo defina a altura */
-        max-height: none; /* Remove a altura máxima fixa */
-    }
-    .friends-section-container h3, .chat-container h3 { font-size: 18px; }
-
-    /* NOVO: Conteúdo das abas de amigos/chat agora ocupa a largura total, sem tabs visíveis */
-    .friends-tabs {
-        display: none; /* Esconde as tabs superiores quando a navegação inferior está ativa */
-    }
-    .friends-tab-content {
-        height: auto !important; /* Assegura que o conteúdo da tab se ajuste */
-        overflow-y: visible !important; /* Desabilita o scroll interno para o scroll da página */
-    }
-
-    .player-list, .friends-list, .friend-requests-list, .sent-friend-requests-list, .search-results-list, .blocked-users-list {
-        max-height: unset; /* Remove a altura fixa e permite que o conteúdo cresça */
-        overflow-y: visible; /* Garante que a lista não tenha scroll interno */
-    }
-
-    .chat-messages { max-height: 250px; }
-    .chat-input-area input { width: calc(100% - 90px); }
-    .chat-input-area button { padding: 0 15px; }
-    .emoji-toggle-btn { margin-left: auto; width: 40px; height: 40px; font-size: 20px;}
-    .emoji-palette { bottom: 90px; right: 10px; max-width: unset; width: calc(100% - 20px); }
-    .private-chat-window { width: calc(100% - 40px); max-width: 320px; right: 10px; height: 350px; }
-    .private-chat-header { font-size: 16px; padding: 10px 15px; }
-    .close-private-chat { font-size: 24px; }
-    .private-chat-messages { padding: 10px; }
-
-    /* Admin responsividade */
-    .admin-main { padding: 20px; }
-    .admin-main .stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-    .admin-main .stat-card { padding: 15px; }
-    .admin-main .stat-card p { font-size: 32px; }
-    table, thead, tbody, th, td, tr { display: block; }
-    thead tr { position: absolute; top: -9999px; left: -9999px; }
-    tr { border: 1px solid var(--border-color); margin-bottom: 15px; }
-    td {
-        border: none;
-        border-bottom: 1px solid var(--border-color);
-        position: relative;
-        padding-left: 50%;
-        text-align: right;
-    }
-    td:before {
-        position: absolute;
-        top: 6px;
-        left: 6px;
-        width: 45%;
-        padding-right: 10px;
-        white-space: nowrap;
-        text-align: left;
-        font-weight: bold;
-        color: var(--primary-color);
-    }
-    td:nth-of-type(1):before { content: "ID:"; }
-    td:nth-of-type(2):before { content: "Nome:"; }
-    td:nth-of-type(3):before { content: "Email:"; }
-    td:nth-of-type(4):before { content: "Registro:"; }
-    td:nth-of-type(5):before { content: "Vitórias:"; }
-    td:nth-of-type(6):before { content: "Derrotas:"; }
-    td:nth-of-type(7):before { content: "Moedas:"; }
-    td:nth-of-type(8):before { content: "Ativo:"; }
-    td:nth-of-type(9):before { content: "Ações:"; }
-    #challenges-table td:nth-of-type(1):before { content: "ID:"; }
-    #challenges-table td:nth-of-type(2):before { content: "Jogo:"; }
-    #challenges-table td:nth-of-type(3):before { content: "Console:"; }
-    #challenges-table td:nth-of-type(4):before { content: "Aposta:"; }
-    #challenges-table td:nth-of-type(5):before { content: "Criado Por:"; }
-    #challenges-table td:nth-of-type(6):before { content: "Oponente:"; }
-    #challenges-table td:nth-of-type(7):before { content: "Status:"; }
-    #challenges-table td:nth-of-type(8):before { content: "Vencedor:"; }
-    #challenges-table td:nth-of-type(9):before { content: "Criação:"; }
-    #challenges-table td:nth-of-type(10):before { content: "Ações:"; }
-
-    /* Mostra a barra de navegação inferior apenas em telas menores */
-    .bottom-nav {
-        display: flex;
+    footer p {
+        font-size: 14px;
     }
 }
 
-/* Estilos para Celulares Pequenos */
+/* Para telas muito pequenas */
 @media (max-width: 480px) {
-    .hero .container h2 { font-size: 38px; }
-    .hero .container p.hero-subtitle { font-size: 16px; }
-    section h2 { font-size: 28px; }
-    .cta-button { padding: 10px 20px !important; font-size: 14px; }
-    .step { width: 100%; min-width: unset; }
-    .games-grid { grid-template-columns: 1fr; }
-    .form-container { padding: 20px; }
-    #cadastro-form, #forgot-password-form, #reset-password-form { padding: 0 20px; }
-    .form-container h2 { font-size: 26px; }
-    .input-group input, .input-group select, .input-group textarea { padding: 10px 12px; font-size: 14px; }
-    .profile-main { padding: 20px 10px; }
-    .admin-main { padding: 20px 10px; }
-    .modal { padding: 15px; }
-    .other-user-profile-modal .header-info h2 { font-size: 20px; }
-    .other-user-profile-modal .user-avatar-large { width: 80px; height: 80px; }
-    .other-user-profile-modal .console-display { font-size: 13px; }
-    .other-user-profile-modal .profile-stats-summary { font-size: 12px; gap: 10px; }
-    .other-user-profile-modal .profile-details-content,
-    .other-user-profile-modal .modal-actions-profile { padding: 0 10px 10px 10px; }
-    .other-user-profile-modal .profile-details-content h3 { font-size: 15px; }
-    .other-user-profile-modal .modal-actions-profile .cta-button { font-size: 12px; padding: 8px 10px; }
-    .bet-amount-options { flex-direction: column; align-items: center; }
-    .bet-option { width: 100%; min-width: unset; }
+    .container {
+        padding: 0 10px;
+    }
+    .logo h1 a img {
+        max-width: 100px;
+    }
+    section h2 {
+        font-size: 26px;
+        margin-bottom: 25px;
+    }
+    .cta-button {
+        padding: 10px 20px !important;
+        font-size: 14px;
+    }
+    .notification {
+        min-width: 280px;
+        right: 10px;
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+    /* Ajustes para sidebar em telas muito pequenas */
+    header nav ul#main-nav-links {
+        width: 80%;
+        right: -80%;
+    }
+    .friends-tab-btn {
+        flex: 1 0 100%;
+        font-size: 13px;
+    }
+    
+    .app-list-item-actions {
+        gap: 5px;
+    }
+    
+    .app-list-item-actions button {
+        padding: 5px;
+        font-size: 14px;
+    }
+    
+    .chat-input-area input {
+        width: 65%;
+    }
 }
-
+/* Adicione isso no final do arquivo base.css */
 header nav ul#main-nav-links.mobile-nav-active {
     visibility: visible;
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
 }
 
 header nav ul#main-nav-links.mobile-nav-active li {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
 }
 
 /* Garanta que a seção de informações do usuário móvel seja visível */
