@@ -113,11 +113,11 @@
 .step p { font-size: 15px; color: var(--text-muted); position: relative; z-index: 1;}
 
 .featured-games { }
-.games-grid { 
-    display: grid; 
+.games-grid {
+    display: grid;
     /* NOVO: Ajuste do minmax para grids responsivos */
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-    gap: 35px; 
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 35px;
 }
 .game-card {
     background: var(--card-bg);
@@ -178,7 +178,7 @@
     border: 1px solid var(--border-color);
     padding: 40px;
     border-radius: 12px;
-    
+
     position: relative;
     overflow: hidden;
     height: 520px;
@@ -196,7 +196,7 @@
     transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
 }
 
-#cadastro-form, #forgot-password-form, #reset-password-form { 
+#cadastro-form, #forgot-password-form, #reset-password-form {
     position: absolute;
     top: 40px;
     left: 0;
@@ -229,13 +229,13 @@
 
 .input-group input,
 .input-group select,
-.input-group textarea { 
+.input-group textarea {
     /* Estilos base movidos para base.css */
 }
 
 .input-group input:focus,
 .input-group select:focus,
-.input-group textarea:focus { 
+.input-group textarea:focus {
     /* Estilos base movidos para base.css */
 }
 
@@ -308,7 +308,7 @@
 .user-nav {
     display: flex;
     align-items: center;
-    gap: 25px; 
+    gap: 25px;
 }
 
 .wallet-info {
@@ -337,8 +337,8 @@
     gap: 12px;
     position: relative;
     cursor: pointer;
-    padding: 5px; 
-    border-radius: 25px; 
+    padding: 5px;
+    border-radius: 25px;
     transition: background-color 0.2s ease;
 }
 
@@ -366,7 +366,7 @@
 
 .dashboard-main {
     display: grid;
-    grid-template-columns: 2.5fr 1fr; 
+    grid-template-columns: 2.5fr 1fr;
     gap: 30px;
     padding: 30px;
     max-width: 1200px;
@@ -416,8 +416,8 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
-    height: 500px; 
-    overflow: hidden; 
+    height: 500px;
+    overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 .chat-container { flex-grow: 1; }
@@ -433,17 +433,17 @@
 
 .chat-messages {
     flex-grow: 1;
-    overflow-y: auto; 
+    overflow-y: auto;
     margin-bottom: 15px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding-right: 10px; 
+    padding-right: 10px;
     max-height: 350px;
 }
 
 .chat-input-area {
-    position: relative; 
+    position: relative;
     display: flex;
     gap: 10px;
 }
@@ -502,12 +502,12 @@
 
 .my-challenge-card {
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr 1fr; 
+    grid-template-columns: 1fr 2fr 1fr 1fr;
     align-items: center;
     gap: 20px;
     background: var(--card-bg);
     padding: 15px 20px;
-    border-left: 5px solid var(--secondary-neon); 
+    border-left: 5px solid var(--secondary-neon);
     border-radius: 12px;
     box-shadow: 0 5px 10px rgba(0,0,0,0.05);
 }
@@ -539,7 +539,7 @@
 
 .show-more-btn {
     background: transparent;
-    border: 2px solid var(--primary-neon); 
+    border: 2px solid var(--primary-neon);
     color: var(--primary-neon);
     padding: 10px 30px;
     font-size: 16px;
@@ -580,7 +580,7 @@
     gap: 5px;
 }
 
-#current-user-console-icon { 
+#current-user-console-icon {
     width: 20px;
     height: 20px;
     vertical-align: middle;
@@ -592,11 +592,11 @@
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 0; 
+    padding: 0;
     display: flex;
     flex-direction: column;
-    height: 500px; 
-    overflow: hidden; 
+    height: 500px;
+    overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
@@ -605,7 +605,7 @@
     justify-content: space-around;
     border-bottom: 1px solid var(--border-color);
     background-color: var(--input-bg);
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
 }
 
 .friends-tab-btn {
@@ -614,12 +614,12 @@
     background: transparent;
     border: none;
     color: var(--text-muted);
-    font-size: 14px; 
+    font-size: 14px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
     border-bottom: 3px solid transparent;
-    white-space: nowrap; 
+    white-space: nowrap;
     min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
     min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
     display: inline-flex; /* NOVO: Para alinhar conteúdo */
@@ -641,16 +641,16 @@
 .friends-content {
     flex-grow: 1;
     padding: 20px;
-    overflow-y: auto; 
-    position: relative; 
+    overflow-y: auto;
+    position: relative;
 }
 
 /* NOVO: Regra para abas de conteúdo */
-.friends-tab-content { 
+.friends-tab-content {
     display: none !important; /* NOVO: Garante que estejam ocultas por padrão */
-    height: 100%; 
+    height: 100%;
 }
-.friends-tab-content.active { 
+.friends-tab-content.active {
     display: block !important; /* NOVO: Garante que a aba ativa seja exibida */
 }
 
@@ -719,7 +719,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    justify-content: center; 
+    justify-content: center;
 }
 
 .bet-option {
@@ -734,7 +734,7 @@
     gap: 5px;
     font-weight: bold;
     color: var(--text-color);
-    min-width: 100px; 
+    min-width: 100px;
     justify-content: center;
     box-shadow: none;
     min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
@@ -748,7 +748,7 @@
 
 .bet-option input[type="radio"] { display: none; }
 
-.bet-option input[type="radio"]:checked + span { 
+.bet-option input[type="radio"]:checked + span {
     color: var(--primary-neon);
     text-shadow: var(--glow-soft);
 }
@@ -838,7 +838,7 @@
 .upload-avatar-btn {
     padding: 10px 25px !important;
     font-size: 16px !important;
-    background: var(--secondary-neon); 
+    background: var(--secondary-neon);
     box-shadow: var(--glow-medium);
     border-color: var(--secondary-neon);
     color: #fff;
@@ -1058,42 +1058,43 @@ tr:hover {
 
     .report-result-btn, .delete-challenge-btn { width: 100%; max-width: 180px; margin: 0 auto; padding: 10px 15px; font-size: 14px; }
     .show-more-btn { width: 100%; padding: 12px 20px; font-size: 15px; }
-    
+
     .sidebar-column { gap: 25px; }
     .friends-section-container, .chat-container { padding: 18px; }
     .friends-section-container h3, .chat-container h3 { font-size: 18px; }
-    .player-list, .friends-list, .friend-requests-list, .sent-friend-requests-list, .search-results-list, .blocked-users-list { max-height: unset; overflow-y: visible; }
-    .friends-tabs { 
-        justify-content: flex-start; 
-        overflow-x: auto; 
-        -webkit-overflow-scrolling: touch; 
-        padding-bottom: 5px; 
-        -ms-overflow-style: none; 
-        scrollbar-width: none; 
+    .player-list, .friends-list, .friend-requests-list, .sent-friend-requests-list, .search-results-list, .blocked-users-list { /* max-height: unset; overflow-y: visible; */ }
+    .friends-tabs {
+        justify-content: flex-start;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 5px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
     .friends-tabs::-webkit-scrollbar { display: none; }
 
     .friends-tab-btn { flex-shrink: 0; font-size: 13px; padding: 10px 8px; }
     .friends-content { padding: 15px; }
-    .app-list-item { 
-        flex-wrap: wrap; 
+    .app-list-item {
+        flex-wrap: wrap;
         justify-content: flex-start;
-        gap: 8px; 
-        padding: 8px 0; 
+        gap: 8px;
+        padding: 8px 0;
     }
-    .app-list-item-avatar { 
-        margin-right: 5px; 
-        width: 30px; 
-        height: 30px; 
+    .app-list-item-avatar {
+        margin-right: 5px;
+        width: 30px;
+        height: 30px;
+        /* border: none; REMOVIDO PARA PRESERVAR BORDAS DE STATUS */
     }
-    .app-list-item-main-content { 
-        flex-basis: calc(100% - 45px); 
-        margin-bottom: 5px; 
+    .app-list-item-main-content {
+        flex-basis: calc(100% - 45px);
+        margin-bottom: 5px;
     }
-    .app-list-item-actions { 
-        width: 100%; 
-        justify-content: flex-end; 
-        margin-top: 5px; 
+    .app-list-item-actions {
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 5px;
     }
     .chat-messages { max-height: 250px; }
     .chat-input-area input { width: calc(100% - 90px); }
