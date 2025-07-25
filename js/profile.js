@@ -339,6 +339,104 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+// Adicione esta parte dentro do DOMContentLoaded, antes do fechamento
+
+// Modal de seleção de tema
+const themeModal = document.getElementById('theme-selection-modal-backdrop');
+const openThemeModalBtn = document.getElementById('open-theme-modal-btn');
+const closeThemeModalBtn = themeModal?.querySelector('.close-modal-btn');
+const saveThemeBtn = document.getElementById('save-theme-button');
+
+if (openThemeModalBtn) {
+    openThemeModalBtn.addEventListener('click', () => {
+        if (themeModal) themeModal.classList.add('active');
+    });
+}
+
+if (closeThemeModalBtn && themeModal) {
+    closeThemeModalBtn.addEventListener('click', () => {
+        themeModal.classList.remove('active');
+    });
+}
+
+if (saveThemeBtn) {
+    saveThemeBtn.addEventListener('click', () => {
+        const selectedTheme = document.querySelector('input[name="theme"]:checked');
+        if (selectedTheme) {
+            document.documentElement.setAttribute('data-theme', selectedTheme.value);
+            localStorage.setItem('theme', selectedTheme.value);
+            if (themeModal) themeModal.classList.remove('active');
+            showNotification('Tema salvo com sucesso!', 'success');
+        } else {
+            showNotification('Por favor, selecione um tema', 'error');
+        }
+    });
+}
+
+// Carrega o tema salvo ao iniciar
+const savedTheme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+if (savedTheme) {
+    const radio = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+    if (radio) radio.checked = true;
+}
+
+// Modifique a lógica de pagamento Pix para:
+depositAmountButtons.forEach(button => {
+    button.addEventListener('click', async () => {
+        walletError.textContent = '';
+        pixPaymentDetailsDiv.style.display = 'none';
+        const amount = parseInt(button.dataset.amount);
+
+        if (isNaN(amount) || amount <= 0) {
+            walletError.textContent = 'Valor de depósito inválido.';
+            return;
+        }
+
+        showNotification(`Processando pagamento de ${amount} moedas...`, 'info');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/payment/deposit-mp`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({ amount, payment_method: 'pix' })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Erro ao iniciar pagamento');
+            }
+
+            // Verifica se há URL de redirecionamento
+            if (data.redirectUrl) {
+                window.location.href = data.redirectUrl;
+                return;
+            }
+
+            // Se não houver redirecionamento, mostra detalhes Pix
+            if (data.qrCodeBase64) {
+                pixQrCodeImg.src = `data:image/png;base64,${data.qrCodeBase64}`;
+            } else if (data.qrCodeUrl) {
+                pixQrCodeImg.src = data.qrCodeUrl;
+            }
+            
+            if (data.pixKey) {
+                pixKeyCopyInput.value = data.pixKey;
+                pixPaymentDetailsDiv.style.display = 'block';
+            }
+
+        } catch (error) {
+            console.error('Erro no pagamento:', error);
+            walletError.textContent = error.message;
+            showNotification(error.message, 'error');
+        }
+    });
+});
+
     // Inicializa o ano no rodapé
     const yearSpan = document.getElementById('currentYear');
     if (yearSpan) { yearSpan.textContent = new Date().getFullYear(); }
