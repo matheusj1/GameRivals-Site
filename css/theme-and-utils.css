@@ -141,3 +141,13 @@
         font-size: 14px;
     }
 }
+
+body.theme-dark {
+    --bg-color: #343A40;
+    --card-bg: #23272B;
+    --text-color: #E0E0E0;
+    --text-muted: #B0B0B0;
+    --border-color: #444950;
+    /* ...outras variáveis para o tema escuro... */
+}
+

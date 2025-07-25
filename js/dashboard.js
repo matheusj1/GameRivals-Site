@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.classList.toggle('mobile-nav-open');
 
                 const isExpanded = hamburgerButton.getAttribute('aria-expanded') === 'true';
-                hamburgerButton.setAttribute('aria-expanded', !isExpanded);
+                hamburgerButton.setAttribute('aria-expanded', (!isExpanded).toString());
             });
 
             // Fecha ao clicar em links ou fora do menu
