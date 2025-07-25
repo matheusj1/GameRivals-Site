@@ -402,4 +402,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const yearSpan = document.getElementById('currentYear');
     if (yearSpan) { yearSpan.textContent = new Date().getFullYear(); }
+
+    // Aplica o tema salvo em todas as páginas
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
 });
