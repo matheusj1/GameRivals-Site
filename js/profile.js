@@ -344,7 +344,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const themeModal = document.getElementById('theme-selection-modal-backdrop');
     const openThemeModalBtn = document.getElementById('open-theme-modal-btn');
     const closeThemeModalBtn = themeModal?.querySelector('.close-modal-btn');
-    const saveThemeBtn = document.getElementById('save-theme-button');
 
     if (openThemeModalBtn) {
         openThemeModalBtn.addEventListener('click', () => {
@@ -355,20 +354,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (closeThemeModalBtn && themeModal) {
         closeThemeModalBtn.addEventListener('click', () => {
             themeModal.classList.remove('active');
-        });
-    }
-
-    if (saveThemeBtn) {
-        saveThemeBtn.addEventListener('click', () => {
-            const selectedTheme = document.querySelector('input[name="theme"]:checked');
-            if (selectedTheme) {
-                document.documentElement.setAttribute('data-theme', selectedTheme.value);
-                localStorage.setItem('theme', selectedTheme.value);
-                themeModal.classList.remove('active');
-                showNotification('Tema salvo com sucesso!', 'success');
-            } else {
-                showNotification('Por favor, selecione um tema', 'error');
-            }
         });
     }
 
