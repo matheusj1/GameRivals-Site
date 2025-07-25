@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (selectedTheme) {
                 document.documentElement.setAttribute('data-theme', selectedTheme.value);
                 localStorage.setItem('theme', selectedTheme.value);
-                if (themeModal) themeModal.classList.remove('active');
+                themeModal.classList.remove('active');
                 showNotification('Tema salvo com sucesso!', 'success');
             } else {
                 showNotification('Por favor, selecione um tema', 'error');
@@ -373,12 +373,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Carrega o tema salvo ao iniciar
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
-    if (savedTheme) {
-        const radio = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
-        if (radio) radio.checked = true;
-    }
+    const radio = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+    if (radio) radio.checked = true;
 
     // Modifique a lógica de pagamento Pix para:
     depositAmountButtons.forEach(button => {

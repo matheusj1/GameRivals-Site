@@ -142,12 +142,21 @@
     }
 }
 
-body.theme-dark {
+[data-theme="dark"] {
     --bg-color: #343A40;
     --card-bg: #23272B;
     --text-color: #E0E0E0;
     --text-muted: #B0B0B0;
     --border-color: #444950;
     /* ...outras variáveis para o tema escuro... */
+}
+
+[data-theme="light"] {
+    --bg-color: #F8F9FA;
+    --card-bg: #FFFFFF;
+    --text-color: #343A40;
+    --text-muted: #6C757D;
+    --border-color: #E9ECEF;
+    /* ...outras variáveis para o tema claro... */
 }
 
