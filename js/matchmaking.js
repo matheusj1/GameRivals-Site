@@ -70,10 +70,10 @@ export const setupMatchmaking = (socket, userId, refreshDashboard) => {
                 showNotification('Entrando na fila de espera...', 'info');
 
                 socket.emit('join matchmaking queue', {
-                    userId: userId,
+                    id: userId,
                     game: game,
                     console: consoleValue,
-                    betAmount: betAmount
+                    betAmount: Number(betAmount)
                 });
             }
         });
