@@ -186,6 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Logout do Admin
     const adminLogoutButton = document.getElementById('admin-logout-button');
+    console.log('Botão logout:', adminLogoutButton); // Adicione esta linha
     if (adminLogoutButton) {
         adminLogoutButton.addEventListener('click', (e) => {
             e.preventDefault();
