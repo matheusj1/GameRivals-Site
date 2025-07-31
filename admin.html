@@ -171,16 +171,10 @@
             <p>Desafio: <strong id="dispute-challenge-info"></strong></p>
             <p>Criado por: <span id="dispute-creator-username"></span> (ID: <span id="dispute-creator-id"></span>)</p>
             <p>Oponente: <span id="dispute-opponent-username"></span> (ID: <span id="dispute-opponent-id"></span>)</p>
+            <div id="dispute-winner-options"></div>
             <form id="resolve-dispute-form" class="modal-form">
-                <div class="input-group">
-                    <label>Quem é o vencedor?</label>
-                    <div class="winner-selection">
-                        </div>
-                </div>
-                <input type="hidden" id="dispute-challenge-id">
-                <p class="form-error-message" id="resolve-dispute-error"></p>
-                <button type="submit" class="cta-button form-submit-btn">Confirmar Vencedor e Resolver</button>
             </form>
+            <span id="resolve-dispute-error" style="color: red;"></span>
         </div>
     </div>
 
