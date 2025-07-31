@@ -407,3 +407,5 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
 });
+
+<script type="module" src="js/main.js"></script>
