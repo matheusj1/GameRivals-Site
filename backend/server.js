@@ -186,7 +186,7 @@ io.on('connection', async (socket) => {
                 username: user.username,
                 socketId: currentSocketId,
                 avatarUrl: avatarUrl,
-                console: userConsole
+                console: Console
             });
             socketIdToUserId.set(currentSocketId, userIdString);
 
