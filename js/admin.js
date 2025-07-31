@@ -350,30 +350,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const challengeId = row.dataset.challengeId;
 
-            // Botão Resolver Disputa
+            // Botão Resolver Disputa (NOVO BLOCO ADICIONADO)
             if (target.classList.contains('resolve-dispute-btn')) {
-                // Busca os detalhes do desafio no array allChallenges para preencher o modal
-                const challengeToResolve = allChallenges.find(c => c._id === challengeId);
-                if (challengeToResolve) {
-                    document.getElementById('dispute-challenge-id').value = challengeToResolve._id;
-                    document.getElementById('dispute-challenge-info').textContent = `${challengeToResolve.game} (${challengeToResolve.betAmount} moedas)`;
-                    document.getElementById('dispute-creator-username').textContent = challengeToResolve.createdBy.username;
-                    document.getElementById('dispute-creator-id').textContent = challengeToResolve.createdBy._id;
-                    document.getElementById('dispute-opponent-username').textContent = challengeToResolve.opponent.username;
-                    document.getElementById('dispute-opponent-id').textContent = challengeToResolve.opponent._id;
+                const challenge = allChallenges.find(c => c._id === challengeId);
+                if (challenge) {
+                    document.getElementById('dispute-challenge-info').textContent = challenge._id.substring(0, 8);
+                    document.getElementById('dispute-challenge-id').value = challenge._id;
+                    document.getElementById('dispute-creator-username').textContent = challenge.createdBy.username;
+                    document.getElementById('dispute-creator-id').textContent = challenge.createdBy._id;
+                    document.getElementById('dispute-opponent-username').textContent = challenge.opponent.username;
+                    document.getElementById('dispute-opponent-id').textContent = challenge.opponent._id;
 
-                    const winnerOptionsDiv = document.getElementById('dispute-winner-options');
-                    winnerOptionsDiv.innerHTML = `
-                        <div class="winner-option">
-                            <input type="radio" name="dispute-winner" id="dispute-winner-creator" value="${challengeToResolve.createdBy._id}" required>
-                            <label for="dispute-winner-creator">${challengeToResolve.createdBy.username}</label>
-                        </div>
-                        <div class="winner-option">
-                            <input type="radio" name="dispute-winner" id="dispute-winner-opponent" value="${challengeToResolve.opponent._id}" required>
-                            <label for="dispute-winner-opponent">${challengeToResolve.opponent.username}</label>
-                        </div>
+                    const optionsHtml = `
+                        <label>
+                            <input type="radio" name="winner" value="${challenge.createdBy._id}"> ${challenge.createdBy.username}
+                        </label><br>
+                        <label>
+                            <input type="radio" name="winner" value="${challenge.opponent._id}"> ${challenge.opponent.username}
+                        </label><br>
+                        <button type="submit" class="cta-button form-submit-btn">Confirmar Vencedor</button>
                     `;
-                    document.getElementById('resolve-dispute-error').textContent = '';
+
+                    document.getElementById('dispute-winner-options').innerHTML = optionsHtml;
+
                     document.getElementById('resolve-dispute-modal-backdrop').classList.add('active');
                 }
             }
