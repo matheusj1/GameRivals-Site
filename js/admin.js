@@ -1,15 +1,15 @@
 // arquivo: site_de_jogos/js/admin.js
 
 // NOVO: Importa showNotification e API_BASE_URL de utils.js
-import { showNotification, API_BASE_URL } from './utils.js';
+import { showNotification, API_BASE_URL } from './utils.js'; // cite: 1
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token'); // cite: 1
     const userRole = localStorage.getItem('userRole'); // Pega a role do localStorage
 
     // --- VERIFICAÇÃO DE ADMIN ---
-    if (!token || userRole !== 'admin') {
-        showNotification('Acesso negado. Você não tem permissão de administrador.', 'error');
+    if (!token || userRole !== 'admin') { // cite: 1
+        showNotification('Acesso negado. Você não tem permissão de administrador.', 'error'); // cite: 1
         setTimeout(() => {
             window.location.href = 'login.html'; // Redireciona para login
         }, 1500);
@@ -20,40 +20,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof io !== 'undefined') {
         const socket = io(API_BASE_URL); // ATUALIZADO: Usando API_BASE_URL
 
-        socket.on('connect', () => {
-            console.log('Admin Frontend: Conectado ao Socket.IO.');
+        socket.on('connect', () => { // cite: 1
+            console.log('Admin Frontend: Conectado ao Socket.IO.'); // cite: 1
             // O admin também precisa se identificar para a contagem de onlineUsers
-            const adminUserId = localStorage.getItem('userId');
-            const adminUsername = localStorage.getItem('username');
+            const adminUserId = localStorage.getItem('userId'); // cite: 1
+            const adminUsername = localStorage.getItem('username'); // cite: 1
             if (adminUserId && adminUsername) {
-                 socket.emit('user connected', { username: adminUsername, id: adminUserId });
+                 socket.emit('user connected', { username: adminUsername, id: adminUserId }); // cite: 1
             }
         });
 
         // Adicionar um listener para o evento de reconexão do Socket.IO.
-        socket.on('reconnect', () => {
-            console.log('Admin Frontend: Socket.IO reconnected. Re-emitting user connected.');
-            const adminUserId = localStorage.getItem('userId');
-            const adminUsername = localStorage.getItem('username');
+        socket.on('reconnect', () => { // cite: 1
+            console.log('Admin Frontend: Socket.IO reconnected. Re-emitting user connected.'); // cite: 1
+            const adminUserId = localStorage.getItem('userId'); // cite: 1
+            const adminUsername = localStorage.getItem('username'); // cite: 1
             if (adminUserId && adminUsername) {
-                socket.emit('user connected', { username: adminUsername, id: adminUserId });
+                socket.emit('user connected', { username: adminUsername, id: adminUserId }); // cite: 1
             }
         });
 
-        socket.on('update user list', (users) => {
-            const onlineUsersCountElement = document.getElementById('online-users-count');
+        socket.on('update user list', (users) => { // cite: 1
+            const onlineUsersCountElement = document.getElementById('online-users-count'); // cite: 1
             if (onlineUsersCountElement) {
                 // A contagem no admin deve incluir todos os usuários conectados (incluindo o próprio admin, se aplicável ao seu cálculo de "online users")
-                onlineUsersCountElement.textContent = users.length;
+                onlineUsersCountElement.textContent = users.length; // cite: 1
             }
         });
 
-        socket.on('error', (err) => {
-            console.error('Admin Frontend: Erro no socket:', err);
-            showNotification('Erro na conexão com o servidor de chat. Algumas informações podem não estar em tempo real.', 'error');
+        socket.on('error', (err) => { // cite: 1
+            console.error('Admin Frontend: Erro no socket:', err); // cite: 1
+            showNotification('Erro na conexão com o servidor de chat. Algumas informações podem não estar em tempo real.', 'error'); // cite: 1
         });
     } else {
-        console.warn('Biblioteca Socket.IO não carregada. Contagem de usuários online pode não ser em tempo real.');
+        console.warn('Biblioteca Socket.IO não carregada. Contagem de usuários online pode não ser em tempo real.'); // cite: 1
     }
 
 
@@ -77,29 +77,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             return await response.json();
         } catch (error) {
             console.error(`Erro em fetchAdminData (${endpoint}):`, error);
-            showNotification(error.message, 'error');
+            showNotification(error.message, 'error'); // cite: 1
             return null;
         }
     };
 
     // --- CARREGAR DADOS DO DASHBOARD ---
     const loadDashboardStats = async () => {
-        const stats = await fetchAdminData('dashboard-stats');
+        const stats = await fetchAdminData('dashboard-stats'); // cite: 1
         if (stats) {
-            document.getElementById('total-users').textContent = stats.totalUsers;
-            document.getElementById('total-challenges').textContent = stats.totalChallenges;
-            document.getElementById('completed-challenges').textContent = stats.completedChallenges;
-            document.getElementById('disputed-challenges').textContent = stats.disputedChallenges;
-            document.getElementById('total-coins-bet').textContent = stats.totalCoinsBet.toLocaleString('pt-BR');
+            document.getElementById('total-users').textContent = stats.totalUsers; // cite: 1
+            document.getElementById('total-challenges').textContent = stats.totalChallenges; // cite: 1
+            document.getElementById('completed-challenges').textContent = stats.completedChallenges; // cite: 1
+            document.getElementById('disputed-challenges').textContent = stats.disputedChallenges; // cite: 1
+            document.getElementById('total-coins-bet').textContent = stats.totalCoinsBet.toLocaleString('pt-BR'); // cite: 1
             // online-users-count é atualizado pelo Socket.IO, mas podemos inicializar aqui se a API admin retornar
-            document.getElementById('online-users-count').textContent = stats.onlineUsersCount;
+            document.getElementById('online-users-count').textContent = stats.onlineUsersCount; // cite: 1
         }
     };
 
     // --- CARREGAR E RENDERIZAR USUÁRIOS ---
     let allUsers = []; // Variável para armazenar todos os usuários carregados
     const loadUsers = async () => {
-        const users = await fetchAdminData('users');
+        const users = await fetchAdminData('users'); // cite: 1
         const usersTableBody = document.querySelector('#users-table tbody');
         if (usersTableBody) {
             usersTableBody.innerHTML = ''; // Limpa a tabela
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- CARREGAR E RENDERIZAR DESAFIOS ---
     let allChallenges = []; // Variável para armazenar todos os desafios carregados
     const loadChallenges = async () => {
-        const challenges = await fetchAdminData('challenges');
+        const challenges = await fetchAdminData('challenges'); // cite: 1
         const challengesTableBody = document.querySelector('#challenges-table tbody');
         if (challengesTableBody) {
             challengesTableBody.innerHTML = ''; // Limpa a tabela
@@ -186,13 +186,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Logout do Admin
     const adminLogoutButton = document.getElementById('admin-logout-button');
-    console.log('Botão logout:', adminLogoutButton); // Adicione esta linha
     if (adminLogoutButton) {
         adminLogoutButton.addEventListener('click', (e) => {
             e.preventDefault();
             localStorage.clear();
-            showNotification('Sessão de admin encerrada.', 'info');
-            setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+            showNotification('Sessão de admin encerrada.', 'info'); // cite: 1
+            window.location.href = 'login.html'; // Redireciona imediatamente
         });
     }
 
@@ -243,7 +242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) {
                 errorElement.textContent = data.message || 'Erro ao atualizar moedas.';
             } else {
-                showNotification(data.message, 'success');
+                showNotification(data.message, 'success'); // cite: 1
                 document.getElementById('edit-coins-modal-backdrop').classList.remove('active');
                 loadUsers(); // Recarrega a tabela de usuários
                 loadDashboardStats(); // Recarrega as estatísticas
@@ -290,13 +289,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .then(res => res.json())
                     .then(data => {
                         if (data.message) {
-                            showNotification(data.message, 'success');
+                            showNotification(data.message, 'success'); // cite: 1
                             loadUsers(); // Recarrega a tabela de usuários
                         } else {
-                            showNotification(data.message || 'Erro ao alterar status.', 'error');
+                            showNotification(data.message || 'Erro ao alterar status.', 'error'); // cite: 1
                         }
                     })
-                    .catch(() => showNotification('Não foi possível conectar ao servidor.', 'error'));
+                    .catch(() => showNotification('Não foi possível conectar ao servidor.', 'error')); // cite: 1
                 }
             }
         });
@@ -328,7 +327,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) {
                 errorElement.textContent = data.message || 'Erro ao resolver disputa.';
             } else {
-                showNotification(data.message, 'success');
+                showNotification(data.message, 'success'); // cite: 1
                 document.getElementById('resolve-dispute-modal-backdrop').classList.remove('active');
                 loadChallenges(); // Recarrega a tabela de desafios
                 loadDashboardStats(); // Recarrega as estatísticas
@@ -389,13 +388,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .then(res => res.json())
                     .then(data => {
                         if (data.message) {
-                            showNotification(data.message, 'success');
+                            showNotification(data.message, 'success'); // cite: 1
                             loadChallenges(); // Recarrega a tabela de desafios
                         } else {
-                            showNotification(data.message || 'Erro ao cancelar desafio.', 'error');
+                            showNotification(data.message || 'Erro ao cancelar desafio.', 'error'); // cite: 1
                         }
                     })
-                    .catch(() => showNotification('Não foi possível conectar ao servidor.', 'error'));
+                    .catch(() => showNotification('Não foi possível conectar ao servidor.', 'error')); // cite: 1
                 }
             }
         });
