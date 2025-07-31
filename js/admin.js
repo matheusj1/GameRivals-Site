@@ -189,8 +189,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (adminLogoutButton) {
         adminLogoutButton.addEventListener('click', (e) => {
             e.preventDefault();
+            console.log('Botão Sair Admin clicado!'); // Adicione esta linha
             localStorage.clear();
-            showNotification('Sessão de admin encerrada.', 'info'); // cite: 1
+            console.log('Local Storage limpo. Redirecionando...'); // Adicione esta linha
+            showNotification('Sessão de admin encerrada.', 'info');
             window.location.href = 'login.html'; // Redireciona imediatamente
         });
     }
