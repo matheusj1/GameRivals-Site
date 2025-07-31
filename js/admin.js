@@ -405,4 +405,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Inicializa o ano no rodapé
     const yearSpan = document.getElementById('currentYear');
     if (yearSpan) { yearSpan.textContent = new Date().getFullYear(); }
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
 });
