@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mainNavLinks.classList.contains('mobile-nav-active') &&
                 !mainNavLinks.contains(e.target) &&
                 !hamburgerMenu.contains(e.target)) {
-
+                
                 mainNavLinks.classList.remove('mobile-nav-active');
                 hamburgerMenu.classList.remove('active');
                 body.classList.remove('mobile-nav-open'); // Remove a classe do body
