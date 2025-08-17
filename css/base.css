@@ -23,7 +23,6 @@
     --glow-hover-subtle-box: 0 0 10px rgba(111, 66, 193, 0.2);
     --input-bg: #F0F2F5; /* Fundo de input levemente cinza */
     --input-bg-disabled: #E9ECEF; /* NOVO: Cor de fundo para inputs desabilitados/readonly */
-    --form-bg-gradient: linear-gradient(135deg, #f5f6fa 0%, #e0e0e0 100%); /* NOVO: Gradiente para formulários */
     
     --win-color: #28A745; /* Verde para vitória */
     --loss-color: #DC3545; /* Vermelho para derrota */
