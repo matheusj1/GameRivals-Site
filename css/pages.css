@@ -161,82 +161,61 @@
 
 /* PÁGINA DE LOGIN/CADASTRO (login.html) */
 .main-form {
-    padding: 60px 0;
     display: flex;
-    align-items: center;
     justify-content: center;
-    min-height: calc(100vh - 160px);
-    background-image: none;
-    animation: none;
+    align-items: center;
+    min-height: 70vh;
+    background: #f5f6fa;
 }
 
 
 .form-container {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    padding: 40px 32px;
     width: 100%;
-    max-width: 490px;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    padding: 40px;
-    border-radius: 12px;
-    
-    position: relative;
-    overflow: hidden;
-    height: 520px;
-    transition: height 0.4s ease-in-out, box-shadow 0.4s ease;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1), var(--glow-soft);
-}
-/* Alturas ajustadas no JS são boas para manter */
-.form-container.show-register { height: 690px; }
-.form-container.show-forgot-password { height: 490px; }
-.form-container.show-reset-password { height: 490px; }
-
-
-.form-wrapper {
-    width: 100%;
-    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+    max-width: 380px;
+    margin: 32px auto;
 }
 
-#cadastro-form, #forgot-password-form, #reset-password-form { 
-    position: absolute;
-    top: 40px;
-    left: 0;
-    width: 100%;
-    padding: 0 40px;
-    opacity: 0;
-    transform: translateX(100%);
-    pointer-events: none;
+.form-wrapper h2 {
+    text-align: center;
+    color: #7c3aed;
+    font-weight: 700;
+    margin-bottom: 24px;
+    font-size: 2rem;
+    letter-spacing: 1px;
 }
 
-.form-container h2 {
-    color: var(--primary-neon);
-    text-shadow: var(--glow-soft);
-    margin-bottom: 30px;
-    font-size: clamp(26px, 6vw, 32px); /* NOVO: Tipografia fluida */
-    text-transform: uppercase;
-    letter-spacing: 0;
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 18px;
 }
-
-.input-group { margin-bottom: 20px; }
 
 .input-group label {
-    display: block;
-    margin-bottom: 8px;
+    font-size: 1rem;
+    color: #444;
     font-weight: 500;
-    color: var(--text-muted);
-    font-size: 16px;
-    letter-spacing: 0;
+    margin-bottom: 2px;
+    text-align: left;
 }
 
-.input-group input,
-.input-group select,
-.input-group textarea { 
-    /* Estilos base movidos para base.css */
+.input-group input {
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    background: #f7f8fa;
+    transition: border-color 0.2s;
+    width: 100%;
 }
 
-.input-group input:focus,
-.input-group select:focus,
-.input-group textarea:focus { 
-    /* Estilos base movidos para base.css */
+.input-group input:focus {
+    border-color: #7c3aed;
 }
 
 .password-wrapper {
@@ -246,62 +225,60 @@
 }
 
 .password-wrapper input {
-    padding-right: 50px;
+    width: 100%;
 }
 
 .toggle-password {
     position: absolute;
-    right: 15px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    background: transparent;
+    background: none;
     border: none;
     cursor: pointer;
-    color: var(--text-muted);
-    font-size: 22px;
-    padding: 0 5px;
-    line-height: 1;
-    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
-    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    font-size: 1.2rem;
+    padding: 0;
 }
 
-.toggle-password:hover {
-    color: var(--primary-neon);
-}
-
-.form-submit-btn {
+.cta-button.form-submit-btn {
+    background: #7c3aed;
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: 24px;
+    padding: 14px 0;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-top: 8px;
     width: 100%;
-    margin-top: 15px;
-    padding: 16px !important;
-    font-size: 18px;
-    border-radius: 25px;
+    transition: background 0.2s;
+}
+
+.cta-button.form-submit-btn:hover {
+    background: #5f2dbb;
 }
 
 .form-switch-link {
-    margin-top: 25px;
-    color: var(--text-muted);
+    text-align: center;
+    margin-top: 16px;
+    font-size: 1rem;
 }
 
 .form-switch-link a {
-    color: var(--secondary-neon);
-    font-weight: bold;
+    color: #0891b2;
     text-decoration: none;
-    text-shadow: none;
-    cursor: pointer;
+    font-weight: 700;
 }
 
 .form-switch-link a:hover {
     text-decoration: underline;
-    color: var(--primary-neon);
 }
 
 .form-error-message {
-    color: var(--loss-color);
+    color: #e53e3e;
+    font-size: 0.95rem;
     text-align: center;
-    margin-top: 15px;
-    font-weight: 500;
-    min-height: 20px;
-    text-shadow: none;
+    margin-bottom: 8px;
 }
 
 /* PÁGINA DASHBOARD (dashboard.html) */
