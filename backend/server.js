@@ -634,7 +634,7 @@ app.post('/api/challenges/private', auth, async (req, res) => {
         const opponentUser = await User.findById(opponentId);
         if (!creatorUser || !opponentUser) { return res.status(404).json({ message: 'Criador ou oponente não encontrado.' }); }
         if (!creatorUser.friends.includes(opponentId)) { return res.status(400).json({ message: 'Você só pode desafiar amigos diretamente.' }); }
-        if (betAmount > 0 && creatorUser.coins < betAmount) { return res.status(400).json({ message: 'Você não tem moedas suficientes para esta aposta.' }); }
+        if (betAmount > 0 && creatorUser.coins < betAmount) { return res.status(400).json({ message: `${opponentUser.username} não tem moedas suficientes para aceitar esta aposta.` }); }
         if (betAmount > 0 && opponentUser.coins < betAmount) { return res.status(400).json({ message: `${opponentUser.username} não tem moedas suficientes para aceitar esta aposta.` }); }
         const newChallenge = new Challenge({ game, console: platform, betAmount, createdBy: createdBy, opponent: opponentId, status: 'open' });
         await newChallenge.save();

@@ -83,27 +83,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // NOVA FUNÇÃO: Buscar e exibir saldo da carteira
     const fetchWalletBalance = async () => {
+        if (!walletCurrentBalanceSpan) return; // Adicionado para segurança
+        walletCurrentBalanceSpan.textContent = 'Carregando...'; // Exibe o status de carregamento
+    
         try {
-            const response = await fetch(`${API_BASE_URL}/api/users/me/stats`, { // Atualizado
+            const response = await fetch(`${API_BASE_URL}/api/users/me/stats`, {
                 headers: { 'x-auth-token': token }
             });
-            if (!response.ok) throw new Error('Erro ao buscar saldo da carteira.');
-            const stats = await response.json();
-            if (walletCurrentBalanceSpan && stats.coins !== undefined) {
-                walletCurrentBalanceSpan.textContent = stats.coins.toLocaleString('pt-BR');
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Erro ao buscar saldo da carteira.');
             }
+    
+            const stats = await response.json();
+    
+            if (stats.coins !== undefined) {
+                walletCurrentBalanceSpan.textContent = stats.coins.toLocaleString('pt-BR');
+            } else {
+                walletCurrentBalanceSpan.textContent = '0';
+            }
+    
             // Atualiza o saldo também no header do dashboard/perfil
             const coinBalanceDesktop = document.getElementById('coin-balance-desktop');
             const coinBalanceMobile = document.getElementById('coin-balance-mobile');
             if (coinBalanceDesktop) coinBalanceDesktop.textContent = stats.coins.toLocaleString('pt-BR');
             if (coinBalanceMobile) coinBalanceMobile.textContent = stats.coins.toLocaleString('pt-BR');
-
+    
         } catch (error) {
             console.error('Erro ao buscar saldo da carteira:', error);
-            if (walletCurrentBalanceSpan) {
-                walletCurrentBalanceSpan.textContent = 'Erro ao carregar';
-            }
-            showNotification('Erro ao carregar saldo da carteira.', 'error');
+            walletCurrentBalanceSpan.textContent = 'Erro';
+            showNotification(`Erro: ${error.message}`, 'error');
         }
     };
 

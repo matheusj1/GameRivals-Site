@@ -831,17 +831,7 @@
     color: var(--text-muted);
 }
 
-.profile-main .input-group input,
-.profile-main .input-group textarea,
-.profile-main .input-group select {
-    /* Estilos base movidos para base.css */
-}
 
-.profile-main .input-group input:focus,
-.profile-main .input-group textarea:focus,
-.profile-main .input-group select:focus {
-    /* Estilos base movidos para base.css */
-}
 
 .profile-main textarea {
     resize: vertical;
@@ -849,9 +839,7 @@
     line-height: 1.5;
 }
 
-.profile-main #username[readonly] {
-    /* Estilo base movido para base.css */
-}
+
 
 .profile-main .form-submit-btn { margin-top: 15px; }
 
