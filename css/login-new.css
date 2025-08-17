@@ -1,0 +1,170 @@
+/* arquivo: site_de_jogos/css/login-new.css */
+
+.main-form-new {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #1e1e2d; /* Fundo escuro */
+    position: relative;
+    overflow: hidden;
+}
+
+.form-container-new {
+    background: #2b2b3a; /* Fundo do card escuro */
+    border: 1px solid #4a4a5c;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 15px #6F42C140; /* Sombra com glow */
+    padding: 50px 40px;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.form-wrapper {
+    position: absolute;
+    width: calc(100% - 80px);
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Transição com bounce */
+    top: 50px;
+}
+
+#login-form { transform: translateX(0); opacity: 1; }
+#cadastro-form, #forgot-password-form, #reset-password-form { transform: translateX(120%); opacity: 0; pointer-events: none; }
+
+.form-wrapper.active-form {
+    transform: translateX(0);
+    opacity: 1;
+    position: relative;
+    pointer-events: all;
+}
+
+.form-container-new h2 {
+    text-align: center;
+    color: #fff;
+    font-weight: 700;
+    margin-bottom: 25px;
+    font-size: 2.2rem;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(111, 66, 193, 0.6);
+}
+
+.input-group label {
+    font-size: 1rem;
+    color: #b0b0c2;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.input-group input {
+    background: #3a3a4c;
+    border: 1px solid #4a4a5c;
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 10px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #6F42C1;
+    box-shadow: 0 0 10px rgba(111, 66, 193, 0.4);
+    background: #343444;
+}
+
+.password-wrapper .toggle-password {
+    color: #b0b0c2;
+    font-size: 1.3rem;
+}
+
+.cta-button.form-submit-btn {
+    background: #6F42C1;
+    background-image: linear-gradient(45deg, #6F42C1 0%, #17A2B8 100%);
+    box-shadow: 0 4px 15px rgba(111, 66, 193, 0.4);
+    font-size: 1.2rem;
+    padding: 16px;
+    letter-spacing: 1px;
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.cta-button.form-submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(111, 66, 193, 0.6);
+}
+
+.form-switch-link {
+    color: #b0b0c2;
+}
+
+.form-switch-link a {
+    color: #17A2B8;
+    text-decoration: none;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(23, 162, 184, 0.4);
+}
+
+.form-switch-link a:hover {
+    text-shadow: 0 0 8px rgba(23, 162, 184, 0.8);
+    color: #4fe1f7;
+}
+
+.form-error-message {
+    color: #ff6b6b;
+    font-weight: 500;
+}
+
+/* Efeito de fundo com glow animado */
+.background-glow {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.5;
+    z-index: 1;
+}
+
+.background-glow.top-left {
+    background: #6F42C1;
+    top: -50px;
+    left: -50px;
+    animation: glow-pulse-1 15s infinite alternate ease-in-out;
+}
+
+.background-glow.bottom-right {
+    background: #17A2B8;
+    bottom: -50px;
+    right: -50px;
+    animation: glow-pulse-2 18s infinite alternate ease-in-out;
+}
+
+@keyframes glow-pulse-1 {
+    0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+    100% { transform: scale(1.2) translate(50px, 30px); opacity: 0.7; }
+}
+
+@keyframes glow-pulse-2 {
+    0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
+    100% { transform: scale(1.1) translate(-40px, -60px); opacity: 0.6; }
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 480px) {
+    .form-container-new {
+        padding: 40px 20px;
+        max-width: 90%;
+    }
+
+    .form-container-new h2 {
+        font-size: 1.8rem;
+    }
+
+    .input-group input {
+        padding: 12px 15px;
+    }
+
+    .cta-button.form-submit-btn {
+        font-size: 1rem;
+        padding: 14px;
+    }
+}

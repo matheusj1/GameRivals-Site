@@ -117,48 +117,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const backToLoginLink = document.querySelector('#back-to-login-link');
         const backToLoginFromResetLink = document.querySelector('#back-to-login-from-reset-link');
 
+        // NOVO: Função de transição com base nas classes
         const showForm = (formToShow) => {
-            loginFormWrapper.style.opacity = 0;
-            loginFormWrapper.style.transform = 'translateX(100%)';
-            loginFormWrapper.style.pointerEvents = 'none';
-            loginFormWrapper.style.display = 'none';
-
-            cadastroFormWrapper.style.opacity = 0;
-            cadastroFormWrapper.style.transform = 'translateX(100%)';
-            cadastroFormWrapper.style.pointerEvents = 'none';
-            cadastroFormWrapper.style.display = 'none';
-
-            forgotPasswordFormWrapper.style.opacity = 0;
-            forgotPasswordFormWrapper.style.transform = 'translateX(100%)';
-            forgotPasswordFormWrapper.style.pointerEvents = 'none';
-            forgotPasswordFormWrapper.style.display = 'none';
-
-            resetPasswordFormWrapper.style.opacity = 0;
-            resetPasswordFormWrapper.style.transform = 'translateX(100%)';
-            resetPasswordFormWrapper.style.pointerEvents = 'none';
-            resetPasswordFormWrapper.style.display = 'none';
-
-
-            if (formToShow === cadastroFormWrapper) {
-                authContainer.style.height = '690px';
-            } else if (formToShow === forgotPasswordFormWrapper || formToShow === resetPasswordFormWrapper) {
-                authContainer.style.height = '490px';
-            }
-            else {
-                authContainer.style.height = '490px';
-            }
-
-            formToShow.style.display = 'block';
-            setTimeout(() => {
-                formToShow.style.opacity = 1;
-                formToShow.style.transform = 'translateX(0)';
-                formToShow.style.pointerEvents = 'all';
-            }, 50);
-
-            document.getElementById('login-error').textContent = '';
-            document.getElementById('register-error').textContent = '';
-            document.getElementById('forgot-password-error').textContent = '';
-            document.getElementById('reset-password-error').textContent = '';
+            const forms = [loginFormWrapper, cadastroFormWrapper, forgotPasswordFormWrapper, resetPasswordFormWrapper];
+            forms.forEach(form => form.classList.remove('active-form'));
+            formToShow.classList.add('active-form');
         };
 
         const urlParams = new URLSearchParams(window.location.search);
