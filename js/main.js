@@ -72,10 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Fecha o menu ao clicar fora dele ou no overlay
         document.addEventListener('click', (e) => {
             // Verifica se o clique foi fora da sidebar e do botão hambúrguer
-            if (mainNavLinks.classList.contains('mobile-nav-active') && 
-                !mainNavLinks.contains(e.target) && 
+            if (mainNavLinks.classList.contains('mobile-nav-active') &&
+                !mainNavLinks.contains(e.target) &&
                 !hamburgerMenu.contains(e.target)) {
-                
+
                 mainNavLinks.classList.remove('mobile-nav-active');
                 hamburgerMenu.classList.remove('active');
                 body.classList.remove('mobile-nav-open'); // Remove a classe do body
@@ -403,29 +403,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const yearSpan = document.getElementById('currentYear');
     if (yearSpan) { yearSpan.textContent = new Date().getFullYear(); }
 
-    // Supondo que o HTML tenha:
-    // <div class="wallet-loading">Carregando...</div>
-    // <span class="coin-balance"></span>
-
-    function carregarCarteira() {
-      fetch('/api/wallet')
-        .then(res => {
-          if (!res.ok) throw new Error('Falha ao carregar');
-          return res.json();
-        })
-        .then(data => {
-          document.querySelector('.coin-balance').textContent = data.balance ?? 0;
-          document.querySelector('.wallet-loading').style.display = 'none';
-        })
-        .catch(() => {
-          document.querySelector('.wallet-loading').textContent = 'Erro ao carregar!';
-        });
-    }
-
-    // Chame essa função quando a página de perfil for exibida
-    if (window.location.pathname.includes('profile')) {
-      carregarCarteira();
-    }
-
-    
+    // Esta função foi removida porque o carregamento da carteira
+    // é feito corretamente no arquivo profile.js, que já busca a
+    // rota correta /api/users/me/stats.
+    function carregarCarteira() {}
 });
