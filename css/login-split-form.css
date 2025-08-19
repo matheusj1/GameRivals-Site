@@ -1,263 +1,180 @@
-/* arquivo: site_de_jogos/css/login-split-form.css (AJUSTADO) */
+/* login-split-form.css (NOVO VISUAL BRANCO E ROXO) */
+
+:root {
+    --primary-purple: #6a0dad;
+    --primary-purple-light: #8a2be2;
+    --bg-color: #ffffff;
+    --card-bg: #ffffff;
+    --text-color: #333333;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--bg-color);
+    margin: 0;
+    padding: 0;
+}
 
 .main-split-form {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: var(--bg-color);
-    overflow: auto; /* Alterado para auto para evitar cortes */
+    background: linear-gradient(135deg, var(--primary-purple), var(--primary-purple-light));
 }
 
 .login-split-container {
     position: relative;
-    width: 90%; /* Ajustado para ocupar menos largura */
-    max-width: 700px; /* Largura máxima menor */
-    height: auto; /* Altura automática para se ajustar ao conteúdo */
-    background-color: var(--card-bg);
-    border-radius: 15px; /* Bordas um pouco menos arredondadas */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Sombra mais suave */
+    width: 90%;
+    max-width: 800px;
+    height: 500px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
     overflow: hidden;
     display: flex;
-    flex-direction: column; /* Layout de coluna em telas menores */
+    transition: transform 0.6s ease-in-out;
 }
 
-.split-form-half {
+/* Metade Login */
+.login-half, .register-half {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    padding: 50px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 30px; /* Reduzido o padding */
-    color: var(--text-color);
-    min-height: auto; /* Ajustar altura automaticamente */
-    position: relative; /* Para posicionar conteúdo interno */
-    width: 100%; /* Ocupar toda a largura inicialmente */
-    transition: transform 0.6s ease-in-out, opacity 0.4s ease; /* Adicionada transição de opacidade */
+    transition: all 0.6s ease-in-out;
 }
 
+/* Login aparece primeiro */
 .login-half {
-    order: 1; /* Ordem inicial */
+    left: 0;
+    z-index: 2;
     opacity: 1;
-    transform: translateX(0);
-    background-color: var(--card-bg);
+    background: #fff;
+    color: var(--text-color);
 }
 
 .register-half {
-    order: 2; /* Ordem inicial */
-    opacity: 0;
-    transform: translateX(100%);
-    background-color: var(--primary-neon);
-    color: white;
-    position: absolute; /* Sobrepor inicialmente */
-    top: 0;
     left: 0;
+    opacity: 0;
+    z-index: 1;
+    background: #fff;
 }
 
+/* Quando ativa cadastro */
 .login-split-container.register-active .login-half {
     transform: translateX(-100%);
     opacity: 0;
+    z-index: 1;
 }
 
 .login-split-container.register-active .register-half {
     transform: translateX(0);
     opacity: 1;
+    z-index: 2;
 }
 
-.split-form-half .form-content {
-    width: 90%; /* Form content mais largo */
-    max-width: 300px; /* Largura máxima do conteúdo do formulário */
-}
-
-.split-form-half h1 {
-    font-size: 1.8em; /* Título menor */
-    margin-bottom: 15px;
-}
-
-.split-form-half p {
-    font-size: 0.9em; /* Texto menor */
-    margin-bottom: 20px;
-    opacity: 0.8;
-}
-
+/* Inputs */
 .input-group {
-    margin-bottom: 12px; /* Espaçamento menor entre os inputs */
+    margin-bottom: 15px;
+    width: 100%;
+    max-width: 320px;
     text-align: left;
 }
 
 .input-group label {
     display: block;
-    margin-bottom: 3px;
-    font-size: 0.85em;
     font-weight: 500;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    color: var(--text-color);
 }
 
 .input-group input {
-    width: calc(100% - 22px); /* Ajuste fino para o padding */
-    padding: 8px 10px; /* Padding menor nos inputs */
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 0.9em;
-}
-
-.split-form-half .form-submit-btn {
     width: 100%;
-    padding: 10px 15px; /* Padding menor nos botões */
+    padding: 10px;
+    border: 1px solid #bbb;
+    border-radius: 8px;
+    font-size: 0.95em;
+}
+
+/* Botão principal */
+.form-submit-btn {
+    width: 100%;
+    max-width: 320px;
+    padding: 12px;
     margin-top: 15px;
-    font-size: 0.9em;
+    font-size: 1em;
     font-weight: bold;
-    border-radius: 20px;
-    transition: background-color 0.3s ease;
+    border-radius: 25px;
+    border: none;
+    background: var(--primary-purple);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.3s ease;
 }
 
-.register-half .form-submit-btn {
-    background-color: white;
-    color: var(--primary-neon);
+.form-submit-btn:hover {
+    background: var(--primary-purple-light);
 }
 
-.register-half .form-submit-btn:hover {
-    background-color: #f0f0f0;
-}
-
-.switch-form-prompt,
-.form-options {
-    margin-top: 15px;
-    font-size: 0.8em;
+/* Links */
+.switch-form-prompt {
+    margin-top: 20px;
+    font-size: 0.85em;
 }
 
 .switch-form-prompt a,
 .form-options a {
-    color: inherit; /* Usar a cor do texto pai */
+    color: var(--primary-purple);
     text-decoration: none;
     font-weight: bold;
-}
-
-.login-half .switch-form-prompt a {
-    color: var(--primary-neon);
-}
-
-.register-half .switch-form-prompt a {
-    color: white;
-}
-
-.form-options a {
-    color: var(--primary-neon);
-}
-
-.password-wrapper {
-    position: relative;
-}
-
-.password-wrapper input {
-    width: calc(100% - 30px);
-}
-
-.password-wrapper .toggle-password {
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #777;
     cursor: pointer;
+}
+
+/* Erros */
+.form-error-message {
+    color: red;
     font-size: 0.8em;
-    padding: 5px;
-    outline: none;
+    margin-top: 5px;
 }
 
-/* Estilos do modal de "Esqueceu a Senha" */
+/* Modal */
 .modal-backdrop {
-    display: none; /* Oculto por padrão */
+    display: none;
     position: fixed;
-    z-index: 10;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-}
-
-.modal-backdrop.active {
-    display: flex;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
     justify-content: center;
     align-items: center;
 }
 
+.modal-backdrop.active {
+    display: flex;
+}
+
 .modal {
-    background-color: var(--card-bg);
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
+    background: #fff;
+    padding: 25px;
+    border-radius: 15px;
+    width: 90%;
     max-width: 400px;
-    border-radius: 8px;
-    position: relative;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
 .close-modal-btn {
-    color: #aaa;
     position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    background: none;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
     border: none;
-    padding: 0;
-    outline: none;
-}
-
-.close-modal-btn:hover,
-.close-modal-btn:focus {
-    color: black;
-    text-decoration: none;
-}
-
-.modal h2 {
-    color: var(--text-color);
-    text-align: center;
-    margin-bottom: 15px;
-    font-size: 1.4em;
-}
-
-.modal .input-group {
-    margin-bottom: 15px;
-}
-
-.modal .cta-button.form-submit-btn {
-    margin-top: 10px;
-}
-
-/* Media query para telas menores (manter o layout de coluna) */
-@media (min-width: 769px) {
-    .login-split-container {
-        flex-direction: row; /* Voltar ao layout de linha em telas maiores */
-        height: 450px; /* Altura fixa para o layout lado a lado */
-    }
-    .split-form-half {
-        min-height: 450px;
-        width: 50%;
-    }
-    .login-half {
-        order: 1;
-        opacity: 1;
-        transform: translateX(0);
-    }
-    .register-half {
-        order: 2;
-        opacity: 0;
-        transform: translateX(100%);
-        position: absolute;
-    }
-    .login-split-container.register-active .login-half {
-        transform: translateX(-100%);
-        opacity: 0;
-    }
-    .login-split-container.register-active .register-half {
-        transform: translateX(0);
-        opacity: 1;
-    }
+    background: none;
+    cursor: pointer;
 }
