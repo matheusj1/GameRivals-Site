@@ -1,75 +1,112 @@
-/* arquivo: site_de_jogos/css/login-split-form.css */
+/* arquivo: site_de_jogos/css/login-split-form.css (AJUSTADO) */
 
 .main-split-form {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: var(--bg-color); /* Usar a cor de fundo do seu tema */
-    overflow: hidden;
+    background-color: var(--bg-color);
+    overflow: auto; /* Alterado para auto para evitar cortes */
 }
 
 .login-split-container {
     position: relative;
-    width: 100%;
-    max-width: 900px;
-    height: 600px;
+    width: 90%; /* Ajustado para ocupar menos largura */
+    max-width: 700px; /* Largura máxima menor */
+    height: auto; /* Altura automática para se ajustar ao conteúdo */
     background-color: var(--card-bg);
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 15px; /* Bordas um pouco menos arredondadas */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Sombra mais suave */
     overflow: hidden;
     display: flex;
+    flex-direction: column; /* Layout de coluna em telas menores */
 }
 
 .split-form-half {
-    position: absolute;
-    top: 0;
-    width: 50%;
-    height: 100%;
-    transition: transform 0.6s ease-in-out;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
+    padding: 30px; /* Reduzido o padding */
     color: var(--text-color);
+    min-height: auto; /* Ajustar altura automaticamente */
+    position: relative; /* Para posicionar conteúdo interno */
+    width: 100%; /* Ocupar toda a largura inicialmente */
+    transition: transform 0.6s ease-in-out, opacity 0.4s ease; /* Adicionada transição de opacidade */
 }
 
 .login-half {
-    left: 0;
+    order: 1; /* Ordem inicial */
+    opacity: 1;
     transform: translateX(0);
     background-color: var(--card-bg);
 }
 
 .register-half {
-    left: 50%;
+    order: 2; /* Ordem inicial */
+    opacity: 0;
     transform: translateX(100%);
-    background-color: var(--primary-neon); /* A cor roxa do seu site */
+    background-color: var(--primary-neon);
     color: white;
+    position: absolute; /* Sobrepor inicialmente */
+    top: 0;
+    left: 0;
 }
 
-.split-form-half .form-content {
-    width: 80%;
-    max-width: 350px;
-}
-
-/* Estado ativo da transição */
 .login-split-container.register-active .login-half {
     transform: translateX(-100%);
+    opacity: 0;
 }
 
 .login-split-container.register-active .register-half {
     transform: translateX(0);
+    opacity: 1;
 }
 
-/* Estilos dos botões para a transição */
-.login-half .form-submit-btn,
-.register-half .form-submit-btn {
+.split-form-half .form-content {
+    width: 90%; /* Form content mais largo */
+    max-width: 300px; /* Largura máxima do conteúdo do formulário */
+}
+
+.split-form-half h1 {
+    font-size: 1.8em; /* Título menor */
+    margin-bottom: 15px;
+}
+
+.split-form-half p {
+    font-size: 0.9em; /* Texto menor */
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.input-group {
+    margin-bottom: 12px; /* Espaçamento menor entre os inputs */
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.input-group input {
+    width: calc(100% - 22px); /* Ajuste fino para o padding */
+    padding: 8px 10px; /* Padding menor nos inputs */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.9em;
+}
+
+.split-form-half .form-submit-btn {
     width: 100%;
-    padding: 12px 20px;
-    margin-top: 20px;
-    font-size: 1em;
+    padding: 10px 15px; /* Padding menor nos botões */
+    margin-top: 15px;
+    font-size: 0.9em;
     font-weight: bold;
-    border-radius: 25px;
+    border-radius: 20px;
     transition: background-color 0.3s ease;
 }
 
@@ -82,56 +119,145 @@
     background-color: #f0f0f0;
 }
 
-/* Links e textos de prompt */
+.switch-form-prompt,
+.form-options {
+    margin-top: 15px;
+    font-size: 0.8em;
+}
+
 .switch-form-prompt a,
 .form-options a {
-    color: var(--primary-neon);
+    color: inherit; /* Usar a cor do texto pai */
     text-decoration: none;
     font-weight: bold;
+}
+
+.login-half .switch-form-prompt a {
+    color: var(--primary-neon);
 }
 
 .register-half .switch-form-prompt a {
     color: white;
 }
 
-/* Inputs */
-.input-group {
-    margin-bottom: 15px;
-    text-align: left;
+.form-options a {
+    color: var(--primary-neon);
 }
 
-.input-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
+.password-wrapper {
+    position: relative;
 }
 
-.input-group input {
+.password-wrapper input {
+    width: calc(100% - 30px);
+}
+
+.password-wrapper .toggle-password {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #777;
+    cursor: pointer;
+    font-size: 0.8em;
+    padding: 5px;
+    outline: none;
+}
+
+/* Estilos do modal de "Esqueceu a Senha" */
+.modal-backdrop {
+    display: none; /* Oculto por padrão */
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    top: 0;
     width: 100%;
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1em;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
+.modal-backdrop.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal {
+    background-color: var(--card-bg);
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 8px;
+    position: relative;
+}
+
+.close-modal-btn {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    outline: none;
+}
+
+.close-modal-btn:hover,
+.close-modal-btn:focus {
+    color: black;
+    text-decoration: none;
+}
+
+.modal h2 {
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.4em;
+}
+
+.modal .input-group {
+    margin-bottom: 15px;
+}
+
+.modal .cta-button.form-submit-btn {
+    margin-top: 10px;
+}
+
+/* Media query para telas menores (manter o layout de coluna) */
+@media (min-width: 769px) {
     .login-split-container {
-        flex-direction: column;
-        height: auto;
+        flex-direction: row; /* Voltar ao layout de linha em telas maiores */
+        height: 450px; /* Altura fixa para o layout lado a lado */
     }
     .split-form-half {
-        position: relative;
-        width: 100%;
-        left: 0;
-        transform: translateX(0) !important;
-        padding: 40px 20px;
+        min-height: 450px;
+        width: 50%;
     }
     .login-half {
-        background-color: var(--card-bg);
-        color: var(--text-color);
+        order: 1;
+        opacity: 1;
+        transform: translateX(0);
     }
     .register-half {
-        display: none; /* Esconder a metade do cadastro em telas pequenas */
+        order: 2;
+        opacity: 0;
+        transform: translateX(100%);
+        position: absolute;
+    }
+    .login-split-container.register-active .login-half {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    .login-split-container.register-active .register-half {
+        transform: translateX(0);
+        opacity: 1;
     }
 }
