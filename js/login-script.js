@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const forgotPasswordFormWrapper = document.getElementById('forgot-password-form');
     const resetPasswordFormWrapper = document.getElementById('reset-password-form');
     
-    // Links de navegação
     const showRegisterLink = document.querySelector('#show-register-link');
     const showLoginLink = document.querySelector('#show-login-link');
     const forgotPasswordLink = document.querySelector('#forgot-password-link');

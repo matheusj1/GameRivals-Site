@@ -53,10 +53,10 @@
 /* Container do formulário com efeito de vidro */
 .login-container-glass {
     position: relative;
-    background: rgba(255, 255, 255, 0.15); /* Fundo semi-transparente */
+    background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
-    backdrop-filter: blur(10px); /* Efeito de borrão (glassmorphism) */
+    backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     padding: 40px;
     width: 100%;
@@ -69,7 +69,7 @@
 /* Transições dos formulários */
 .form-wrapper-glass {
     position: absolute;
-    width: calc(100% - 80px); /* Ajusta a largura para o padding do container */
+    width: calc(100% - 80px);
     transition: all 0.5s ease-in-out;
     top: 40px;
     left: 40px;
