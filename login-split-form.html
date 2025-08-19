@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Cadastro - GameRivals</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/login-split-form.css">
+</head>
+<body>
+    <main class="main-split-form">
+        <div class="login-split-container" id="login-split-container">
+            <div class="split-form-half login-half">
+                <div class="form-content">
+                    <h1>Bem-vindo de volta!</h1>
+                    <p>Acesse sua conta para continuar.</p>
+                    <form id="login-form-inner" novalidate>
+                        <div class="input-group">
+                            <label for="login-email">E-mail</label>
+                            <input type="email" id="login-email" name="login-email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="login-senha">Senha</label>
+                            <input type="password" id="login-senha" name="login-senha" required>
+                            <button type="button" class="toggle-password" aria-label="Mostrar senha">👁️</button>
+                        </div>
+                        <p class="form-error-message" id="login-error"></p>
+                        <div class="form-options">
+                            <a href="#" id="show-forgot-password-link">Esqueceu sua senha?</a>
+                        </div>
+                        <button type="submit" class="cta-button form-submit-btn">Entrar</button>
+                    </form>
+                    <p class="switch-form-prompt">
+                        Não tem uma conta? <a href="#" id="show-register">Cadastre-se</a>
+                    </p>
+                </div>
+            </div>
+
+            <div class="split-form-half register-half">
+                <div class="form-content">
+                    <h1>Crie sua conta</h1>
+                    <p>Junte-se à comunidade GameRivals!</p>
+                    <form id="cadastro-form-inner" novalidate>
+                        <div class="input-group">
+                            <label for="reg-username">Nome de Usuário</label>
+                            <input type="text" id="reg-username" name="username" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg-email">E-mail</label>
+                            <input type="email" id="reg-email" name="email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg-senha">Senha</label>
+                            <input type="password" id="reg-senha" name="senha" required>
+                            <button type="button" class="toggle-password" aria-label="Mostrar senha">👁️</button>
+                        </div>
+                        <div class="input-group">
+                            <label for="reg-confirmar-senha">Confirmar Senha</label>
+                            <input type="password" id="reg-confirmar-senha" name="confirmar-senha" required>
+                            <button type="button" class="toggle-password" aria-label="Mostrar senha">👁️</button>
+                        </div>
+                        <p class="form-error-message" id="register-error"></p>
+                        <button type="submit" class="cta-button form-submit-btn">Cadastrar</button>
+                    </form>
+                    <p class="switch-form-prompt">
+                        Já tem uma conta? <a href="#" id="show-login">Entrar</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-backdrop" id="forgot-password-modal">
+            <div class="modal">
+                <button class="close-modal-btn">&times;</button>
+                <h2>Esqueceu a Senha?</h2>
+                <form id="request-reset-form" novalidate>
+                    <p>Informe seu e-mail para receber um link de redefinição.</p>
+                    <div class="input-group">
+                        <label for="forgot-email">E-mail</label>
+                        <input type="email" id="forgot-email" name="forgot-email" required>
+                    </div>
+                    <p class="form-error-message" id="forgot-password-error"></p>
+                    <button type="submit" class="cta-button form-submit-btn">Enviar Link</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div id="notification-container"></div>
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/login-split-form.js"></script>
+</body>
+</html>

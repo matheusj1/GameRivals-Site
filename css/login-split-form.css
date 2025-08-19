@@ -1,0 +1,137 @@
+/* arquivo: site_de_jogos/css/login-split-form.css */
+
+.main-split-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--bg-color); /* Usar a cor de fundo do seu tema */
+    overflow: hidden;
+}
+
+.login-split-container {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    height: 600px;
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+}
+
+.split-form-half {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    transition: transform 0.6s ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--text-color);
+}
+
+.login-half {
+    left: 0;
+    transform: translateX(0);
+    background-color: var(--card-bg);
+}
+
+.register-half {
+    left: 50%;
+    transform: translateX(100%);
+    background-color: var(--primary-neon); /* A cor roxa do seu site */
+    color: white;
+}
+
+.split-form-half .form-content {
+    width: 80%;
+    max-width: 350px;
+}
+
+/* Estado ativo da transição */
+.login-split-container.register-active .login-half {
+    transform: translateX(-100%);
+}
+
+.login-split-container.register-active .register-half {
+    transform: translateX(0);
+}
+
+/* Estilos dos botões para a transição */
+.login-half .form-submit-btn,
+.register-half .form-submit-btn {
+    width: 100%;
+    padding: 12px 20px;
+    margin-top: 20px;
+    font-size: 1em;
+    font-weight: bold;
+    border-radius: 25px;
+    transition: background-color 0.3s ease;
+}
+
+.register-half .form-submit-btn {
+    background-color: white;
+    color: var(--primary-neon);
+}
+
+.register-half .form-submit-btn:hover {
+    background-color: #f0f0f0;
+}
+
+/* Links e textos de prompt */
+.switch-form-prompt a,
+.form-options a {
+    color: var(--primary-neon);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.register-half .switch-form-prompt a {
+    color: white;
+}
+
+/* Inputs */
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .login-split-container {
+        flex-direction: column;
+        height: auto;
+    }
+    .split-form-half {
+        position: relative;
+        width: 100%;
+        left: 0;
+        transform: translateX(0) !important;
+        padding: 40px 20px;
+    }
+    .login-half {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+    }
+    .register-half {
+        display: none; /* Esconder a metade do cadastro em telas pequenas */
+    }
+}
