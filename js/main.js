@@ -1,9 +1,7 @@
 // arquivo: site_de_jogos/js/main.js
-import { API_BASE_URL, showNotification } from './utils.js'; // showNotification importado de utils.js
+import { API_BASE_URL, showNotification } from './utils.js';
 
-// A função showNotification duplicada foi removida daqui, pois já é importada de utils.js
-
-// Função para aplicar o tema (light ou dark) - Mantida para compatibilidade, embora o tema seja fixo agora
+// Função para aplicar o tema (light ou dark) - Mantida para compatibilidade
 function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
@@ -15,12 +13,12 @@ function loadTheme() {
     if (savedTheme) {
         applyTheme(savedTheme);
     } else {
-        applyTheme('light'); // Tema padrão: clean
+        applyTheme('light');
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadTheme(); // Carrega o tema assim que o DOM estiver pronto
+    loadTheme();
 
     const token = localStorage.getItem('token');
     const currentPage = window.location.pathname.split('/').pop();
@@ -35,13 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return;
         }
-
         if (profileCompleted === 'false' && currentPage !== 'profile.html') {
             showNotification('Por favor, complete seu perfil para continuar.', 'info');
             window.location.href = 'profile.html';
             return;
         } else if (profileCompleted === 'true' && currentPage === 'profile.html') {
-            // Permite que o usuário interaja com o perfil mesmo se já completo.
         } else if (currentPage === 'login.html' || currentPage === 'index.html' || currentPage === '') {
             window.location.href = 'dashboard.html';
             return;
@@ -53,56 +49,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // =======================================================
-    // NOVO: Lógica do Menu Hambúrguer (Reescrita para Sidebar)
-    // =======================================================
+    // Lógica do Menu Hambúrguer
     const hamburgerMenu = document.querySelector('.hamburger-menu');
     const mainNavLinks = document.querySelector('#main-nav-links');
     const body = document.body;
 
     if (hamburgerMenu && mainNavLinks && body) {
         hamburgerMenu.addEventListener('click', (e) => {
-            e.stopPropagation(); // Evita que o clique no hambúrguer feche imediatamente
-            mainNavLinks.classList.toggle('mobile-nav-active'); // Adiciona/remove classe para mostrar/esconder
-            hamburgerMenu.classList.toggle('active'); // Anima o hambúrguer
-            body.classList.toggle('mobile-nav-open'); // NOVO: Adiciona classe ao body para controlar overflow e overlay
+            e.stopPropagation();
+            mainNavLinks.classList.toggle('mobile-nav-active');
+            hamburgerMenu.classList.toggle('active');
+            body.classList.toggle('mobile-nav-open');
             hamburgerMenu.setAttribute('aria-expanded', mainNavLinks.classList.contains('mobile-nav-active'));
         });
 
-        // Fecha o menu ao clicar fora dele ou no overlay
         document.addEventListener('click', (e) => {
-            // Verifica se o clique foi fora da sidebar e do botão hambúrguer
-            if (mainNavLinks.classList.contains('mobile-nav-active') &&
-                !mainNavLinks.contains(e.target) &&
-                !hamburgerMenu.contains(e.target)) {
-                
+            if (mainNavLinks.classList.contains('mobile-nav-active') && !mainNavLinks.contains(e.target) && !hamburgerMenu.contains(e.target)) {
                 mainNavLinks.classList.remove('mobile-nav-active');
                 hamburgerMenu.classList.remove('active');
-                body.classList.remove('mobile-nav-open'); // Remove a classe do body
+                body.classList.remove('mobile-nav-open');
                 hamburgerMenu.setAttribute('aria-expanded', 'false');
             }
         });
 
-        // Adiciona um listener para cliques nos links internos do menu
-        // para que ele feche automaticamente ao navegar
         mainNavLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 if (mainNavLinks.classList.contains('mobile-nav-active')) {
                     mainNavLinks.classList.remove('mobile-nav-active');
                     hamburgerMenu.classList.remove('active');
-                    body.classList.remove('mobile-nav-open'); // Remove a classe do body
+                    body.classList.remove('mobile-nav-open');
                     hamburgerMenu.setAttribute('aria-expanded', 'false');
                 }
             });
         });
-
     } else {
         console.error('Elementos do menu hambúrguer ou body não encontrados no DOM.');
     }
-    // =======================================================
-    // FIM: Lógica do Menu Hambúrguer
-    // =======================================================
-
 
     const authContainer = document.querySelector('#auth-container');
     const loginFormWrapper = document.getElementById('login-form');
@@ -117,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const backToLoginLink = document.querySelector('#back-to-login-link');
         const backToLoginFromResetLink = document.querySelector('#back-to-login-from-reset-link');
 
-        // NOVO: Função de transição com base nas classes
         const showForm = (formToShow) => {
             const forms = [loginFormWrapper, cadastroFormWrapper, forgotPasswordFormWrapper, resetPasswordFormWrapper];
             forms.forEach(form => form.classList.remove('active-form'));
@@ -131,8 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('reset-token-field').value = resetTokenFromUrl;
             showForm(resetPasswordFormWrapper);
             showNotification('Por favor, defina sua nova senha.', 'info');
-        }
-        else {
+        } else {
             showForm(loginFormWrapper);
         }
 
@@ -193,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const data = await response.json();
-                console.log('Frontend: Resposta completa da API de login:', data);
 
                 if (!response.ok) {
                     loginError.textContent = data.message || 'Ocorreu um erro no login.';
@@ -207,13 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         localStorage.setItem('userRole', data.userRole);
                         localStorage.setItem('profileCompleted', data.profileCompleted);
 
-                        console.log('Frontend: Dados salvos no Local Storage:', {
-                            tokenExists: !!localStorage.getItem('token'),
-                            username: localStorage.getItem('username'),
-                            userId: localStorage.getItem('userId'),
-                            userRole: localStorage.getItem('userRole'),
-                            profileCompleted: localStorage.getItem('profileCompleted')
-                        });
                     } catch (storageError) {
                         console.error('Frontend: Erro ao salvar no Local Storage:', storageError);
                         showNotification('Erro ao salvar dados de sessão. Tente novamente.', 'error');
@@ -340,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/reset-password/${resetToken}`, { // Atualizado
+                const response = await fetch(`${API_BASE_URL}/api/reset-password/${resetToken}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ newPassword })
@@ -362,12 +334,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
     const yearSpan = document.getElementById('currentYear');
     if (yearSpan) { yearSpan.textContent = new Date().getFullYear(); }
 
-    // Esta função foi removida porque o carregamento da carteira
-    // é feito corretamente no arquivo profile.js, que já busca a
-    // rota correta /api/users/me/stats.
     function carregarCarteira() {}
 });
