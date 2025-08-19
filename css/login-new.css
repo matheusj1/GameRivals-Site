@@ -1,170 +1,205 @@
-/* arquivo: site_de_jogos/css/login-new.css */
+/* arquivo: site_de_jogos/css/login-glass.css */
 
-.main-form-new {
+/* Fundo da página e gradientes animados */
+.main-login-glass {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #1e1e2d; /* Fundo escuro */
-    position: relative;
+    background: #000000;
     overflow: hidden;
+    position: relative;
+    font-family: 'Montserrat', sans-serif;
+    color: #fff;
 }
 
-.form-container-new {
-    background: #2b2b3a; /* Fundo do card escuro */
-    border: 1px solid #4a4a5c;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 15px #6F42C140; /* Sombra com glow */
-    padding: 50px 40px;
-    width: 100%;
-    max-width: 450px;
-    position: relative;
-    overflow: hidden;
-    z-index: 10;
-}
-
-.form-wrapper {
+.main-login-glass::before,
+.main-login-glass::after {
+    content: '';
     position: absolute;
-    width: calc(100% - 80px);
-    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Transição com bounce */
-    top: 50px;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.6;
 }
 
-#login-form { transform: translateX(0); opacity: 1; }
-#cadastro-form, #forgot-password-form, #reset-password-form { transform: translateX(120%); opacity: 0; pointer-events: none; }
+.main-login-glass::before {
+    top: -100px;
+    left: -100px;
+    width: 400px;
+    height: 400px;
+    background: #7F00FF;
+    animation: moveGlow1 15s infinite alternate ease-in-out;
+}
 
-.form-wrapper.active-form {
-    transform: translateX(0);
+.main-login-glass::after {
+    bottom: -100px;
+    right: -100px;
+    width: 450px;
+    height: 450px;
+    background: #00FFFF;
+    animation: moveGlow2 18s infinite alternate ease-in-out;
+}
+
+@keyframes moveGlow1 {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+    100% { transform: translate(50px, 80px) scale(1.1); opacity: 0.7; }
+}
+
+@keyframes moveGlow2 {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+    100% { transform: translate(-80px, -50px) scale(1.1); opacity: 0.7; }
+}
+
+/* Container do formulário com efeito de vidro */
+.login-container-glass {
+    position: relative;
+    background: rgba(255, 255, 255, 0.15); /* Fundo semi-transparente */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    backdrop-filter: blur(10px); /* Efeito de borrão (glassmorphism) */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    z-index: 10;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* Transições dos formulários */
+.form-wrapper-glass {
+    position: absolute;
+    width: calc(100% - 80px); /* Ajusta a largura para o padding do container */
+    transition: all 0.5s ease-in-out;
+    top: 40px;
+    left: 40px;
+    right: 40px;
+    opacity: 0;
+    pointer-events: none;
+    display: none;
+}
+.form-wrapper-glass.active {
     opacity: 1;
     position: relative;
     pointer-events: all;
+    display: block;
 }
 
-.form-container-new h2 {
-    text-align: center;
-    color: #fff;
-    font-weight: 700;
-    margin-bottom: 25px;
+/* Títulos */
+.login-container-glass h2 {
     font-size: 2.2rem;
-    letter-spacing: 2px;
-    text-shadow: 0 0 8px rgba(111, 66, 193, 0.6);
+    margin-bottom: 25px;
+    font-weight: 700;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+.login-container-glass h2::before { content: none; }
+
+/* Inputs e labels */
+.login-container-glass .input-group {
+    text-align: left;
+    margin-bottom: 20px;
 }
 
-.input-group label {
+.login-container-glass .input-group label {
+    display: block;
     font-size: 1rem;
-    color: #b0b0c2;
-    font-weight: 500;
     margin-bottom: 8px;
+    color: #f0f0f0;
 }
 
-.input-group input {
-    background: #3a3a4c;
-    border: 1px solid #4a4a5c;
+.login-container-glass .input-group input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
     color: #fff;
     padding: 15px 20px;
-    border-radius: 10px;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+    transition: all 0.3s ease;
 }
 
-.input-group input:focus {
-    border-color: #6F42C1;
-    box-shadow: 0 0 10px rgba(111, 66, 193, 0.4);
-    background: #343444;
+.login-container-glass .input-group input:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #7F00FF;
+    box-shadow: 0 0 10px rgba(127, 0, 255, 0.5);
+}
+
+.password-wrapper {
+    position: relative;
 }
 
 .password-wrapper .toggle-password {
-    color: #b0b0c2;
-    font-size: 1.3rem;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0;
 }
 
+/* Botões */
 .cta-button.form-submit-btn {
-    background: #6F42C1;
-    background-image: linear-gradient(45deg, #6F42C1 0%, #17A2B8 100%);
-    box-shadow: 0 4px 15px rgba(111, 66, 193, 0.4);
-    font-size: 1.2rem;
+    width: 100%;
     padding: 16px;
-    letter-spacing: 1px;
-    transition: transform 0.2s, box-shadow 0.3s;
+    font-size: 1.2rem;
+    background-image: linear-gradient(45deg, #7F00FF 0%, #00FFFF 100%);
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(127, 0, 255, 0.4);
 }
 
 .cta-button.form-submit-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(111, 66, 193, 0.6);
+    box-shadow: 0 6px 20px rgba(127, 0, 255, 0.6);
 }
 
+/* Links de troca de formulário */
 .form-switch-link {
-    color: #b0b0c2;
+    margin-top: 20px;
+    color: #f0f0f0;
+    font-size: 0.9rem;
 }
 
 .form-switch-link a {
-    color: #17A2B8;
+    color: #00FFFF;
     text-decoration: none;
     font-weight: bold;
-    text-shadow: 0 0 5px rgba(23, 162, 184, 0.4);
+    transition: text-shadow 0.3s ease;
 }
 
 .form-switch-link a:hover {
-    text-shadow: 0 0 8px rgba(23, 162, 184, 0.8);
-    color: #4fe1f7;
+    text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
 }
 
 .form-error-message {
     color: #ff6b6b;
-    font-weight: 500;
+    font-size: 0.9rem;
+    margin-top: 10px;
 }
 
-/* Efeito de fundo com glow animado */
-.background-glow {
-    position: absolute;
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.5;
-    z-index: 1;
-}
-
-.background-glow.top-left {
-    background: #6F42C1;
-    top: -50px;
-    left: -50px;
-    animation: glow-pulse-1 15s infinite alternate ease-in-out;
-}
-
-.background-glow.bottom-right {
-    background: #17A2B8;
-    bottom: -50px;
-    right: -50px;
-    animation: glow-pulse-2 18s infinite alternate ease-in-out;
-}
-
-@keyframes glow-pulse-1 {
-    0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
-    100% { transform: scale(1.2) translate(50px, 30px); opacity: 0.7; }
-}
-
-@keyframes glow-pulse-2 {
-    0% { transform: scale(1) translate(0, 0); opacity: 0.5; }
-    100% { transform: scale(1.1) translate(-40px, -60px); opacity: 0.6; }
-}
-
-/* RESPONSIVIDADE */
+/* Responsividade básica */
 @media (max-width: 480px) {
-    .form-container-new {
-        padding: 40px 20px;
+    .login-container-glass {
+        padding: 30px 20px;
         max-width: 90%;
     }
-
-    .form-container-new h2 {
+    .login-container-glass h2 {
         font-size: 1.8rem;
     }
-
-    .input-group input {
-        padding: 12px 15px;
+    .form-wrapper-glass {
+        left: 20px;
+        right: 20px;
     }
-
     .cta-button.form-submit-btn {
-        font-size: 1rem;
         padding: 14px;
+        font-size: 1rem;
     }
 }
