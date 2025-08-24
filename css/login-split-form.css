@@ -118,23 +118,26 @@ body {
 .input-group input {
     width: 100%;
     padding: 12px;
-    border: 1px solid var(--border-color);
+    border: 1px solid #A0A0A0; /* borda visível */
     border-radius: 8px;
     font-size: 0.95em;
     outline: none;
-    background: var(--input-bg);
-    color: var(--text-color);
+
+    /* Correções */
+    background: #fff; /* fundo branco visível */
+    color: #000;      /* texto preto */
+
     transition: all 0.3s ease;
     min-height: 44px;
-    /* NOVO: Adiciona um sombreamento sutil e borda mais visível */
     box-shadow: 0 0 5px rgba(0,0,0,0.1); 
-    border-color: #A0A0A0; /* Cor de borda mais escura por padrão */
 }
 
+
 .input-group input:focus {
-    border-color: var(--primary-neon);
+    border-color: var(--primary-neon, #6f42c1);
     box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
-    background-color: var(--card-bg);
+    background-color: #fff;
+    color: #000;
 }
 
 /* Wrapper de senha com olho dentro */
