@@ -118,20 +118,19 @@ body {
 .input-group input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #A0A0A0; /* borda visível */
+    border: 1px solid #A0A0A0;
     border-radius: 8px;
     font-size: 0.95em;
     outline: none;
 
-    /* Correções */
-    background: #fff; /* fundo branco visível */
-    color: #000;      /* texto preto */
+    /* Garantir visibilidade */
+    background: #fff;
+    color: #000;
 
     transition: all 0.3s ease;
     min-height: 44px;
     box-shadow: 0 0 5px rgba(0,0,0,0.1); 
 }
-
 
 .input-group input:focus {
     border-color: var(--primary-neon, #6f42c1);
@@ -147,13 +146,13 @@ body {
 }
 
 .password-wrapper input {
-    padding-right: 40px;
+    padding-right: 45px; /* espaço para o olho */
 }
 
 .password-wrapper .toggle-password {
     position: absolute;
-    right: 10px;
     top: 50%;
+    right: 10px;
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -161,19 +160,13 @@ body {
     font-size: 1.2em;
     color: var(--text-muted);
     padding: 0;
-    transition: color 0.2s ease;
+    line-height: 1;
 
-    /* Centralização limpa */
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
 
-    min-width: 40px; /* largura mínima só p/ clicar */
-}
-
-.password-wrapper .toggle-password:hover {
-    color: var(--primary-neon);
+    min-width: 30px; /* área de clique */
 }
 
 /* Botão principal */
