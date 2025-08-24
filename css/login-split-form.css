@@ -162,11 +162,14 @@ body {
     color: var(--text-muted);
     padding: 0;
     transition: color 0.2s ease;
-    min-width: 44px;
-    min-height: 44px;
-    display: inline-flex;
+
+    /* Centralização limpa */
+    height: 100%;
+    display: flex;
     align-items: center;
     justify-content: center;
+
+    min-width: 40px; /* largura mínima só p/ clicar */
 }
 
 .password-wrapper .toggle-password:hover {
