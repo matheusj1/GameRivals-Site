@@ -1,9 +1,14 @@
 :root {
-    --primary-purple: #6a0dad;
-    --primary-purple-light: #8a2be2;
-    --bg-color: #ffffff;
-    --card-bg: #ffffff;
-    --text-color: #333333;
+    /* Usar variáveis de tema global */
+    --primary-purple: var(--primary-neon); 
+    --primary-purple-light: #5E3A9F; 
+    --bg-color: var(--bg-color);
+    --card-bg: var(--card-bg);
+    --text-color: var(--text-color);
+    --text-muted: var(--text-muted);
+    --input-bg: var(--input-bg);
+    --border-color: var(--border-color);
+    --glow-medium: var(--glow-medium);
 }
 
 body {
@@ -19,14 +24,15 @@ body {
     align-items: center;
     min-height: 100vh;
     background: linear-gradient(135deg, var(--primary-purple), var(--primary-purple-light));
+    padding: 20px;
 }
 
 .login-split-container {
     position: relative;
-    width: 90%;
+    width: 100%;
     max-width: 800px;
-    height: 500px;
-    background: #fff;
+    height: 550px; /* Aumenta a altura para mais espaço */
+    background: var(--card-bg);
     border-radius: 20px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.2);
     overflow: hidden;
@@ -52,7 +58,7 @@ body {
     left: 0;
     z-index: 2;
     opacity: 1;
-    background: #fff;
+    background: var(--card-bg);
     color: var(--text-color);
 }
 
@@ -60,7 +66,7 @@ body {
     left: 0;
     opacity: 0;
     z-index: 1;
-    background: #fff;
+    background: var(--card-bg);
 }
 
 .login-split-container.register-active .login-half {
@@ -76,49 +82,65 @@ body {
 }
 
 .split-form-half h1 {
-    font-size: 1.8em;
-    margin-bottom: 15px;
+    font-size: clamp(1.8em, 5vw, 2.5em); /* Título fluido */
+    margin-bottom: 10px;
+    color: var(--primary-neon);
+    text-shadow: var(--glow-soft);
 }
 
 .split-form-half p {
-    font-size: 0.9em;
-    margin-bottom: 20px;
+    font-size: clamp(0.9em, 3vw, 1em);
+    margin-bottom: 25px;
     opacity: 0.8;
+    color: var(--text-muted);
 }
 
 /* Inputs */
-.input-group {
-    margin-bottom: 15px;
+.form-content {
     width: 100%;
-    max-width: 320px;
+    max-width: 400px; /* Aumenta a largura dos formulários */
+}
+
+.input-group {
+    margin-bottom: 20px;
+    width: 100%;
     text-align: left;
 }
 
 .input-group label {
     display: block;
     font-weight: 500;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-size: 0.9em;
-    color: var(--text-color);
+    color: var(--text-muted);
 }
 
 .input-group input {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #bbb;
+    padding: 12px;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.95em;
+    outline: none;
+    background: var(--input-bg);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+    min-height: 44px; /* Acessibilidade */
+}
+
+.input-group input:focus {
+    border-color: var(--primary-neon);
+    box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+    background-color: var(--card-bg);
 }
 
 /* Wrapper de senha com olho dentro */
 .password-wrapper {
     position: relative;
     width: 100%;
-    max-width: 320px;
 }
 
 .password-wrapper input {
-    width: 100%;
     padding-right: 40px; /* espaço para o olho */
 }
 
@@ -130,83 +152,109 @@ body {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 1em;
-    color: #888;
+    font-size: 1.2em; /* Ícone um pouco maior */
+    color: var(--text-muted);
     padding: 0;
+    transition: color 0.2s ease;
+    min-width: 44px; /* Acessibilidade */
+    min-height: 44px; /* Acessibilidade */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-wrapper .toggle-password:hover {
+    color: var(--primary-neon);
 }
 
 /* Botão principal */
 .form-submit-btn {
     width: 100%;
-    max-width: 320px;
-    padding: 12px;
+    padding: 14px;
     margin-top: 15px;
     font-size: 1em;
     font-weight: bold;
     border-radius: 25px;
     border: none;
-    background: var(--primary-purple);
+    background: var(--primary-neon);
     color: #fff;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    box-shadow: var(--glow-medium);
+    min-height: 44px; /* Acessibilidade */
 }
 
 .form-submit-btn:hover {
     background: var(--primary-purple-light);
+    box-shadow: var(--glow-hover-subtle-box);
+    transform: translateY(-2px);
 }
 
 /* Links */
 .switch-form-prompt {
     margin-top: 20px;
-    font-size: 0.85em;
+    font-size: 0.9em;
+    color: var(--text-color);
 }
 
 .switch-form-prompt a,
 .form-options a {
-    color: var(--primary-purple);
+    color: var(--primary-neon);
     text-decoration: none;
     font-weight: bold;
     cursor: pointer;
+    transition: text-shadow 0.2s ease;
+}
+.switch-form-prompt a:hover,
+.form-options a:hover {
+    text-shadow: var(--glow-hover-subtle-text);
 }
 
 /* Erros */
 .form-error-message {
-    color: red;
-    font-size: 0.8em;
+    color: var(--loss-color);
+    font-size: 0.9em;
     margin-top: 5px;
-}
-
-/* Modal */
-.modal-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-backdrop.active {
-    display: flex;
-}
-
-.modal {
-    background: #fff;
-    padding: 25px;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 400px;
     text-align: center;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    position: relative;
 }
 
-.close-modal-btn {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 24px;
-    border: none;
-    background: none;
-    cursor: pointer;
+/* RESPONSIVIDADE */
+@media (max-width: 768px) {
+    .login-split-container {
+        height: auto;
+        flex-direction: column;
+        max-height: 95vh;
+        overflow-y: auto;
+    }
+
+    .login-half, .register-half {
+        position: static;
+        padding: 30px;
+        transition: none;
+        opacity: 1; /* Ambos os formulários são visíveis */
+        display: none;
+    }
+
+    .login-half.active-form {
+        display: flex;
+    }
+    .register-half.active-form {
+        display: flex;
+    }
+
+    .login-split-container.register-active .login-half {
+        transform: translateX(0);
+        opacity: 0;
+        z-index: 1;
+    }
+
+    .login-split-container.register-active .register-half {
+        transform: translateX(0);
+        opacity: 1;
+        z-index: 2;
+    }
+    
+    .form-content {
+        max-width: 100%;
+    }
 }

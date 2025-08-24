@@ -5,21 +5,43 @@ import { API_BASE_URL, showNotification } from './utils.js';
 document.addEventListener('DOMContentLoaded', () => {
 
     const splitContainer = document.getElementById('login-split-container');
+    const loginFormWrapper = document.querySelector('.login-half');
+    const registerFormWrapper = document.querySelector('.register-half');
     const showRegisterLink = document.getElementById('show-register');
     const showLoginLink = document.getElementById('show-login');
     const showForgotPasswordLink = document.getElementById('show-forgot-password-link');
     const forgotPasswordModal = document.getElementById('forgot-password-modal');
     const closeModalBtn = forgotPasswordModal.querySelector('.close-modal-btn');
-
+    
     // Funções para alternar entre login e cadastro
+    // MODIFICADO: Lógica para telas menores
+    const showForm = (formToShow) => {
+        if (window.innerWidth <= 768) {
+            const forms = [loginFormWrapper, registerFormWrapper];
+            forms.forEach(form => form.classList.remove('active-form'));
+            formToShow.classList.add('active-form');
+        } else {
+            if (formToShow === registerFormWrapper) {
+                splitContainer.classList.add('register-active');
+            } else {
+                splitContainer.classList.remove('register-active');
+            }
+        }
+    };
+
+    // Lógica inicial para exibir o formulário correto em telas pequenas
+    if (window.innerWidth <= 768) {
+        showForm(loginFormWrapper);
+    }
+
     showRegisterLink.addEventListener('click', (e) => {
         e.preventDefault();
-        splitContainer.classList.add('register-active');
+        showForm(registerFormWrapper);
     });
 
     showLoginLink.addEventListener('click', (e) => {
         e.preventDefault();
-        splitContainer.classList.remove('register-active');
+        showForm(loginFormWrapper);
     });
     
     // Funções para o modal de "Esqueci a Senha"
@@ -94,13 +116,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('reg-username').value;
         const email = document.getElementById('reg-email').value;
         const password = document.getElementById('reg-senha').value;
-        const confirmarSenha = document.getElementById('reg-confirmar-senha'); // Adicionei aqui
+        const confirmarSenha = document.getElementById('reg-confirmar-senha').value;
         registerError.textContent = '';
-        if (!username || !email || !password) {
+        if (!username || !email || !password || !confirmarSenha) {
             registerError.textContent = 'Por favor, preencha todos os campos.';
             return;
         }
-        // ... (resto da sua lógica de cadastro)
+        if (password !== confirmarSenha) {
+            registerError.textContent = 'As senhas não coincidem!';
+            return;
+        }
+        if (password.length < 6) {
+            registerError.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                registerError.textContent = data.message || 'Ocorreu um erro.';
+            } else {
+                showNotification('Cadastro realizado com sucesso! Faça o login.', 'success');
+                registerForm.reset();
+                showForm(loginFormWrapper); // Volta para o formulário de login
+            }
+        } catch (error) {
+            console.error('Frontend: Erro ao conectar ou processar cadastro:', error);
+            registerError.textContent = 'Não foi possível conectar ao servidor.';
+        }
     });
 
     // Lógica para mostrar/esconder senha
