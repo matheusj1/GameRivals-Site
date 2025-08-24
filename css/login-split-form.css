@@ -31,7 +31,7 @@ body {
     position: relative;
     width: 100%;
     max-width: 800px;
-    height: 620px; /* Aumenta a altura para mais espaço */
+    height: 550px; /* Aumenta a altura para mais espaço */
     background: var(--card-bg);
     border-radius: 20px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.2);
