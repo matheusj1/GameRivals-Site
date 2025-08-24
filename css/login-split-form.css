@@ -23,7 +23,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: var(--bg-color); /* Alterado para usar o fundo padrão do tema */
+    background: var(--bg-color);
     padding: 20px;
 }
 
@@ -126,6 +126,9 @@ body {
     color: var(--text-color);
     transition: all 0.3s ease;
     min-height: 44px;
+    /* NOVO: Adiciona um sombreamento sutil e borda mais visível */
+    box-shadow: 0 0 5px rgba(0,0,0,0.1); 
+    border-color: #A0A0A0; /* Cor de borda mais escura por padrão */
 }
 
 .input-group input:focus {
@@ -231,7 +234,7 @@ body {
         position: static;
         padding: 30px;
         transition: none;
-        opacity: 1; /* Ambos os formulários são visíveis */
+        opacity: 1;
         display: none;
     }
 
