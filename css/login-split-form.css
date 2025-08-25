@@ -143,12 +143,9 @@ body {
 .password-wrapper {
     position: relative;
     width: 100%;
-    display: flex; /* Adicionado para alinhar os itens */
-    align-items: center; /* Adicionado para alinhar os itens */
 }
 
 .password-wrapper input {
-    width: 100%;
     padding-right: 45px; /* espaço para o olho */
 }
 
@@ -170,7 +167,6 @@ body {
     justify-content: center;
 
     min-width: 30px; /* área de clique */
-    height: 100%; /* para garantir que o alinhamento vertical seja consistente */
 }
 
 /* Botão principal */
