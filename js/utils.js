@@ -21,7 +21,7 @@ export function showNotification(message, type = 'info') {
         notification.addEventListener('animationend', () => {
             notification.remove();
         });
-    }, 3500); // Exibe por 3.5 segundos antes de iniciar a saída
+    }, 5000); // Exibe por 5 segundos antes de iniciar a saída (alterado de 3500 para 5000)
 }
 
 // Função para obter o caminho do ícone do console
