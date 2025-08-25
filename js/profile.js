@@ -192,50 +192,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // LÓGICA DE DEPÓSITO VIA PIX (Substituição do Mercado Pago)
+    // LÓGICA DE DEPÓSITO VIA PIX
     depositAmountButtons.forEach(button => {
         button.addEventListener('click', async () => {
             walletError.textContent = '';
             pixPaymentDetailsDiv.style.display = 'none';
-            const amount = parseInt(button.dataset.amount);
 
-            if (isNaN(amount) || amount <= 0) {
-                walletError.textContent = 'Valor de depósito inválido. Contate o suporte.';
-                return;
+            const amount = parseInt(button.dataset.amount);
+            const depositCard = button.closest('.deposit-card');
+            let notifyButton = document.getElementById('pix-notify-payment-btn');
+            if (notifyButton) {
+                notifyButton.remove();
             }
 
-            showNotification(`Gerando QR Code Pix para ${amount} moedas...`, 'info');
+            if (amount === 10) {
+                const pixKey = '00020126360014BR.GOV.BCB.PIX0114+5511972519097520400005303986540510.005802BR5923Matheus Jose dos Santos6009SAO PAULO62140510aUom3cX4yZ63041BB7';
+                const qrCodeUrl = 'http://googleusercontent.com/file_content/13';
+                
+                pixQrCodeImg.src = qrCodeUrl;
+                pixKeyCopyInput.value = pixKey;
+                pixPaymentDetailsDiv.style.display = 'block';
 
-            // --- INÍCIO DA SIMULAÇÃO DE PAGAMENTO PIX ---
-            // A chave Pix e o QR Code aqui são estáticos.
-            const staticPixKey = 'sua-chave-pix-aqui@exemplo.com.br';
-            const staticQrCodeUrl = 'https://i.imgur.com/your-pix-qr-code.png'; 
+                // Cria o novo botão de notificação
+                notifyButton = document.createElement('button');
+                notifyButton.id = 'pix-notify-payment-btn';
+                notifyButton.className = 'cta-button form-submit-btn';
+                notifyButton.textContent = 'Já paguei, me notifique';
+                notifyButton.style.marginTop = '20px';
+                depositCard.appendChild(notifyButton);
 
-            // Exibe os detalhes do Pix na interface
-            pixQrCodeImg.src = staticQrCodeUrl;
-            pixKeyCopyInput.value = staticPixKey;
-            pixPaymentDetailsDiv.style.display = 'block';
-            
-            // Simula o monitoramento do pagamento (a cada 3 segundos)
-            let checkPaymentInterval = setInterval(async () => {
-                // Em um ambiente de produção, esta chamada de API verificaria o status real do pagamento
-                try {
-                    const response = await fetch(`${API_BASE_URL}/api/payment/check-status?amount=${amount}`, {
-                        headers: { 'x-auth-token': token }
-                    });
-                    const data = await response.json();
-                    
-                    if (data.status === 'approved') {
-                        clearInterval(checkPaymentInterval); // Para de verificar
-                        showNotification('Pagamento Pix confirmado! Seu saldo foi atualizado.', 'success');
-                        fetchWalletBalance(); // Atualiza o saldo na tela
-                        pixPaymentDetailsDiv.style.display = 'none'; // Esconde os detalhes do Pix
+                notifyButton.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/payment/notify-pix`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-auth-token': token
+                            },
+                            body: JSON.stringify({ amount, userId })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            showNotification(data.message, 'success');
+                            notifyButton.disabled = true;
+                            notifyButton.textContent = 'Notificação enviada!';
+                        } else {
+                            showNotification(data.message || 'Erro ao enviar notificação.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao enviar notificação de Pix:', error);
+                        showNotification('Não foi possível conectar ao servidor.', 'error');
                     }
-                } catch (error) {
-                    console.error('Erro ao verificar status do pagamento:', error);
-                }
-            }, 3000); // Verifica a cada 3 segundos
-            // --- FIM DA SIMULAÇÃO ---
+                });
+
+            } else {
+                // Lógica para outros botões (se houver) ou apenas mostrar um aviso
+                showNotification(`Nenhuma chave Pix configurada para ${amount} moedas.`, 'info');
+            }
         });
     });
 

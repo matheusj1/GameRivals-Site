@@ -23,8 +23,6 @@ const FriendRequest = require('./models/FriendRequest');
 const auth = require('./middleware/auth');
 const adminAuth = require('./middleware/adminAuth');
 
-const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
-
 const app = express();
 const server = http.createServer(app);
 
@@ -86,10 +84,6 @@ const upload = multer({
 
 // Sirva os avatares estaticamente
 app.use('/avatars', express.static(avatarsDir));
-
-const client = new MercadoPagoConfig({ accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN });
-const preferences = new Preference(client);
-const payments = new Payment(client);
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
@@ -186,7 +180,7 @@ io.on('connection', async (socket) => {
                 username: user.username,
                 socketId: currentSocketId,
                 avatarUrl: avatarUrl,
-                console: console // ou apenas console, se já está desestruturado
+                console: user.console
             });
             socketIdToUserId.set(currentSocketId, userIdString);
 
@@ -487,107 +481,19 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// --- Endpoint para iniciar pagamento com Mercado Pago ---
-app.post('/api/payment/deposit-mp', auth, async (req, res) => {
-    const { amount, payment_method } = req.body;
-    const userId = req.user.id;
+// --- ROTA PARA RECEBER NOTIFICAÇÃO DE PAGAMENTO PIX ---
+app.post('/api/payment/notify-pix', auth, async (req, res) => {
+    const { amount, userId } = req.body;
 
-    if (typeof amount !== 'number' || amount <= 0) {
-        return res.status(400).json({ message: 'Valor de depósito inválido. Deve ser um número positivo.' });
-    }
-    if (!payment_method) {
-        return res.status(400).json({ message: 'Método de pagamento não especificado.' });
-    }
+    // AQUI VOCÊ PODE IMPLEMENTAR UMA LÓGICA DE CONFIRMAÇÃO MANUAL
+    // Exemplo: Salvar a notificação em um banco de dados para um admin verificar
+    console.log(`[PIX NOTIFY] Usuário ${req.user.username} (ID: ${userId}) notificou um pagamento de ${amount} moedas.`);
+    
+    // ATENÇÃO: Esta é apenas uma simulação da notificação.
+    // A atualização real do saldo precisa ser feita por um admin após a confirmação do pagamento.
+    // Você não deve atualizar o saldo automaticamente aqui.
 
-    try {
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: 'Usuário não encontrado.' });
-        }
-        if (!user.email) {
-            console.error('[API PAYMENT] Usuário sem email definido para o pagamento Mercado Pago. User ID:', userId);
-            return res.status(400).json({ message: 'Seu perfil não tem um e-mail configurado para o pagamento.' });
-        }
-
-        // NOVO: Use a URL dinâmica do backend para o webhook do Mercado Pago
-        const publicBaseUrl = BACKEND_URL;
-        console.log('Using dynamic publicBaseUrl for MP:', publicBaseUrl);
-
-        let preference;
-        if (payment_method === 'pix') {
-            preference = {
-                items: [{
-                    title: `Depósito de ${amount} Moedas GameRivals`,
-                    quantity: 1,
-                    unit_price: amount
-                }],
-                payer: {
-                    email: user.email
-                },
-                external_reference: userId,
-                notification_url: `${publicBaseUrl}/api/webhooks/mercadopago`,
-                back_urls: {
-                    success: `${FRONTEND_URL}/profile.html?payment_status=success`, // Use a URL dinâmica do frontend
-                    failure: `${FRONTEND_URL}/profile.html?payment_status=failure`,   // Use a URL dinâmica do frontend
-                    pending: `${FRONTEND_URL}/profile.html?payment_status=pending`    // Use a URL dinâmica do frontend
-                },
-                auto_return: 'approved'
-            };
-        } else {
-            return res.status(400).json({ message: 'Método de pagamento não suportado no momento.' });
-        }
-
-        console.log('[Mercado Pago Request Preference]', JSON.stringify(preference, null, 2));
-
-        const mpResponse = await preferences.create({ body: preference });
-        console.log('[Mercado Pago API Full Response]', JSON.stringify(mpResponse, null, 2));
-
-        const initPoint = mpResponse.init_point;
-        const sandboxInitPoint = mpResponse.sandbox_init_point;
-        const paymentId = mpResponse.id;
-
-        console.log('Valor de initPoint:', initPoint);
-        console.log('Valor de sandboxInitPoint:', sandboxInitPoint);
-
-        const redirectUrl = sandboxInitPoint || initPoint;
-        if (!redirectUrl) {
-            console.error('[API PAYMENT] Resposta do Mercado Pago não contém URL de redirecionamento válida.');
-            return res.status(500).json({ message: 'Erro ao iniciar pagamento. URL de redirecionamento ausente na resposta do MP.' });
-        }
-
-        res.json({
-            message: 'Pagamento iniciado com sucesso! Redirecionando...',
-            type: 'redirect',
-            redirectUrl: redirectUrl,
-            paymentId: paymentId
-        });
-
-    } catch (error) {
-        console.error('[API PAYMENT] Erro ao iniciar pagamento com Mercado Pago:', error.message);
-        if (error.response && error.response.data) {
-            console.error('Detalhes do Erro do Mercado Pago:', JSON.stringify(error.response.data, null, 2));
-            return res.status(500).json({ message: `Erro do Mercado Pago: ${error.response.data.message || 'Erro desconhecido.'}` });
-        }
-        res.status(500).json({ message: 'Erro ao iniciar pagamento. Tente novamente mais tarde.' });
-    }
-});
-
-// --- Rotas da Carteira Temporária (mantidas para saque) ---
-app.post('/api/wallet/deposit', auth, async (req, res) => {
-    // Esta rota não é mais usada para depósitos reais, apenas para simulação ou legado.
-    try {
-        const { amount } = req.body;
-        const userId = req.user.id;
-        if (typeof amount !== 'number' || amount <= 0) { return res.status(400).json({ message: 'Valor de depósito inválido. Deve ser um número positivo.' }); }
-        const user = await User.findById(userId);
-        if (!user) { return res.status(404).json({ message: 'Usuário não encontrado.' }); }
-        user.coins += amount;
-        await user.save();
-        res.status(200).json({ message: `Depósito de ${amount} moedas simulado com sucesso!`, newBalance: user.coins });
-    } catch (error) {
-        console.error('[API WALLET] Erro ao processar depósito simulado:', error);
-        res.status(500).json({ message: 'Erro no servidor ao processar depósito simulado.' });
-    }
+    res.status(200).json({ message: 'Notificação de pagamento recebida. Seu pagamento será verificado em breve!' });
 });
 
 app.post('/api/wallet/withdraw', auth, async (req, res) => {
@@ -1093,7 +999,7 @@ app.post('/api/forgot-password', async (req, res) => {
         const resetExpires = Date.now() + 3600000;
         user.resetPasswordToken = resetToken; user.resetPasswordExpires = resetExpires; await user.save();
         // NOVO: Use a URL dinâmica do frontend para o link de redefinição de senha
-        const resetUrl = `${FRONTEND_URL}/login-split-form.html?resetToken=${resetToken}`; // ALTERADO
+        const resetUrl = `${FRONTEND_URL}/login-split-form.html?resetToken=${resetToken}`;
         const mailOptions = { to: user.email, from: process.env.EMAIL_USER, subject: 'GameRivals - Redefinição de Senha', html: `<p>Você solicitou uma redefinição de senha para sua conta GameRivals.</p><p>Por favor, clique no link a seguir para redefinir sua senha:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Este link expirará em 1 hora.</p><p>Se você não solicitou esta redefinição, por favor, ignore este e-mail.</p>` };
         await transporter.sendMail(mailOptions);
         res.status(200).json({ message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' });
@@ -1118,31 +1024,4 @@ app.post('/api/reset-password/:token', async (req, res) => {
         console.error('[API RESET PASSWORD] Erro ao redefinir senha:', error);
         res.status(500).json({ message: 'Erro no servidor ao redefinir a senha.' });
     }
-});
-
-// Endpoint para o Webhook do Mercado Pago (para receber notificações de pagamento)
-app.post('/api/webhooks/mercadopago', async (req, res) => {
-    console.log('[WEBHOOK MP] Requisição recebida para /api/webhooks/mercadopago');
-    if (req.query.topic === 'payment') {
-        const paymentId = req.query.id;
-        try {
-            const payment = await payments.get({ id: paymentId });
-            const paymentStatus = payment.body.status;
-            const externalReference = payment.body.external_reference;
-            console.log(`[Mercado Pago Webhook] Pagamento ID: ${paymentId}, Status: ${paymentStatus}, Ref Externa: ${externalReference}`);
-            if (paymentStatus === 'approved') {
-                const userId = externalReference;
-                const paidAmount = payment.body.transaction_amount;
-                const user = await User.findById(userId);
-                if (user) { user.coins += paidAmount; await user.save(); console.log(`[Mercado Pago Webhook] Saldo do usuário ${user.username} atualizado. Novo saldo: ${user.coins}.`); }
-                else { console.error(`[Mercado Pago Webhook] Usuário com ID ${userId} não encontrado para atualizar saldo.`); }
-            } else if (paymentStatus === 'rejected' || paymentStatus === 'cancelled') {
-                console.warn(`[Mercado Pago Webhook] Pagamento ${paymentId} foi rejeitado ou cancelado.`);
-            }
-            res.status(200).send('Webhook recebido e processado.');
-        } catch (error) {
-            console.error('[Mercado Pago Webhook] Erro ao processar webhook:', error.response ? error.response.data : error.message);
-            res.status(500).send('Erro interno do servidor ao processar webhook.');
-        }
-    } else { res.status(200).send('Webhook recebido (tópico não relevante).'); }
 });
