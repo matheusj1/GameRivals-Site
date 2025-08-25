@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (amount === 10) {
                 const pixKey = '00020126360014BR.GOV.BCB.PIX0114+5511972519097520400005303986540510.005802BR5923Matheus Jose dos Santos6009SAO PAULO62140510aUom3cX4yZ63041BB7';
-                const qrCodeUrl = 'img/10 reais.jpeg';
+                const qrCodeUrl = 'https://github.com/matheusj1/GameRivals-Site/raw/main/img/10%20reais.jpeg'; // CORRIGIDO PARA O LINK BRUTO DO GITHUB
                 
                 pixQrCodeImg.src = qrCodeUrl;
                 pixKeyCopyInput.value = pixKey;
