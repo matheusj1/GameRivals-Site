@@ -1057,7 +1057,6 @@ app.post('/api/forgot-password', async (req, res) => {
         const resetToken = crypto.randomBytes(32).toString('hex');
         const resetExpires = Date.now() + 3600000;
         user.resetPasswordToken = resetToken; user.resetPasswordExpires = resetExpires; await user.save();
-        // NOVO: Use a URL dinâmica do frontend para o link de redefinição de senha
         const resetUrl = `${FRONTEND_URL}/login-split-form.html?resetToken=${resetToken}`;
         const mailOptions = { to: user.email, from: process.env.EMAIL_USER, subject: 'GameRivals - Redefinição de Senha', html: `<p>Você solicitou uma redefinição de senha para sua conta GameRivals.</p><p>Por favor, clique no link a seguir para redefinir sua senha:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Este link expirará em 1 hora.</p><p>Se você não solicitou esta redefinição, por favor, ignore este e-mail.</p>` };
         await transporter.sendMail(mailOptions);

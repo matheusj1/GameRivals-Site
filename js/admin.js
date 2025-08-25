@@ -173,11 +173,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // --- NOVO: CARREGAR E RENDERIZAR PAGAMENTOS PIX PENDENTES ---
+    const loadPendingPixPayments = async () => {
+        const pendingPayments = await fetchAdminData('pending-pix');
+        const paymentsTableBody = document.querySelector('#pix-payments-table tbody');
+        if (paymentsTableBody) {
+            paymentsTableBody.innerHTML = '';
+            if (pendingPayments && pendingPayments.length > 0) {
+                pendingPayments.forEach(payment => {
+                    const row = `
+                        <tr data-payment-id="${payment._id}">
+                            <td>${payment._id.substring(0, 8)}...</td>
+                            <td>${payment.userId._id.substring(0, 8)}...</td>
+                            <td>${payment.userId.email}</td>
+                            <td>${payment.amount.toLocaleString('pt-BR')}</td>
+                            <td>${formatDate(payment.createdAt)}</td>
+                            <td class="table-actions">
+                                <button class="confirm-pix-btn cta-button resolve" title="Confirmar Pagamento">✅</button>
+                            </td>
+                        </tr>
+                    `;
+                    paymentsTableBody.innerHTML += row;
+                });
+            } else {
+                paymentsTableBody.innerHTML = '<tr><td colspan="6">Nenhum pagamento Pix pendente.</td></tr>';
+            }
+        }
+    };
+
     // --- INICIALIZAÇÃO DA PÁGINA ---
     const initializeAdminPage = () => {
         loadDashboardStats();
         loadUsers();
         loadChallenges();
+        loadPendingPixPayments(); // NOVO: Carrega os pagamentos Pix
     };
 
     initializeAdminPage();
@@ -303,43 +332,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- Modal Resolver Disputa ---
-    setupModal('resolve-dispute-modal-backdrop', '.close-modal-btn', 'resolve-dispute-form', async (e) => {
-        const challengeId = document.getElementById('dispute-challenge-id').value;
-        const winnerRadio = e.target.querySelector('input[name="winner"]:checked'); // Alterado de dispute-winner para winner
-        const errorElement = document.getElementById('resolve-dispute-error');
-        errorElement.textContent = '';
-
-        if (!winnerRadio) {
-            errorElement.textContent = 'Você precisa selecionar um vencedor.';
-            return;
-        }
-        const winnerId = winnerRadio.value;
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/challenges/${challengeId}/resolve-dispute`, { // ATUALIZADO: Usando API_BASE_URL
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token
-                },
-                body: JSON.stringify({ winnerId })
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                errorElement.textContent = data.message || 'Erro ao resolver disputa.';
-            } else {
-                showNotification(data.message, 'success'); // cite: 1
-                document.getElementById('resolve-dispute-modal-backdrop').classList.remove('active');
-                loadChallenges(); // Recarrega a tabela de desafios
-                loadDashboardStats(); // Recarrega as estatísticas
-                loadUsers(); // Recarrega usuários para atualizar wins/losses/coins
-            }
-        } catch (error) {
-            errorElement.textContent = 'Não foi possível conectar ao servidor.';
-        }
-    });
-
     // Delegando eventos para a tabela de desafios
     const challengesTableBody = document.querySelector('#challenges-table tbody');
     if (challengesTableBody) {
@@ -396,6 +388,44 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     })
                     .catch(() => showNotification('Não foi possível conectar ao servidor.', 'error')); // cite: 1
+                }
+            }
+        });
+    }
+
+    // --- NOVO: Lógica para a tabela de pagamentos Pix ---
+    const paymentsTableBody = document.querySelector('#pix-payments-table tbody');
+    if (paymentsTableBody) {
+        paymentsTableBody.addEventListener('click', async (e) => {
+            const target = e.target;
+            const row = target.closest('tr[data-payment-id]');
+            if (!row) return;
+
+            const paymentId = row.dataset.paymentId;
+            const actionButton = row.querySelector('.confirm-pix-btn');
+
+            if (target.classList.contains('confirm-pix-btn')) {
+                if (confirm("Tem certeza que deseja CONFIRMAR este pagamento? Isso irá adicionar o valor ao saldo do usuário.")) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/admin/confirm-pix/${paymentId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'x-auth-token': token
+                            }
+                        });
+                        const data = await response.json();
+                        if (response.ok) {
+                            showNotification(data.message, 'success');
+                            loadPendingPixPayments(); // Recarrega a tabela de pagamentos pendentes
+                            loadUsers(); // Recarrega a tabela de usuários para atualizar o saldo
+                            loadDashboardStats(); // Recarrega as estatísticas
+                        } else {
+                            showNotification(data.message || 'Erro ao confirmar pagamento.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao confirmar pagamento:', error);
+                        showNotification('Não foi possível conectar ao servidor.', 'error');
+                    }
                 }
             }
         });
