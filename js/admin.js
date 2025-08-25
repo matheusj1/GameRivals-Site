@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!token || userRole !== 'admin') { // cite: 1
         showNotification('Acesso negado. Você não tem permissão de administrador.', 'error'); // cite: 1
         setTimeout(() => {
-            window.location.href = 'login.html'; // Redireciona para login
+            window.location.href = 'login-split-form.html'; // ALTERADO
         }, 1500);
         return;
     }
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.clear();
             console.log('Local Storage limpo. Redirecionando...'); // Adicione esta linha
             showNotification('Sessão de admin encerrada.', 'info');
-            window.location.href = 'login.html'; // Redireciona imediatamente
+            window.location.href = 'login-split-form.html'; // ALTERADO
         });
     }
 
@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Modal Resolver Disputa ---
     setupModal('resolve-dispute-modal-backdrop', '.close-modal-btn', 'resolve-dispute-form', async (e) => {
         const challengeId = document.getElementById('dispute-challenge-id').value;
-        const winnerRadio = e.target.querySelector('input[name="dispute-winner"]:checked');
+        const winnerRadio = e.target.querySelector('input[name="winner"]:checked'); // Alterado de dispute-winner para winner
         const errorElement = document.getElementById('resolve-dispute-error');
         errorElement.textContent = '';
 

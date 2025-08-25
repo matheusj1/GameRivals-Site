@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Redirecionar se não estiver logado ou se for admin
     if (!token || !userId) {
-        window.location.href = 'login.html';
+        window.location.href = 'login-split-form.html'; // ALTERADO
         return;
     }
     if (userRole === 'admin') {
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (response.status === 401 || response.status === 403) {
                     showNotification('Sessão expirada. Faça login novamente.', 'error');
                     localStorage.clear();
-                    setTimeout(() => window.location.href = 'login.html', 1500);
+                    setTimeout(() => window.location.href = 'login-split-form.html', 1500); // ALTERADO
                     return;
                 }
                 throw new Error('Erro ao carregar perfil.');
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             localStorage.clear();
             showNotification('Você foi desconectado com sucesso.', 'info');
-            setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+            setTimeout(() => { window.location.href = 'login-split-form.html'; }, 1000); // ALTERADO
         });
     }
 

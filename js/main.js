@@ -38,13 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'profile.html';
             return;
         } else if (profileCompleted === 'true' && currentPage === 'profile.html') {
-        } else if (currentPage === 'login.html' || currentPage === 'index.html' || currentPage === '') {
+        } else if (currentPage === 'login-split-form.html' || currentPage === 'index.html' || currentPage === '') { // ALTERADO
             window.location.href = 'dashboard.html';
             return;
         }
     } else {
-        if (currentPage !== 'login.html' && currentPage !== 'index.html' && currentPage !== '' && currentPage !== 'profile.html') {
-            window.location.href = 'login.html';
+        if (currentPage !== 'login-split-form.html' && currentPage !== 'index.html' && currentPage !== '' && currentPage !== 'profile.html') { // ALTERADO
+            window.location.href = 'login-split-form.html'; // ALTERADO
             return;
         }
     }

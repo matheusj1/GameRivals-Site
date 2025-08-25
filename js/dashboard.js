@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Redirecionamentos iniciais de segurança
     if (!token) {
-        window.location.href = 'login.html';
+        window.location.href = 'login-split-form.html'; // ALTERADO
         return;
     }
     if (userRole === 'admin') {
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.status === 401 || response.status === 403) {
                     showNotification('Sessão expirada. Faça login novamente.', 'error');
                     localStorage.clear();
-                    setTimeout(() => window.location.href = 'login.html', 1500);
+                    setTimeout(() => window.location.href = 'login-split-form.html', 1500); // ALTERADO
                     return;
                 }
                 throw new Error('Erro ao carregar perfil do usuário.');
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     e.preventDefault();
                     localStorage.clear();
                     showNotification('Você foi desconectado com sucesso.', 'info');
-                    setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+                    setTimeout(() => { window.location.href = 'login-split-form.html'; }, 1500); // ALTERADO
                 });
             }
         } else {
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             localStorage.clear();
             showNotification('Você foi desconectado com sucesso.', 'info');
-            setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+            setTimeout(() => { window.location.href = 'login-split-form.html'; }, 1500); // ALTERADO
         });
     }
 
