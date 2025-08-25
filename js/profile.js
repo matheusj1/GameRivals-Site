@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const profileForm = document.getElementById('profile-form');
     const usernameInput = document.getElementById('username');
-    const phoneInput = document.getElementById('phone');
+    // const phoneInput = document.getElementById('phone'); // CAMPO DE TELEFONE REMOVIDO
     const bioTextarea = document.getElementById('bio');
     const descriptionTextarea = document.getElementById('description');
     const consoleSelect = document.getElementById('console');
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const userData = await response.json();
 
             usernameInput.value = userData.username || '';
-            phoneInput.value = userData.phone || '';
+            // phoneInput.value = userData.phone || ''; // CAMPO DE TELEFONE REMOVIDO
             bioTextarea.value = userData.bio || '';
             descriptionTextarea.value = userData.description || '';
             consoleSelect.value = userData.console || '';
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const formData = new FormData();
         formData.append('username', usernameInput.value);
-        formData.append('phone', phoneInput.value);
+        // formData.append('phone', phoneInput.value); // CAMPO DE TELEFONE REMOVIDO
         formData.append('bio', bioTextarea.value);
         formData.append('description', descriptionTextarea.value);
         formData.append('console', consoleSelect.value);

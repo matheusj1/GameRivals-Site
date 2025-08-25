@@ -114,11 +114,13 @@ document.addEventListener('DOMContentLoaded', () => {
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('reg-username').value;
+        const fullName = document.getElementById('reg-full-name').value;
+        const cpf = document.getElementById('reg-cpf').value;
         const email = document.getElementById('reg-email').value;
         const password = document.getElementById('reg-senha').value;
         const confirmarSenha = document.getElementById('reg-confirmar-senha').value;
         registerError.textContent = '';
-        if (!username || !email || !password || !confirmarSenha) {
+        if (!username || !fullName || !cpf || !email || !password || !confirmarSenha) {
             registerError.textContent = 'Por favor, preencha todos os campos.';
             return;
         }
@@ -135,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_BASE_URL}/api/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify({ username, fullName, cpf, email, password }),
             });
 
             const data = await response.json();
@@ -199,4 +201,21 @@ document.addEventListener('DOMContentLoaded', () => {
             forgotPasswordError.textContent = 'Não foi possível conectar ao servidor.';
         }
     });
+    
+    // NOVO: Máscara para o campo de CPF
+    const cpfInput = document.getElementById('reg-cpf');
+    if (cpfInput) {
+        cpfInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+            value = value.slice(0, 11); // Limita a 11 dígitos
+            if (value.length > 9) {
+                value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+            } else if (value.length > 6) {
+                value = value.replace(/^(\d{3})(\d{3})(\d{3})$/, '$1.$2.$3');
+            } else if (value.length > 3) {
+                value = value.replace(/^(\d{3})(\d{3})$/, '$1.$2');
+            }
+            e.target.value = value;
+        });
+    }
 });

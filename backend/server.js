@@ -433,8 +433,8 @@ io.on('connection', async (socket) => {
 
 app.post('/api/register', async (req, res) => {
     try {
-        const { username, email, password } = req.body;
-        if (!username || !email || !password) {
+        const { username, fullName, cpf, email, password } = req.body;
+        if (!username || !fullName || !cpf || !email || !password) {
             return res.status(400).json({ message: 'Por favor, preencha todos os campos.' });
         }
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -443,7 +443,7 @@ app.post('/api/register', async (req, res) => {
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const newUser = new User({ username, email, password: hashedPassword, wins: 0, losses: 0, coins: 1000, role: 'user', isActive: true, profileCompleted: false });
+        const newUser = new User({ username, fullName, cpf, email, password: hashedPassword, wins: 0, losses: 0, coins: 1000, role: 'user', isActive: true, profileCompleted: false });
         await newUser.save();
         res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
     }
@@ -789,7 +789,7 @@ app.patch('/api/users/profile', auth, upload.single('avatar'), async (req, res) 
             }
             user.username = updates.username;
         }
-        if (updates.phone !== undefined) user.phone = updates.phone;
+        // if (updates.phone !== undefined) user.phone = updates.phone; // CAMPO DE TELEFONE REMOVIDO
         if (updates.bio !== undefined) user.bio = updates.bio;
         if (updates.description !== undefined) user.description = updates.description;
         if (updates.console !== undefined) user.console = updates.console;
