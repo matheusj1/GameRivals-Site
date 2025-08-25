@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Redirecionar se não estiver logado ou se for admin
     if (!token || !userId) {
-        window.location.href = 'login-split-form.html'; // ALTERADO
+        window.location.href = 'login-split-form.html';
         return;
     }
     if (userRole === 'admin') {
@@ -32,22 +32,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // NOVOS ELEMENTOS DA CARTEIRA
     const walletCurrentBalanceSpan = document.getElementById('wallet-current-balance');
-    // Removidos: depositAmountInput e depositBtn
-    const depositAmountButtons = document.querySelectorAll('.deposit-amount-btn'); // NOVO: Selecionar todos os botões de valor fixo
+    const depositAmountButtons = document.querySelectorAll('.deposit-amount-btn');
     const withdrawAmountInput = document.getElementById('withdraw-amount');
     const withdrawBtn = document.getElementById('withdraw-btn');
     const walletError = document.getElementById('wallet-error');
 
-    const pixPaymentDetailsDiv = document.getElementById('pix-payment-details'); // NOVO
-    const pixQrCodeImg = document.getElementById('pix-qr-code'); // NOVO
-    const pixKeyCopyInput = document.getElementById('pix-key-copy'); // NOVO
-    const copyPixKeyBtn = document.getElementById('copy-pix-key-btn'); // NOVO
+    const pixPaymentDetailsDiv = document.getElementById('pix-payment-details');
+    const pixQrCodeImg = document.getElementById('pix-qr-code');
+    const pixKeyCopyInput = document.getElementById('pix-key-copy');
+    const copyPixKeyBtn = document.getElementById('copy-pix-key-btn');
 
 
     // Preencher campos com dados existentes do usuário
     const fetchUserProfile = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/users/me`, { // Atualizado
+            const response = await fetch(`${API_BASE_URL}/api/users/me`, {
                 headers: {
                     'x-auth-token': token
                 }
@@ -56,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (response.status === 401 || response.status === 403) {
                     showNotification('Sessão expirada. Faça login novamente.', 'error');
                     localStorage.clear();
-                    setTimeout(() => window.location.href = 'login-split-form.html', 1500); // ALTERADO
+                    setTimeout(() => window.location.href = 'login-split-form.html', 1500);
                     return;
                 }
                 throw new Error('Erro ao carregar perfil.');
@@ -72,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (userData.avatarUrl) {
                 avatarPreview.src = userData.avatarUrl;
             } else {
-                avatarPreview.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
+                avatarPreview.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`;
             }
         } catch (error) {
             console.error('Erro ao buscar perfil:', error);
@@ -83,8 +82,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // NOVA FUNÇÃO: Buscar e exibir saldo da carteira
     const fetchWalletBalance = async () => {
-        if (!walletCurrentBalanceSpan) return; // Adicionado para segurança
-        walletCurrentBalanceSpan.textContent = 'Carregando...'; // Exibe o status de carregamento
+        if (!walletCurrentBalanceSpan) return;
+        walletCurrentBalanceSpan.textContent = 'Carregando...';
     
         try {
             const response = await fetch(`${API_BASE_URL}/api/users/me/stats`, {
@@ -118,8 +117,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
 
-    await fetchUserProfile(); // Carrega os dados do perfil ao entrar na página
-    await fetchWalletBalance(); // Carrega o saldo da carteira
+    await fetchUserProfile();
+    await fetchWalletBalance();
 
 
     // Pré-visualização da imagem do avatar
@@ -132,35 +131,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
             reader.readAsDataURL(file);
         } else {
-            avatarPreview.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Retorna ao placeholder se nenhum arquivo for selecionado
+            avatarPreview.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`;
         }
     });
 
     // Lógica de submissão do formulário de perfil
     profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        profileError.textContent = ''; // Limpa mensagens de erro anteriores
+        profileError.textContent = '';
 
         const formData = new FormData();
-        formData.append('username', usernameInput.value); // O username pode ter sido mudado
+        formData.append('username', usernameInput.value);
         formData.append('phone', phoneInput.value);
         formData.append('bio', bioTextarea.value);
         formData.append('description', descriptionTextarea.value);
         formData.append('console', consoleSelect.value);
 
-        // Se uma nova imagem foi selecionada, anexe-a ao FormData
         if (avatarUploadInput.files.length > 0) {
             formData.append('avatar', avatarUploadInput.files[0]);
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/users/profile`, { // Atualizado
+            const response = await fetch(`${API_BASE_URL}/api/users/profile`, {
                 method: 'PATCH',
                 headers: {
                     'x-auth-token': token
-                    // Não defina 'Content-Type': 'application/json' quando usar FormData com upload de arquivo
                 },
-                body: formData // Envia o FormData diretamente
+                body: formData
             });
 
             const data = await response.json();
@@ -170,24 +167,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showNotification(data.message || 'Erro ao salvar perfil.', 'error');
             } else {
                 showNotification('Perfil salvo com sucesso!', 'success');
-                // Atualiza o localStorage com o novo username e avatarUrl, se aplicável
                 if (data.user.username) {
                     localStorage.setItem('username', data.user.username);
-                    usernameInput.value = data.user.username; // Atualiza o campo com o nome do banco
+                    usernameInput.value = data.user.username;
                 }
                 if (data.user.avatarUrl) {
-                    localStorage.setItem('avatarUrl', data.user.avatarUrl); // Salva o novo URL do avatar
+                    localStorage.setItem('avatarUrl', data.user.avatarUrl);
                     avatarPreview.src = data.user.avatarUrl;
                 }
-                localStorage.setItem('profileCompleted', data.user.profileCompleted); // Atualiza status do perfil
+                localStorage.setItem('profileCompleted', data.user.profileCompleted);
 
-                // Se o perfil foi recém-completado, redireciona para o dashboard
-                if (data.user.profileCompleted) { // Já está completo ou acabou de ser
+                if (data.user.profileCompleted) {
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
                     }, 1500);
                 } else {
-                    // Se por algum motivo não marcou como completo, apenas recarrega os dados
                     fetchUserProfile();
                 }
             }
@@ -198,11 +192,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // LÓGICA DE DEPÓSITO VIA MERCADO PAGO (PIX)
+    // LÓGICA DE DEPÓSITO VIA PIX (Substituição do Mercado Pago)
     depositAmountButtons.forEach(button => {
         button.addEventListener('click', async () => {
             walletError.textContent = '';
-            pixPaymentDetailsDiv.style.display = 'none'; // Esconde detalhes antigos
+            pixPaymentDetailsDiv.style.display = 'none';
             const amount = parseInt(button.dataset.amount);
 
             if (isNaN(amount) || amount <= 0) {
@@ -210,47 +204,38 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            showNotification(`Iniciando pagamento de ${amount} moedas...`, 'info');
+            showNotification(`Gerando QR Code Pix para ${amount} moedas...`, 'info');
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/payment/deposit-mp`, { // Atualizado
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-auth-token': token
-                    },
-                    body: JSON.stringify({ amount, payment_method: 'pix' }) // Sempre Pix por enquanto
-                });
+            // --- INÍCIO DA SIMULAÇÃO DE PAGAMENTO PIX ---
+            // A chave Pix e o QR Code aqui são estáticos.
+            const staticPixKey = 'sua-chave-pix-aqui@exemplo.com.br';
+            const staticQrCodeUrl = 'https://i.imgur.com/your-pix-qr-code.png'; 
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                    walletError.textContent = data.message || 'Erro ao iniciar pagamento.';
-                    showNotification(data.message || 'Erro ao iniciar pagamento.', 'error');
-                } else {
-                    showNotification(data.message, 'success');
-                    // A decisão de exibir Pix direto ou redirecionar
-                    if (data.type === 'pix_direct') {
-                        if (data.qrCodeBase64) {
-                            pixQrCodeImg.src = `data:image/jpeg;base64,${data.qrCodeBase64}`; // Exibir QR Code Base64
-                        } else if (data.qrCodeUrl) {
-                            pixQrCodeImg.src = data.qrCodeUrl; // Ou a URL direta do QR Code
-                        }
-                        
-                        pixKeyCopyInput.value = data.pixKey; // Chave Pix Copia e Cola
-                        pixPaymentDetailsDiv.style.display = 'block'; // Mostrar a seção Pix
-                    } else if (data.type === 'redirect' && data.redirectUrl) {
-                        window.location.href = data.redirectUrl; // Redirecionar para o checkout do MP
-                    } else {
-                        showNotification('Resposta de pagamento inesperada. Tente novamente.', 'error');
-                        console.error('Resposta de pagamento inesperada:', data);
+            // Exibe os detalhes do Pix na interface
+            pixQrCodeImg.src = staticQrCodeUrl;
+            pixKeyCopyInput.value = staticPixKey;
+            pixPaymentDetailsDiv.style.display = 'block';
+            
+            // Simula o monitoramento do pagamento (a cada 3 segundos)
+            let checkPaymentInterval = setInterval(async () => {
+                // Em um ambiente de produção, esta chamada de API verificaria o status real do pagamento
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/payment/check-status?amount=${amount}`, {
+                        headers: { 'x-auth-token': token }
+                    });
+                    const data = await response.json();
+                    
+                    if (data.status === 'approved') {
+                        clearInterval(checkPaymentInterval); // Para de verificar
+                        showNotification('Pagamento Pix confirmado! Seu saldo foi atualizado.', 'success');
+                        fetchWalletBalance(); // Atualiza o saldo na tela
+                        pixPaymentDetailsDiv.style.display = 'none'; // Esconde os detalhes do Pix
                     }
+                } catch (error) {
+                    console.error('Erro ao verificar status do pagamento:', error);
                 }
-            } catch (error) {
-                console.error('Erro ao iniciar pagamento Mercado Pago:', error);
-                walletError.textContent = 'Não foi possível conectar ao servidor de pagamentos.';
-                showNotification('Não foi possível conectar ao servidor de pagamentos.', 'error');
-            }
+            }, 3000); // Verifica a cada 3 segundos
+            // --- FIM DA SIMULAÇÃO ---
         });
     });
 
@@ -258,31 +243,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (copyPixKeyBtn && pixKeyCopyInput) {
         copyPixKeyBtn.addEventListener('click', () => {
             pixKeyCopyInput.select();
-            pixKeyCopyInput.setSelectionRange(0, 99999); // Para mobile
+            pixKeyCopyInput.setSelectionRange(0, 99999);
             document.execCommand('copy');
             showNotification('Chave Pix copiada!', 'info');
         });
     }
 
-    // Lógica para lidar com o status do pagamento na URL após redirecionamento do MP
-    const urlParams = new URLSearchParams(window.location.search);
-    const paymentStatus = urlParams.get('payment_status');
-    if (paymentStatus) {
-        if (paymentStatus === 'success' || paymentStatus === 'approved') {
-            showNotification('Pagamento aprovado! Seu saldo será atualizado em breve.', 'success');
-            // O webhook já deveria ter atualizado o saldo. Apenas buscamos de novo.
-            fetchWalletBalance(); 
-        } else if (paymentStatus === 'pending') {
-            showNotification('Pagamento pendente. Aguardando confirmação.', 'info');
-        } else if (paymentStatus === 'failure' || paymentStatus === 'rejected') {
-            showNotification('Pagamento falhou ou foi rejeitado. Tente novamente.', 'error');
-        }
-        // Limpar parâmetros da URL para não mostrar a mensagem novamente em um refresh
-        history.replaceState(null, '', window.location.pathname);
-    }
-
-
-    // LÓGICA DE SAQUE (SIMULADO)
+    // Lógica de saque (simulado)
     if (withdrawBtn && withdrawAmountInput) {
         withdrawBtn.addEventListener('click', async () => {
             walletError.textContent = '';
@@ -294,7 +261,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/wallet/withdraw`, { // Atualizado
+                const response = await fetch(`${API_BASE_URL}/api/wallet/withdraw`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -311,8 +278,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     showNotification(data.message, 'success');
                     walletCurrentBalanceSpan.textContent = data.newBalance.toLocaleString('pt-BR');
-                    withdrawAmountInput.value = ''; // Limpa o input
-                    // Opcional: Atualizar o saldo também no header do dashboard/perfil
+                    withdrawAmountInput.value = '';
                     const coinBalanceDesktop = document.getElementById('coin-balance-desktop');
                     const coinBalanceMobile = document.getElementById('coin-balance-mobile');
                     if (coinBalanceDesktop) coinBalanceDesktop.textContent = data.newBalance.toLocaleString('pt-BR');
@@ -333,19 +299,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             localStorage.clear();
             showNotification('Você foi desconectado com sucesso.', 'info');
-            setTimeout(() => { window.location.href = 'login-split-form.html'; }, 1000); // ALTERADO
+            setTimeout(() => { window.location.href = 'login-split-form.html'; }, 1000);
         });
     }
 
-    // Link para Dashboard (para garantir que funciona mesmo antes de profileCompleted ser true)
+    // Link para Dashboard
     if (dashboardLink) {
         dashboardLink.addEventListener('click', (e) => {
             const profileCompletedStatus = localStorage.getItem('profileCompleted');
             if (profileCompletedStatus === 'false') {
-                e.preventDefault(); // Impede a navegação padrão se o perfil não estiver completo
+                e.preventDefault();
                 showNotification('Por favor, complete seu perfil antes de ir para o Dashboard.', 'info');
             }
-            // Se profileCompleted for 'true' (ou null/undefined, significando que é admin ou algum erro, mas a verificação já pegou), o link funcionará normalmente
         });
     }
 
@@ -372,62 +337,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.documentElement.setAttribute('data-theme', savedTheme);
     const radio = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
     if (radio) radio.checked = true;
-
-    // Modifique a lógica de pagamento Pix para:
-    depositAmountButtons.forEach(button => {
-        button.addEventListener('click', async () => {
-            walletError.textContent = '';
-            pixPaymentDetailsDiv.style.display = 'none';
-            const amount = parseInt(button.dataset.amount);
-
-            if (isNaN(amount) || amount <= 0) {
-                walletError.textContent = 'Valor de depósito inválido.';
-                return;
-            }
-
-            showNotification(`Processando pagamento de ${amount} moedas...`, 'info');
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/payment/deposit-mp`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-auth-token': token
-                    },
-                    body: JSON.stringify({ amount, payment_method: 'pix' })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || 'Erro ao iniciar pagamento');
-                }
-
-                // Verifica se há URL de redirecionamento
-                if (data.redirectUrl) {
-                    window.location.href = data.redirectUrl;
-                    return;
-                }
-
-                // Se não houver redirecionamento, mostra detalhes Pix
-                if (data.qrCodeBase64) {
-                    pixQrCodeImg.src = `data:image/png;base64,${data.qrCodeBase64}`;
-                } else if (data.qrCodeUrl) {
-                    pixQrCodeImg.src = data.qrCodeUrl;
-                }
-                
-                if (data.pixKey) {
-                    pixKeyCopyInput.value = data.pixKey;
-                    pixPaymentDetailsDiv.style.display = 'block';
-                }
-
-            } catch (error) {
-                console.error('Erro no pagamento:', error);
-                walletError.textContent = error.message;
-                showNotification(error.message, 'error');
-            }
-        });
-    });
 
     // Inicializa o ano no rodapé
     const yearSpan = document.getElementById('currentYear');
