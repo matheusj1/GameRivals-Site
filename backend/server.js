@@ -19,6 +19,7 @@ const User = require('./models/User');
 const Challenge = require('./models/Challenge');
 const Message = require('./models/Message');
 const FriendRequest = require('./models/FriendRequest');
+const PixPaymentNotification = require('./models/PixPaymentNotification'); // NOVO: Importe o novo modelo
 
 const auth = require('./middleware/auth');
 const adminAuth = require('./middleware/adminAuth');
@@ -481,20 +482,79 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+
 // --- ROTA PARA RECEBER NOTIFICAÇÃO DE PAGAMENTO PIX ---
 app.post('/api/payment/notify-pix', auth, async (req, res) => {
     const { amount, userId } = req.body;
 
-    // AQUI VOCÊ PODE IMPLEMENTAR UMA LÓGICA DE CONFIRMAÇÃO MANUAL
-    // Exemplo: Salvar a notificação em um banco de dados para um admin verificar
-    console.log(`[PIX NOTIFY] Usuário ${req.user.username} (ID: ${userId}) notificou um pagamento de ${amount} moedas.`);
-    
-    // ATENÇÃO: Esta é apenas uma simulação da notificação.
-    // A atualização real do saldo precisa ser feita por um admin após a confirmação do pagamento.
-    // Você não deve atualizar o saldo automaticamente aqui.
+    try {
+        const newNotification = new PixPaymentNotification({
+            userId: userId,
+            amount: amount,
+            status: 'pending'
+        });
+        await newNotification.save();
+        
+        console.log(`[PIX NOTIFY] Usuário ${req.user.username} (ID: ${userId}) notificou um pagamento de ${amount} moedas.`);
+        
+        res.status(200).json({ message: 'Notificação de pagamento recebida. Seu pagamento será verificado em breve!' });
 
-    res.status(200).json({ message: 'Notificação de pagamento recebida. Seu pagamento será verificado em breve!' });
+    } catch (error) {
+        console.error('[API PAYMENT NOTIFY] Erro ao salvar notificação de Pix:', error);
+        res.status(500).json({ message: 'Erro interno ao processar a notificação.' });
+    }
 });
+
+
+// --- NOVO: Rotas de administração para pagamentos Pix ---
+app.get('/api/admin/pending-pix', adminAuth, async (req, res) => {
+    try {
+        const pendingPayments = await PixPaymentNotification.find({ status: 'pending' })
+            .populate('userId', 'username email') // Preenche com dados do usuário
+            .sort({ createdAt: 1 });
+        
+        res.status(200).json(pendingPayments);
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao buscar pagamentos Pix pendentes:', error);
+        res.status(500).json({ message: 'Erro no servidor ao buscar pagamentos pendentes.' });
+    }
+});
+
+app.patch('/api/admin/confirm-pix/:paymentId', adminAuth, async (req, res) => {
+    const { paymentId } = req.params;
+
+    try {
+        const payment = await PixPaymentNotification.findById(paymentId);
+        if (!payment || payment.status !== 'pending') {
+            return res.status(404).json({ message: 'Pagamento pendente não encontrado ou já processado.' });
+        }
+
+        const user = await User.findById(payment.userId);
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não encontrado.' });
+        }
+
+        // Atualiza o saldo do usuário
+        user.coins += payment.amount;
+        await user.save();
+
+        // Atualiza o status do pagamento para 'approved'
+        payment.status = 'approved';
+        await payment.save();
+
+        // Opcional: Envie uma notificação via Socket.IO para o frontend do usuário
+        if (onlineUsers.has(String(user._id))) {
+            io.to(onlineUsers.get(String(user._id)).socketId).emit('wallet updated', { newBalance: user.coins });
+        }
+
+        res.status(200).json({ message: 'Pagamento confirmado e saldo atualizado com sucesso!' });
+
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao confirmar pagamento Pix:', error);
+        res.status(500).json({ message: 'Erro no servidor ao confirmar o pagamento.' });
+    }
+});
+
 
 app.post('/api/wallet/withdraw', auth, async (req, res) => {
     try {
@@ -513,7 +573,6 @@ app.post('/api/wallet/withdraw', auth, async (req, res) => {
     }
 });
 
-// Outras rotas (Desafios, Amigos, Admin, etc.) - Manter conforme o seu código original
 app.post('/api/challenges', auth, async (req, res) => {
     try {
         const { game, console: platform, betAmount, scheduledTime } = req.body;
