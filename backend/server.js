@@ -27,10 +27,10 @@ const adminAuth = require('./middleware/adminAuth');
 const app = express();
 const server = http.createServer(app);
 
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 
 // NOVO: Defina as URLs do frontend e backend dinamicamente
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://matheusj1.github.io";
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://matheusj1.github.io/GameRivals-Site";
 const BACKEND_URL = process.env.BACKEND_URL || "https://gamerivals-site.onrender.com"; // Esta será a URL do seu serviço de backend no Render
 
 const io = new Server(server, {
@@ -325,6 +325,10 @@ io.on('connection', async (socket) => {
                 if (foundOpponentObject.socketId !== user.socketId) {
                      io.to(foundOpponentObject.socketId).emit('matchmaking status', { inQueue: false, message: 'Partida encontrada!' });
                 }
+                
+                io.to(foundOpponentObject.socketId).emit('challenge updated');
+                io.to(user.socketId).emit('challenge updated');
+
 
             } catch (error) {
                 console.error('[MATCHMAKING] Erro ao criar desafio após encontrar partida:', error);
@@ -573,6 +577,7 @@ app.post('/api/wallet/withdraw', auth, async (req, res) => {
     }
 });
 
+// MODIFICADO: Emite um evento de socket quando um desafio é criado
 app.post('/api/challenges', auth, async (req, res) => {
     try {
         const { game, console: platform, betAmount, scheduledTime } = req.body;
@@ -582,6 +587,8 @@ app.post('/api/challenges', auth, async (req, res) => {
         const newChallenge = new Challenge({ game, console: platform, betAmount, scheduledTime, createdBy: req.user.id });
         await newChallenge.save();
         if (betAmount > 0) { user.coins -= betAmount; await user.save(); }
+        // Emite o evento para atualizar a lista de desafios abertos para todos os usuários
+        io.emit('challenge created');
         res.status(201).json(newChallenge);
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao criar desafio:', error);
@@ -589,6 +596,7 @@ app.post('/api/challenges', auth, async (req, res) => {
     }
 });
 
+// MODIFICADO: Emite um evento de socket para o oponente quando um desafio privado é criado
 app.post('/api/challenges/private', auth, async (req, res) => {
     try {
         const { opponentId, game, console: platform, betAmount } = req.body;
@@ -605,6 +613,10 @@ app.post('/api/challenges/private', auth, async (req, res) => {
         await newChallenge.save();
         const opponentSocketId = onlineUsers.get(String(opponentId))?.socketId;
         if (opponentSocketId) { io.to(opponentSocketId).emit('private challenge received', { challengeId: newChallenge._id, senderUsername: creatorUser.username, game: newChallenge.game, console: newChallenge.console, betAmount: newChallenge.betAmount, createdBy: createdBy }); }
+        // Emite um evento para o criador e o oponente atualizarem seus painéis
+        const creatorSocketId = onlineUsers.get(String(createdBy))?.socketId;
+        io.to(creatorSocketId).emit('challenge updated');
+        io.to(opponentSocketId).emit('challenge updated');
         res.status(201).json({ message: 'Desafio privado criado com sucesso e enviado ao seu amigo!', challenge: newChallenge });
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao criar desafio privado:', error);
@@ -622,6 +634,7 @@ app.get('/api/challenges', auth, async (req, res) => {
     }
 });
 
+// MODIFICADO: Emite eventos de socket para os usuários envolvidos quando um desafio é aceito
 app.patch('/api/challenges/:id/accept', auth, async (req, res) => {
     try {
         const challenge = await Challenge.findById(req.params.id);
@@ -635,6 +648,12 @@ app.patch('/api/challenges/:id/accept', auth, async (req, res) => {
         challenge.status = 'accepted';
         await challenge.save();
         if (challenge.betAmount > 0) { acceptorUser.coins -= challenge.betAmount; await acceptorUser.save(); }
+        // Emite o evento para o criador e o oponente atualizarem seus painéis
+        const creatorSocketId = onlineUsers.get(String(challenge.createdBy))?.socketId;
+        const opponentSocketId = onlineUsers.get(String(challenge.opponent))?.socketId;
+        if (creatorSocketId) io.to(creatorSocketId).emit('challenge updated');
+        if (opponentSocketId) io.to(opponentSocketId).emit('challenge updated');
+        io.emit('challenge created'); // Para remover o desafio da lista aberta de todos os usuários
         res.json(challenge);
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao aceitar desafio:', error);
@@ -653,6 +672,7 @@ app.get('/api/my-challenges', auth, async (req, res) => {
     }
 });
 
+// MODIFICADO: Emite eventos de socket quando o resultado é reportado
 app.post('/api/challenges/:id/result', auth, async (req, res) => {
     try {
         const { winnerId } = req.body;
@@ -676,8 +696,18 @@ app.post('/api/challenges/:id/result', auth, async (req, res) => {
                 const loserId = playerIds.find(id => id !== firstReport.winner.toString());
                 if (challenge.betAmount > 0) { await User.findByIdAndUpdate(firstReport.winner, { $inc: { wins: 1, coins: challenge.betAmount } }); await User.findByIdAndUpdate(loserId, { $inc: { losses: 1, coins: -challenge.betAmount } }); }
                 else { await User.findByIdAndUpdate(firstReport.winner, { $inc: { wins: 1 } }); await User.findByIdAndUpdate(loserId, { $inc: { losses: 1 } }); }
+                const winnerSocketId = onlineUsers.get(firstReport.winner.toString())?.socketId;
+                const loserSocketId = onlineUsers.get(loserId)?.socketId;
+                if (winnerSocketId) io.to(winnerSocketId).emit('challenge updated');
+                if (loserSocketId) io.to(loserSocketId).emit('challenge updated');
                 return res.json({ message: "Resultado confirmado! Partida finalizada.", challenge });
-            } else { challenge.status = 'disputed'; await challenge.save(); return res.status(409).json({ message: "Resultados conflitantes. A partida entrou em análise pelo suporte.", challenge }); }
+            } else { challenge.status = 'disputed'; await challenge.save();
+                const player1SocketId = onlineUsers.get(playerIds[0])?.socketId;
+                const player2SocketId = onlineUsers.get(playerIds[1])?.socketId;
+                if (player1SocketId) io.to(player1SocketId).emit('challenge updated');
+                if (player2SocketId) io.to(player2SocketId).emit('challenge updated');
+                return res.status(409).json({ message: "Resultados conflitantes. A partida entrou em análise pelo suporte.", challenge });
+            }
         }
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao reportar resultado:', error);
@@ -941,7 +971,7 @@ app.delete('/api/friends/:friendId', auth, async (req, res) => {
         if (friendSocketId) io.to(friendSocketId).emit('friend removed', { user: user.username, userId: user._id });
         return res.status(200).json({ message: `${friend.username} foi removido da sua lista de amigos.` });
     } catch (error) {
-        console.error('[API FRIENDS] Erro ao remover amigo:', error);
+        console.        console.error('[API FRIENDS] Erro ao remover amigo:', error);
         res.status(500).json({ message: 'Erro no servidor ao remover amigo.' });
     }
 });
