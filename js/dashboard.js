@@ -242,16 +242,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // NOVO: Adiciona um listener para o evento de atualização de desafio
-        socket.on('challenge updated', () => {
-             showNotification('Um desafio foi atualizado. Atualizando seu painel...', 'info');
+        socket.on('challenge:updated', () => {
+             // Apenas recarrega o painel, a notificação será tratada por um evento mais específico se necessário
              refreshDashboard();
         });
-
-        // NOVO: Adiciona um listener para o evento de criação de desafio
-        socket.on('challenge created', () => {
-             // Não mostra notificação para o criador, pois ele já viu a mensagem de sucesso
-             // Apenas atualiza a lista de desafios para os outros usuários
-             refreshDashboard();
+        
+        socket.on('private challenge received', (data) => {
+            const { challengeId, senderUsername, game, console: platform, betAmount } = data;
+            const betText = betAmount > 0 ? `${betAmount} moedas` : 'sem moedas';
+            showNotification(`Novo desafio de ${senderUsername} em ${game} (${platform}) ${betText}!`, 'info');
+            refreshDashboard(); // Garante que o desafio apareça na lista "Meus Desafios"
         });
 
 

@@ -587,8 +587,8 @@ app.post('/api/challenges', auth, async (req, res) => {
         const newChallenge = new Challenge({ game, console: platform, betAmount, scheduledTime, createdBy: req.user.id });
         await newChallenge.save();
         if (betAmount > 0) { user.coins -= betAmount; await user.save(); }
-        // Emite o evento para atualizar a lista de desafios abertos para todos os usuários
-        io.emit('challenge created');
+        // Emite um evento de atualização para todos os clientes
+        io.emit('challenge:updated');
         res.status(201).json(newChallenge);
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao criar desafio:', error);
@@ -613,10 +613,9 @@ app.post('/api/challenges/private', auth, async (req, res) => {
         await newChallenge.save();
         const opponentSocketId = onlineUsers.get(String(opponentId))?.socketId;
         if (opponentSocketId) { io.to(opponentSocketId).emit('private challenge received', { challengeId: newChallenge._id, senderUsername: creatorUser.username, game: newChallenge.game, console: newChallenge.console, betAmount: newChallenge.betAmount, createdBy: createdBy }); }
-        // Emite um evento para o criador e o oponente atualizarem seus painéis
-        const creatorSocketId = onlineUsers.get(String(createdBy))?.socketId;
-        io.to(creatorSocketId).emit('challenge updated');
-        io.to(opponentSocketId).emit('challenge updated');
+        // Emite um evento de atualização para o criador e o oponente
+        io.to(creatorSocketId).emit('challenge:updated');
+        io.to(opponentSocketId).emit('challenge:updated');
         res.status(201).json({ message: 'Desafio privado criado com sucesso e enviado ao seu amigo!', challenge: newChallenge });
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao criar desafio privado:', error);
@@ -648,12 +647,13 @@ app.patch('/api/challenges/:id/accept', auth, async (req, res) => {
         challenge.status = 'accepted';
         await challenge.save();
         if (challenge.betAmount > 0) { acceptorUser.coins -= challenge.betAmount; await acceptorUser.save(); }
-        // Emite o evento para o criador e o oponente atualizarem seus painéis
+        // Emite um evento de atualização para o criador e o oponente
         const creatorSocketId = onlineUsers.get(String(challenge.createdBy))?.socketId;
         const opponentSocketId = onlineUsers.get(String(challenge.opponent))?.socketId;
-        if (creatorSocketId) io.to(creatorSocketId).emit('challenge updated');
-        if (opponentSocketId) io.to(opponentSocketId).emit('challenge updated');
-        io.emit('challenge created'); // Para remover o desafio da lista aberta de todos os usuários
+        if (creatorSocketId) io.to(creatorSocketId).emit('challenge:updated');
+        if (opponentSocketId) io.to(opponentSocketId).emit('challenge:updated');
+        // E também para todos os clientes para remover o desafio da lista aberta
+        io.emit('challenge:updated');
         res.json(challenge);
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao aceitar desafio:', error);
@@ -687,7 +687,14 @@ app.post('/api/challenges/:id/result', auth, async (req, res) => {
         const hasAlreadyReported = challenge.results.some(result => result.reportedBy.toString() === reporterId);
         if (hasAlreadyReported) { return res.status(400).json({ message: "Você já reportou um resultado para esta partida." }); }
         challenge.results.push({ reportedBy: reporterId, winner: winnerId });
-        if (challenge.results.length === 1) { await challenge.save(); return res.json({ message: "Seu resultado foi registrado. Aguardando oponente.", challenge }); }
+        if (challenge.results.length === 1) { 
+            await challenge.save(); 
+            // Emite para o oponente saber que o resultado foi reportado
+            const opponentId = playerIds.find(id => id !== reporterId);
+            const opponentSocketId = onlineUsers.get(opponentId)?.socketId;
+            if (opponentSocketId) io.to(opponentSocketId).emit('challenge:updated');
+            return res.json({ message: "Seu resultado foi registrado. Aguardando oponente.", challenge });
+        }
         else if (challenge.results.length === 2) {
             const firstReport = challenge.results[0];
             const secondReport = challenge.results[1];
@@ -698,14 +705,14 @@ app.post('/api/challenges/:id/result', auth, async (req, res) => {
                 else { await User.findByIdAndUpdate(firstReport.winner, { $inc: { wins: 1 } }); await User.findByIdAndUpdate(loserId, { $inc: { losses: 1 } }); }
                 const winnerSocketId = onlineUsers.get(firstReport.winner.toString())?.socketId;
                 const loserSocketId = onlineUsers.get(loserId)?.socketId;
-                if (winnerSocketId) io.to(winnerSocketId).emit('challenge updated');
-                if (loserSocketId) io.to(loserSocketId).emit('challenge updated');
+                if (winnerSocketId) io.to(winnerSocketId).emit('challenge:updated');
+                if (loserSocketId) io.to(loserSocketId).emit('challenge:updated');
                 return res.json({ message: "Resultado confirmado! Partida finalizada.", challenge });
             } else { challenge.status = 'disputed'; await challenge.save();
                 const player1SocketId = onlineUsers.get(playerIds[0])?.socketId;
                 const player2SocketId = onlineUsers.get(playerIds[1])?.socketId;
-                if (player1SocketId) io.to(player1SocketId).emit('challenge updated');
-                if (player2SocketId) io.to(player2SocketId).emit('challenge updated');
+                if (player1SocketId) io.to(player1SocketId).emit('challenge:updated');
+                if (player2SocketId) io.to(player2SocketId).emit('challenge:updated');
                 return res.status(409).json({ message: "Resultados conflitantes. A partida entrou em análise pelo suporte.", challenge });
             }
         }
