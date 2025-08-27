@@ -240,6 +240,20 @@ document.addEventListener('DOMContentLoaded', () => {
             refreshFriendsAndRequests(token);
             if (socket) socket.emit('request matchmaking queue counts');
         });
+        
+        // NOVO: Adiciona um listener para o evento de atualização de desafio
+        socket.on('challenge updated', () => {
+             showNotification('Um desafio foi atualizado. Atualizando seu painel...', 'info');
+             refreshDashboard();
+        });
+
+        // NOVO: Adiciona um listener para o evento de criação de desafio
+        socket.on('challenge created', () => {
+             // Não mostra notificação para o criador, pois ele já viu a mensagem de sucesso
+             // Apenas atualiza a lista de desafios para os outros usuários
+             refreshDashboard();
+        });
+
 
         socket.on('connect_error', (err) => {
             console.error('Erro na conexão do socket:', err);

@@ -546,7 +546,7 @@ app.patch('/api/admin/confirm-pix/:paymentId', adminAuth, async (req, res) => {
         payment.status = 'approved';
         await payment.save();
 
-        // Opcional: Envie uma notificação via Socket.IO para o frontend do usuário
+        // Opcional: Emite uma notificação via Socket.IO para o frontend do usuário
         if (onlineUsers.has(String(user._id))) {
             io.to(onlineUsers.get(String(user._id)).socketId).emit('wallet updated', { newBalance: user.coins });
         }
