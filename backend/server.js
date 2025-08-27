@@ -578,23 +578,32 @@ app.post('/api/wallet/withdraw', auth, async (req, res) => {
 });
 
 // MODIFICADO: Emite um evento de socket quando um desafio é criado
+// Exemplo de rota de criação de desafio
 app.post('/api/challenges', auth, async (req, res) => {
     try {
-        const { game, console: platform, betAmount, scheduledTime } = req.body;
-        if (!game || !platform || !betAmount) { return res.status(400).json({ message: 'Por favor, preencha todos os campos do desafio.' }); }
-        const user = await User.findById(req.user.id);
-        if (betAmount > 0 && user.coins < betAmount) { return res.status(400).json({ message: 'Você não tem moedas suficientes para esta aposta.' }); }
-        const newChallenge = new Challenge({ game, console: platform, betAmount, scheduledTime, createdBy: req.user.id });
+        const { game, console, betAmount, scheduledTime } = req.body;
+
+        const newChallenge = new Challenge({
+            game,
+            console,
+            betAmount,
+            scheduledTime,
+            createdBy: req.user.id,
+            status: 'open'
+        });
+
         await newChallenge.save();
-        if (betAmount > 0) { user.coins -= betAmount; await user.save(); }
-        // Emite um evento de atualização para todos os clientes
-        io.emit('challenge:updated');
+
+        // 🚀 Notifica todos os clientes que a lista de desafios mudou
+        io.emit('challenge updated');
+
         res.status(201).json(newChallenge);
     } catch (error) {
-        console.error('[API CHALLENGE] Erro ao criar desafio:', error);
-        res.status(500).json({ message: 'Erro no servidor, tente novamente mais tarde.' });
+        console.error('Erro ao criar desafio:', error);
+        res.status(500).json({ message: 'Erro ao criar desafio' });
     }
 });
+
 
 // MODIFICADO: Emite um evento de socket para o oponente quando um desafio privado é criado
 app.post('/api/challenges/private', auth, async (req, res) => {
