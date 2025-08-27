@@ -55,14 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let emitUserConnected = () => { /* Função vazia inicial */ };
     let readyToConnectUser = false;
 
-    // Listener para desafios em tempo real
-socket.on('challenge updated', () => {
-    console.log('[SOCKET] Lista de desafios atualizada pelo servidor');
-    fetchAndDisplayChallenges(token, userId);
-    fetchAndDisplayMyChallenges(token, userId);
-    // Opcional: feedback visual
-    showNotification('Um novo desafio foi criado!', 'info');
-});
+    
 
     // --- FUNÇÕES PARA CARREGAR E EXIBIR DADOS DO USUÁRIO E AVATAR ---
     const fetchUserProfile = async () => {
