@@ -29,13 +29,13 @@ const server = http.createServer(app);
 
 app.set('trust proxy', 1);
 
-// NOVO: Defina as URLs do frontend e backend dinamicamente
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://matheusj1.github.io/GameRivals-Site";
+// CORRIGIDO: O domínio do frontend é a origem 'https://matheusj1.github.io', sem o caminho.
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://matheusj1.github.io";
 const BACKEND_URL = process.env.BACKEND_URL || "https://gamerivals-site.onrender.com"; // Esta será a URL do seu serviço de backend no Render
 
 const io = new Server(server, {
     cors: {
-        origin: FRONTEND_URL, // Use a URL dinâmica do frontend para CORS
+        origin: FRONTEND_URL, // Usa a URL dinâmica do frontend para CORS
         methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"]
     }
@@ -45,7 +45,7 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-    origin: FRONTEND_URL, // Use a URL dinâmica do frontend para CORS
+    origin: FRONTEND_URL, // Usa a URL dinâmica do frontend para CORS
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
 }));
@@ -971,7 +971,7 @@ app.delete('/api/friends/:friendId', auth, async (req, res) => {
         if (friendSocketId) io.to(friendSocketId).emit('friend removed', { user: user.username, userId: user._id });
         return res.status(200).json({ message: `${friend.username} foi removido da sua lista de amigos.` });
     } catch (error) {
-        console.        console.error('[API FRIENDS] Erro ao remover amigo:', error);
+        console.error('[API FRIENDS] Erro ao remover amigo:', error);
         res.status(500).json({ message: 'Erro no servidor ao remover amigo.' });
     }
 });
