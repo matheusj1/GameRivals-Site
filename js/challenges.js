@@ -345,6 +345,31 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
         });
     }
 
+    else if (target.classList.contains('cancel-challenge-btn')) {
+    const targetButton = target;
+    if (confirm("Deseja realmente cancelar este desafio? Suas moedas serão devolvidas.")) {
+        fetch(`${API_BASE_URL}/api/challenges/${challengeId}/cancel`, {
+            method: 'PATCH',
+            headers: { 'x-auth-token': token }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.message) {
+                showNotification(data.message, 'success');
+                applyButtonFeedback(targetButton, true);
+                setTimeout(() => refreshDashboard(), 1000);
+            } else {
+                showNotification(data.message || 'Erro ao cancelar desafio.', 'error');
+                applyButtonFeedback(targetButton, false);
+            }
+        })
+        .catch(() => {
+            showNotification('Não foi possível conectar ao servidor.', 'error');
+            applyButtonFeedback(targetButton, false);
+        });
+    }
+}
+
     const reportModalBackdrop = document.querySelector('#report-modal-backdrop');
     if (reportModalBackdrop) {
         const closeReportModalBtn = reportModalBackdrop.querySelector('.close-modal-btn');
