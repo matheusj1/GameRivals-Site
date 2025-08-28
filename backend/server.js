@@ -729,6 +729,52 @@ app.patch('/api/challenges/:id/archive', auth, async (req, res) => {
     }
 });
 
+// NOVO: Rota para o criador cancelar um desafio aberto
+app.patch('/api/challenges/:id/cancel', auth, async (req, res) => {
+    try {
+        const challengeId = req.params.id;
+        const userId = req.user.id;
+        const challenge = await Challenge.findById(challengeId);
+        if (!challenge) {
+            return res.status(404).json({ message: "Desafio não encontrado." });
+        }
+
+        // 1. O desafio deve estar em status 'open' para ser cancelado pelo criador.
+        if (challenge.status !== 'open') {
+            return res.status(400).json({ message: "Apenas desafios abertos podem ser cancelados." });
+        }
+
+        // 2. Apenas o criador pode cancelar o desafio.
+        if (String(challenge.createdBy) !== String(userId)) {
+            return res.status(403).json({ message: "Você não tem permissão para cancelar este desafio." });
+        }
+
+        // 3. Devolver as moedas apostadas
+        if (challenge.betAmount > 0) {
+            await User.findByIdAndUpdate(userId, { $inc: { coins: challenge.betAmount } });
+        }
+
+        // 4. Mudar o status do desafio para 'cancelled'
+        challenge.status = 'cancelled';
+        await challenge.save();
+
+        // 5. Emitir evento para o socket remover o desafio da lista de todos os usuários
+        io.emit('challenge created'); // Reutilizamos este evento para forçar o recarregamento das listas.
+        
+        // 6. Emitir evento para o criador atualizar o dashboard
+        const creatorSocketId = onlineUsers.get(String(userId))?.socketId;
+        if (creatorSocketId) {
+            io.to(creatorSocketId).emit('challenge updated');
+        }
+
+        res.json({ message: "Desafio cancelado com sucesso! Suas moedas foram devolvidas." });
+
+    } catch (error) {
+        console.error('[API CHALLENGE] Erro ao cancelar desafio:', error);
+        res.status(500).json({ message: 'Erro no servidor ao cancelar desafio.' });
+    }
+});
+
 app.get('/api/users/me/stats', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('wins losses coins');
