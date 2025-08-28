@@ -43,12 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropdownTemplate = document.getElementById('user-profile-dropdown-template');
 
     // Seletores para MOBILE (dentro do menu hambúrguer)
-    const usernameMobile = document.getElementById('username-mobile'); // Adicione este ID ao seu HTML no menu mobile
-    const currentUserAvatarMobile = document.getElementById('current-user-avatar-mobile'); // Adicione este ID ao seu HTML no menu mobile
-    const coinBalanceMobile = document.getElementById('coin-balance-mobile'); // Adicione este ID ao seu HTML no menu mobile
-    const userWinsMobile = document.getElementById('user-wins-mobile'); // Adicione este ID ao seu HTML no menu mobile
-    const userLossesMobile = document.getElementById('user-losses-mobile'); // Adicione este ID ao seu HTML no menu mobile
-
+    // Os seletores para o menu mobile antigo foram removidos
+    const currentUserAvatarMobile = document.getElementById('current-user-avatar-mobile');
 
     // --- VARIÁVEIS E FUNÇÕES GLOBAIS (PARA O SOCKET.IO E NOTIFICAÇÕES) ---
     let socket;
@@ -100,15 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 userConsoleIconDesktop.dataset.consoleName = '';
             }
 
-            // Atualiza elementos MOBILE
+            // Atualiza o avatar MOBILE
             if (currentUserAvatarMobile) {
                 currentUserAvatarMobile.src = userData.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`;
             }
-
-            if (usernameMobile) {
-                usernameMobile.textContent = userData.username || 'Usuário';
-            }
-
 
             localStorage.setItem('profileCompleted', userData.profileCompleted);
 
@@ -135,10 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (userLossesDesktop) userLossesDesktop.textContent = stats.losses || '0';
             if (coinBalanceDesktop) coinBalanceDesktop.textContent = stats.coins ? stats.coins.toLocaleString('pt-BR') : '0';
 
-            // Atualiza elementos MOBILE
-            if (userWinsMobile) userWinsMobile.textContent = stats.wins || '0';
-            if (userLossesMobile) userLossesMobile.textContent = stats.losses || '0';
-            if (coinBalanceMobile) coinBalanceMobile.textContent = stats.coins ? stats.coins.toLocaleString('pt-BR') : '0';
+            // Os elementos de stats mobile foram removidos do HTML, então não são atualizados aqui.
 
         } catch (error) {
             console.error('Erro ao buscar stats:', error);
@@ -153,12 +141,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INICIALIZAÇÃO DA INTERFACE ---
     fetchUserProfile();
-    refreshDashboard(); // Inicializa o dashboard
+    refreshDashboard();
 
     // Lógica do dropdown de perfil para DESKTOP
     if (userProfileMenuDesktop && dropdownTemplate) {
         const dropdownContent = dropdownTemplate.content.cloneNode(true);
-        const dropdown = dropdownContent.firstElementChild; // Corrigido!
+        const dropdown = dropdownContent.firstElementChild;
         if (dropdown) {
             userProfileMenuDesktop.appendChild(dropdown);
 
@@ -179,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     e.preventDefault();
                     localStorage.clear();
                     showNotification('Você foi desconectado com sucesso.', 'info');
-                    setTimeout(() => { window.location.href = 'login-split-form.html'; }, 1500); // ALTERADO
+                    setTimeout(() => { window.location.href = 'login-split-form.html'; }, 1500);
                 });
             }
         } else {
@@ -196,10 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             localStorage.clear();
             showNotification('Você foi desconectado com sucesso.', 'info');
-            setTimeout(() => { window.location.href = 'login-split-form.html'; }, 1500); // ALTERADO
+            setTimeout(() => { window.location.href = 'login-split-form.html'; }, 1500);
         });
     }
-
 
     // --- LÓGICA DO CHAT E JOGADORES ONLINE (Socket.IO) ---
     if (typeof io !== 'undefined') {
@@ -241,16 +228,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (socket) socket.emit('request matchmaking queue counts');
         });
         
-        // NOVO: Adiciona um listener para o evento de atualização de desafio
         socket.on('challenge updated', () => {
              showNotification('Um desafio foi atualizado. Atualizando seu painel...', 'info');
              refreshDashboard();
         });
 
-        // NOVO: Adiciona um listener para o evento de criação de desafio
         socket.on('challenge created', () => {
-             // Não mostra notificação para o criador, pois ele já viu a mensagem de sucesso
-             // Apenas atualiza a lista de desafios para os outros usuários
              refreshDashboard();
         });
 
@@ -265,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (reason === 'io server disconnect') {
                 socket.connect();
             }
-            // Não chame setupMatchmaking aqui, ele já é chamado na inicialização
         });
 
         socket.on('error', (err) => {
@@ -280,8 +262,4 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error('Biblioteca Socket.IO não carregada. O chat e a lista de jogadores não funcionarão.');
     }
-
-    // --- LÓGICA DO MENU HAMBÚRGUER (Mobile) ---
-    // NOVO: Remove a função setupMobileMenu e os listeners relacionados ao menu hambúrguer, pois ele foi substituído
-    // A navegação agora é feita diretamente pelo link do perfil no HTML
 });

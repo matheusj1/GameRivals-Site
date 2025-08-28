@@ -107,12 +107,32 @@ header .container {
     filter: brightness(1.1);
 }
 
-/* NOVO: Wrapper para os elementos do usuário no desktop, para controle de display */
+/* Navegação para Desktop */
 .user-nav-desktop {
     display: flex; /* Visível por padrão em desktop */
     align-items: center;
     gap: 25px;
 }
+
+/* Perfil para Mobile */
+.user-nav-mobile {
+    display: none; /* Escondido por padrão */
+}
+.user-nav-mobile .user-avatar-mobile {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-neon);
+    object-fit: cover;
+    box-shadow: var(--glow-soft);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.user-nav-mobile .user-avatar-mobile:hover {
+    transform: scale(1.1);
+    box-shadow: var(--glow-medium);
+}
+
 
 header nav ul#main-nav-links {
     list-style: none;
@@ -120,20 +140,14 @@ header nav ul#main-nav-links {
     align-items: center;
     margin: 0;
     padding: 0;
-    /* Reset para desktop, para o mobile será sobrescrito */
     position: static;
     width: auto;
     height: auto;
     background: transparent;
     box-shadow: none;
     flex-direction: row;
-    transform: translateX(0); /* Garante visível em desktop */
-    transition: none; /* Desabilita transição em desktop */
-
-    /* NOVO: Esconde a seção mobile-user-info-section em desktop */
-    .mobile-user-info-section {
-        display: none; /* Esconde em desktop */
-    }
+    transform: translateX(0);
+    transition: none;
 }
 
 header nav ul#main-nav-links li {
@@ -167,12 +181,12 @@ header nav ul#main-nav-links li a.active:not(.nav-button) {
     box-shadow: var(--glow-medium);
     transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease, color 0.3s ease;
     border: none;
-    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
-    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
-    display: inline-flex; /* NOVO: Para alinhar conteúdo com min-height/width */
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    text-align: center; /* NOVO: Garante que o texto se alinhe dentro do botão */
+    text-align: center;
 }
 
 .nav-button:hover {
@@ -183,7 +197,7 @@ header nav ul#main-nav-links li a.active:not(.nav-button) {
 }
 
 .hamburger-menu {
-    display: none; /* Escondido por padrão em desktop */
+    display: none;
     flex-direction: column;
     justify-content: space-around;
     width: 30px;
@@ -192,10 +206,10 @@ header nav ul#main-nav-links li a.active:not(.nav-button) {
     border: none;
     cursor: pointer;
     padding: 0;
-    z-index: 1005; /* Acima da sidebar */
-    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
-    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
-    align-items: center; /* NOVO: Centraliza spans */
+    z-index: 1005;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
 }
 
 .hamburger-menu span {
@@ -215,7 +229,7 @@ footer {
     padding: 30px 0;
     margin-top: 50px;
     border-top: 1px solid var(--border-color);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* Ajustado: era 0 -2px, agora 0 2px para consistência */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 footer ul { list-style: none; margin-top: 10px; }
 footer ul li { display: inline; margin: 0 15px; }
@@ -223,19 +237,18 @@ footer ul li a {
     color: #fff;
     text-decoration: none;
     transition: color 0.3s ease, text-shadow 0.3s ease;
-    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
-    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
-    display: inline-flex; /* NOVO: Para alinhar conteúdo */
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 5px 10px; /* NOVO: Ajuste de padding para não distorcer */
+    padding: 5px 10px;
 }
 footer ul li a:hover { color: var(--primary-neon); text-shadow: var(--glow-hover-subtle-text); }
 
 /* UTILITÁRIOS GLOBAIS */
 section { padding: 60px 0; position: relative; }
 section h2 {
-    /* NOVO: Tipografia fluida com clamp() */
     font-size: clamp(28px, 5vw, 38px);
     margin-bottom: 40px;
     color: var(--text-color);
@@ -259,14 +272,14 @@ section h2 {
     box-shadow: var(--glow-medium);
     border: none;
     letter-spacing: 0.5px;
-    overflow: hidden; /* Garante que o flash não vaze */
-    position: relative; /* Para posicionar o ::after */
-    min-width: 44px; /* NOVO: Garante tamanho mínimo para toque */
-    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
-    display: inline-flex; /* NOVO: Para alinhar conteúdo com min-height/width */
+    overflow: hidden;
+    position: relative;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    text-align: center; /* NOVO: Garante que o texto se alinhe dentro do botão */
+    text-align: center;
 }
 .cta-button.proximity-glow {
     box-shadow: 0 0 10px rgba(111, 66, 193, 0.3), 0 0 20px rgba(111, 66, 193, 0.2);
@@ -281,8 +294,8 @@ section h2 {
 /* NOVO: Animações para botões de sucesso/falha */
 .cta-button.flash-success,
 .cta-button.flash-error {
-    transition: none; /* Desabilita transições normais durante o flash */
-    animation: none; /* Reset para permitir re-trigger */
+    transition: none;
+    animation: none;
 }
 
 .cta-button.flash-success::after,
@@ -298,11 +311,11 @@ section h2 {
 }
 
 .cta-button.flash-success::after {
-    background-color: rgba(40, 167, 69, 0.8); /* Verde semi-transparente */
+    background-color: rgba(40, 167, 69, 0.8);
 }
 
 .cta-button.flash-error::after {
-    background-color: rgba(220, 53, 69, 0.8); /* Vermelho semi-transparente */
+    background-color: rgba(220, 53, 69, 0.8);
 }
 
 @keyframes buttonFlash {
@@ -319,7 +332,6 @@ section h2 {
 .input-group input[type="number"],
 .input-group select,
 .input-group textarea,
-/* Adicionar classes para inputs fora de .input-group se houver */
 input[type="text"].standard-input,
 input[type="email"].standard-input,
 input[type="password"].standard-input,
@@ -327,19 +339,19 @@ input[type="number"].standard-input,
 select.standard-input,
 textarea.standard-input {
     width: 100%;
-    padding: 14px 18px; /* Padronizar padding para todos os inputs */
+    padding: 14px 18px;
     background-color: var(--input-bg);
     border: 1px solid gray;
-    border-radius: 8px; /* Padronizar border-radius */
+    border-radius: 8px;
     color: var(--text-color);
-    font-size: 16px; /* Padronizar font-size */
+    font-size: 16px;
     font-family: 'Montserrat', sans-serif;
     transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
     box-shadow: none;
-    -webkit-appearance: none; /* Remover estilos padrão do navegador */
+    -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    min-height: 44px; /* NOVO: Garante tamanho mínimo para toque */
+    min-height: 44px;
 }
 
 .input-group input[type="text"]:focus,
@@ -357,7 +369,7 @@ textarea.standard-input:focus {
     outline: none;
     border-color: var(--primary-neon);
     box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
-    background-color: var(--card-bg); /* Fundo branco no foco */
+    background-color: var(--card-bg);
 }
 
 /* Estilo para selects com ícone de seta customizado */
@@ -372,7 +384,7 @@ textarea.standard-input:focus {
 /* Readonly fields */
 input[readonly],
 textarea[readonly] {
-    background-color: var(--input-bg-disabled) !important; /* Uma nova variável pode ser criada */
+    background-color: var(--input-bg-disabled) !important;
     color: var(--text-muted) !important;
     cursor: not-allowed !important;
     border-color: var(--border-color) !important;
@@ -434,27 +446,23 @@ textarea[readonly] {
     border-left: 5px solid #fff;
     opacity: 0;
     transform: translateX(100%);
-    /* Removido forwards para controlar a remoção via JS */
     animation: slideIn 0.5s ease-out; 
     text-shadow: none;
-    display: flex; /* Para ícone */
-    align-items: center; /* Para ícone */
-    gap: 10px; /* Espaço entre ícone e texto */
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
-/* NOVO: Ícone na notificação */
 .notification::before {
-    /* É necessário importar uma biblioteca de ícones como Font Awesome no HTML, se ainda não o fez */
-    /* Ex: <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> */
     font-family: 'Font Awesome 5 Free'; 
     font-weight: 900;
     font-size: 1.2em;
-    content: ''; /* Conteúdo padrão vazio */
+    content: '';
     display: inline-block;
     vertical-align: middle;
 }
-.notification.success::before { content: "\f058"; } /* Check-circle */
-.notification.error::before { content: "\f06a"; } /* Exclamation-circle */
-.notification.info::before { content: "\f05a"; } /* Info-circle */
+.notification.success::before { content: "\f058"; }
+.notification.error::before { content: "\f06a"; }
+.notification.info::before { content: "\f05a"; }
 
 
 .notification.success {
@@ -482,7 +490,6 @@ textarea[readonly] {
         transform: translateX(0);
     }
 }
-/* NOVO: Animação de saída da notificação */
 @keyframes slideOut {
     from {
         opacity: 1;
@@ -509,137 +516,19 @@ textarea[readonly] {
         max-width: 130px;
     }
 
-    /* Oculta os elementos de navegação desktop */
+    /* Oculta a navegação de desktop e mostra a navegação de mobile */
     .user-nav-desktop {
         display: none;
     }
+    .user-nav-mobile {
+        display: flex;
+        align-items: center;
+    }
 
-    .hamburger-menu { 
-        display: none; /* Oculta o hambúrguer */
-    } 
-    
-    /* Menu de navegação mobile como sidebar (Gaveta Lateral) */
-    header nav ul#main-nav-links { 
-        position: fixed; /* Fixa na tela */
-        top: 0;
-        right: 0; /* Alinha a direita e usa transform para esconder */
-        width: 250px; /* Largura da sidebar */
-        height: 100vh; /* Altura total da viewport */
-        background-color: var(--card-bg); /* Fundo branco do menu */
-        box-shadow: -5px 0 15px rgba(0,0,0,0.1); /* Sombra à esquerda */
-        flex-direction: column;
-        justify-content: flex-start; /* Alinha itens ao topo */
-        padding: 20px; /* Padding geral */
-        z-index: 1000 !important; /* Aumentado z-index para garantir que esteja acima de tudo */
-        overflow-y: auto; /* Adiciona scroll se o conteúdo for muito grande */
-        -webkit-overflow-scrolling: touch; /* Melhora o scroll em iOS */
-
-        /* Alterações para transição suave e ocultamento eficaz */
-        visibility: hidden; /* Esconde visualmente mas mantém no layout para transição */
-        opacity: 0; /* Começa transparente */
-        transform: translateX(100%); /* Move completamente para fora da tela à direita (100% da própria largura) */
-        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, visibility 0s 0.3s; /* Transição para todas as propriedades, visibilidade atrasada */
+    header nav {
+        display: none; /* Oculta a tag <nav> completamente em mobile */
     }
     
-    /* Estado ativo da sidebar */
-    header nav ul#main-nav-links.mobile-nav-active { 
-        visibility: visible; /* Torna visível */
-        opacity: 1; /* Torna opaco */
-        transform: translateX(0); /* Retorna à posição original */
-        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; /* Transição para todas as propriedades */
-    }
-
-    header nav ul#main-nav-links li { 
-        display: block; 
-        margin: 0; 
-        width: 100%; 
-        text-align: left; /* Alinha links à esquerda */
-        border-bottom: 1px solid var(--border-color); /* Borda para separar links */
-        padding: 12px 0; /* Ajusta padding para itens */
-    }
-
-    header nav ul#main-nav-links li:last-child {
-        border-bottom: none; /* Último item sem borda */
-    }
-
-    header nav ul#main-nav-links li a { 
-        display: block; /* Links ocupam a largura total do item */
-        font-size: 16px; 
-    }
-
-    header nav ul#main-nav-links li a.nav-button { 
-        border-bottom: none; 
-        margin: 15px 0; /* Margem vertical */
-        display: block; /* Ocupa largura total na sidebar */
-        width: 100%;
-        padding: 10px 20px !important;
-        font-size: 15px !important;
-        text-align: center;
-    }
-
-    /* Animação do ícone hambúrguer (funciona em conjunto com o overlay) */
-    .hamburger-menu.active span:nth-child(1) { transform: translateY(8.5px) rotate(45deg); }
-    .hamburger-menu.active span:nth-child(2) { opacity: 0; }
-    .hamburger-menu.active span:nth-child(3) { transform: translateY(-8.5px) rotate(-45deg); }
-
-    /* Overlay escuro quando a sidebar está aberta */
-    body::after {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.4);
-        z-index: 1003; /* Abaixo da sidebar */
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s ease-in-out;
-    }
-    body.mobile-nav-open::after {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    /* NOVO: Estilo para a seção de informações do usuário dentro do menu mobile */
-    .mobile-user-info-section {
-        display: flex; /* Mostra a seção no mobile */
-        flex-direction: row; /* Volta para layout de linha */
-        align-items: center; /* Alinha verticalmente */
-        padding-bottom: 0; /* Remove espaço abaixo */
-        border-bottom: none; /* Remove a borda */
-        margin-bottom: 0; /* Remove a margem */
-        width: auto; /* Ajusta a largura */
-        
-        /* NOVO: Alinhamento e estilo do link do perfil no mobile */
-        .mobile-profile-link {
-            order: 2; /* Move o link do perfil para a direita */
-            flex-grow: 1;
-            text-align: right;
-            .mobile-user-profile-summary {
-                display: inline-flex;
-                flex-direction: row;
-                align-items: center;
-                gap: 8px;
-                padding: 5px 0;
-                margin-bottom: 0;
-                .user-avatar {
-                    width: 45px; /* Tamanho do avatar mobile */
-                    height: 45px;
-                    border: 2px solid var(--primary-neon);
-                }
-                .username {
-                    display: none; /* Oculta o nome de usuário no mobile */
-                }
-            }
-        }
-
-        .mobile-user-stats-wallet {
-            display: none; /* Oculta as informações de estatísticas/carteira no header */
-        }
-    }
-
-    /* Adicione isso na seção de responsividade (max-width: 768px) */
     .dashboard-main {
         flex-direction: column;
         gap: 30px;
@@ -734,11 +623,6 @@ textarea[readonly] {
         padding: 12px 15px;
         font-size: 14px;
     }
-    /* Ajustes para sidebar em telas muito pequenas */
-    header nav ul#main-nav-links {
-        width: 80%;
-        right: -80%;
-    }
     .friends-tab-btn {
         flex: 1 0 100%;
         font-size: 13px;
@@ -755,27 +639,5 @@ textarea[readonly] {
     
     .chat-input-area input {
         width: 65%;
-    }
-}
-/* Adicione isso no final do arquivo base.css */
-header nav ul#main-nav-links.mobile-nav-active {
-    visibility: visible;
-    opacity: 1;
-    transform: translateX(0);
-}
-
-header nav ul#main-nav-links.mobile-nav-active li {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-/* Garanta que a seção de informações do usuário móvel seja visível */
-header nav ul#main-nav-links.mobile-nav-active .mobile-user-info-section {
-    display: flex;
-}
-
-@media (max-width: 768px) {
-    header nav ul#main-nav-links.mobile-nav-active .mobile-user-info-section {
-        display: flex;
     }
 }
