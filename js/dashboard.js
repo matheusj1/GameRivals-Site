@@ -282,44 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- LÓGICA DO MENU HAMBÚRGUER (Mobile) ---
-    const setupMobileMenu = () => {
-        const hamburgerButton = document.querySelector('.hamburger-menu');
-        const mobileNav = document.querySelector('#main-nav-links');
-
-        if (hamburgerButton && mobileNav) {
-            hamburgerButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                hamburgerButton.classList.toggle('active');
-                mobileNav.classList.toggle('mobile-nav-active');
-                document.body.classList.toggle('mobile-nav-open');
-
-                const isExpanded = hamburgerButton.getAttribute('aria-expanded') === 'true';
-                hamburgerButton.setAttribute('aria-expanded', (!isExpanded).toString());
-            });
-
-            // Fecha ao clicar em links ou fora do menu
-            mobileNav.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') {
-                    hamburgerButton.classList.remove('active');
-                    mobileNav.classList.remove('mobile-nav-active');
-                    document.body.classList.remove('mobile-nav-open');
-                    hamburgerButton.setAttribute('aria-expanded', 'false');
-                }
-            });
-
-            document.addEventListener('click', (e) => {
-                if (mobileNav.classList.contains('mobile-nav-active') &&
-                    !mobileNav.contains(e.target) &&
-                    !hamburgerButton.contains(e.target)) {
-                    hamburgerButton.classList.remove('active');
-                    mobileNav.classList.remove('mobile-nav-active');
-                    document.body.classList.remove('mobile-nav-open');
-                    hamburgerButton.setAttribute('aria-expanded', 'false');
-                }
-            });
-        }
-    };
-
-    // Chame a função de setup do menu mobile
-    setupMobileMenu();
+    // NOVO: Remove a função setupMobileMenu e os listeners relacionados ao menu hambúrguer, pois ele foi substituído
+    // A navegação agora é feita diretamente pelo link do perfil no HTML
 });

@@ -515,7 +515,7 @@ textarea[readonly] {
     }
 
     .hamburger-menu { 
-        display: flex; /* Mostra o hambúrguer */
+        display: none; /* Oculta o hambúrguer */
     } 
     
     /* Menu de navegação mobile como sidebar (Gaveta Lateral) */
@@ -604,51 +604,39 @@ textarea[readonly] {
     /* NOVO: Estilo para a seção de informações do usuário dentro do menu mobile */
     .mobile-user-info-section {
         display: flex; /* Mostra a seção no mobile */
-        flex-direction: column;
-        align-items: center;
-        padding-bottom: 20px; /* Espaço abaixo */
-        border-bottom: 1px solid var(--border-color);
-        margin-bottom: 15px; /* Espaço após a borda */
-        width: 100%; /* Ocupa a largura total */
-    }
+        flex-direction: row; /* Volta para layout de linha */
+        align-items: center; /* Alinha verticalmente */
+        padding-bottom: 0; /* Remove espaço abaixo */
+        border-bottom: none; /* Remove a borda */
+        margin-bottom: 0; /* Remove a margem */
+        width: auto; /* Ajusta a largura */
+        
+        /* NOVO: Alinhamento e estilo do link do perfil no mobile */
+        .mobile-profile-link {
+            order: 2; /* Move o link do perfil para a direita */
+            flex-grow: 1;
+            text-align: right;
+            .mobile-user-profile-summary {
+                display: inline-flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 8px;
+                padding: 5px 0;
+                margin-bottom: 0;
+                .user-avatar {
+                    width: 45px; /* Tamanho do avatar mobile */
+                    height: 45px;
+                    border: 2px solid var(--primary-neon);
+                }
+                .username {
+                    display: none; /* Oculta o nome de usuário no mobile */
+                }
+            }
+        }
 
-    .mobile-user-profile-summary {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 10px;
-    }
-    .mobile-user-profile-summary .user-avatar {
-        width: 60px; /* Avatar maior no menu */
-        height: 60px;
-        border: 3px solid var(--primary-neon);
-        box-shadow: var(--glow-soft);
-    }
-    .mobile-user-profile-summary .username {
-        font-size: 18px; /* Nome de usuário maior */
-        font-weight: 700;
-        color: var(--text-color);
-    }
-
-    .mobile-user-stats-wallet {
-        display: flex;
-        flex-wrap: wrap; /* Permite quebra de linha */
-        justify-content: center;
-        gap: 15px;
-        width: 100%;
-    }
-    .mobile-user-stats-wallet .wallet-info,
-    .mobile-user-stats-wallet .user-stats {
-        padding: 6px 12px;
-        font-size: 14px;
-        border-radius: 15px;
-        background-color: var(--input-bg);
-        border: 1px solid var(--border-color);
-        box-shadow: inset 0 0 3px rgba(0,0,0,0.05);
-    }
-    .mobile-user-stats-wallet .user-stats span {
-        font-size: 13px;
+        .mobile-user-stats-wallet {
+            display: none; /* Oculta as informações de estatísticas/carteira no header */
+        }
     }
 
     /* Adicione isso na seção de responsividade (max-width: 768px) */
