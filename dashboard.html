@@ -32,13 +32,17 @@
                         <span>🏆<span id="user-wins-desktop">0</span></span>
                         <span>☠️<span id="user-losses-desktop">0</span></span>
                     </div>
-                    <img src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar" id="current-user-avatar-desktop">
+                    <div class="user-initial-circle" id="user-initial-circle-desktop">
+                        <span id="user-initial-desktop"></span>
+                    </div>
                 </div>
             </div>
 
             <div class="user-nav-mobile">
                 <a href="profile.html">
-                    <img src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar-mobile" id="current-user-avatar-mobile">
+                    <div class="user-initial-circle" id="user-initial-circle-mobile">
+                        <span id="user-initial-mobile"></span>
+                    </div>
                 </a>
             </div>
         </div>
@@ -266,7 +270,9 @@
 
 <template id="search-result-item-template">
     <li class="app-list-item player-item">
-        <img src="img/avatar-placeholder.png" alt="Avatar" class="app-list-item-avatar">
+        <div class="app-list-item-initial">
+            <span class="app-list-item-initial-text"></span>
+        </div>
         <div class="app-list-item-main-content">
             <span class="app-list-item-username">Nome de Usuário<img src="" alt="Console Icon" class="console-icon"></span>
             <span class="app-list-item-sub-info console-name"></span>
@@ -281,7 +287,9 @@
 
 <template id="friend-list-item-template">
     <li class="app-list-item friend-list-item">
-        <img src="img/avatar-placeholder.png" alt="Avatar" class="app-list-item-avatar">
+        <div class="app-list-item-initial">
+            <span class="app-list-item-initial-text"></span>
+        </div>
         <div class="app-list-item-main-content">
             <span class="app-list-item-username">Nome do Amigo <img src="" alt="Console Icon" class="console-icon"></span>
             <span class="app-list-item-sub-info console-name"></span>
@@ -297,7 +305,9 @@
 
 <template id="received-friend-request-template">
     <li class="app-list-item friend-request-item">
-        <img src="img/avatar-placeholder.png" alt="Avatar" class="app-list-item-avatar">
+        <div class="app-list-item-initial">
+            <span class="app-list-item-initial-text"></span>
+        </div>
         <div class="app-list-item-main-content">
             <span class="app-list-item-username">Solicitação De <img src="" alt="Console Icon" class="console-icon"></span>
             <span class="app-list-item-sub-info console-name"></span>
@@ -312,7 +322,9 @@
 
 <template id="sent-friend-request-template">
     <li class="app-list-item sent-friend-request-item">
-        <img src="img/avatar-placeholder.png" alt="Avatar" class="app-list-item-avatar">
+        <div class="app-list-item-initial">
+            <span class="app-list-item-initial-text"></span>
+        </div>
         <div class="app-list-item-main-content">
             <span class="app-list-item-username">Enviado Para <img src="" alt="Console Icon" class="console-icon"></span>
             <span class="app-list-item-sub-info console-name"></span>
@@ -326,7 +338,9 @@
 
 <template id="blocked-user-item-template">
     <li class="app-list-item blocked-user-item">
-        <img src="img/avatar-placeholder.png" alt="Avatar" class="app-list-item-avatar">
+        <div class="app-list-item-initial">
+            <span class="app-list-item-initial-text"></span>
+        </div>
         <div class="app-list-item-main-content">
             <span class="app-list-item-username">Nome do Usuário<img src="" alt="Console Icon" class="console-icon"></span>
             <span class="app-list-item-sub-info console-name"></span>
@@ -365,7 +379,9 @@
             <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
             
             <div class="profile-header">
-                <img id="other-user-avatar-preview" src="img/avatar-placeholder.png" alt="Avatar do Usuário" class="user-avatar-large">
+                <div class="user-initial-circle-large">
+                    <span id="other-user-initial-preview"></span>
+                </div>
                 <div class="header-info">
                     <h2 id="other-user-profile-username">Nome do Usuário</h2>
                     <p class="console-display">

@@ -35,16 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Seletores para DESKTOP
     const usernameDesktop = document.getElementById('username-desktop');
     const userConsoleIconDesktop = document.getElementById('current-user-console-icon');
-    const currentUserAvatarDesktop = document.getElementById('current-user-avatar-desktop');
+    const userInitialDesktop = document.getElementById('user-initial-desktop');
     const userWinsDesktop = document.getElementById('user-wins-desktop');
     const userLossesDesktop = document.getElementById('user-losses-desktop');
     const coinBalanceDesktop = document.getElementById('coin-balance-desktop');
     const userProfileMenuDesktop = document.getElementById('user-profile-menu-desktop');
     const dropdownTemplate = document.getElementById('user-profile-dropdown-template');
 
-    // Seletores para MOBILE (dentro do menu hambúrguer)
-    // Os seletores para o menu mobile antigo foram removidos
-    const currentUserAvatarMobile = document.getElementById('current-user-avatar-mobile');
+    // Seletores para MOBILE
+    const userInitialMobile = document.getElementById('user-initial-mobile');
 
     // --- VARIÁVEIS E FUNÇÕES GLOBAIS (PARA O SOCKET.IO E NOTIFICAÇÕES) ---
     let socket;
@@ -70,9 +69,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const userData = await response.json();
 
+            // Pega a inicial do nome de usuário
+            const initial = userData.username ? userData.username.charAt(0).toUpperCase() : '';
+
             // Atualiza elementos DESKTOP
-            if (currentUserAvatarDesktop) {
-                currentUserAvatarDesktop.src = userData.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`;
+            if (userInitialDesktop) {
+                userInitialDesktop.textContent = initial;
             }
 
             if (usernameDesktop) {
@@ -97,8 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Atualiza o avatar MOBILE
-            if (currentUserAvatarMobile) {
-                currentUserAvatarMobile.src = userData.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`;
+            if (userInitialMobile) {
+                userInitialMobile.textContent = initial;
             }
 
             localStorage.setItem('profileCompleted', userData.profileCompleted);
@@ -125,8 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (userWinsDesktop) userWinsDesktop.textContent = stats.wins || '0';
             if (userLossesDesktop) userLossesDesktop.textContent = stats.losses || '0';
             if (coinBalanceDesktop) coinBalanceDesktop.textContent = stats.coins ? stats.coins.toLocaleString('pt-BR') : '0';
-
-            // Os elementos de stats mobile foram removidos do HTML, então não são atualizados aqui.
 
         } catch (error) {
             console.error('Erro ao buscar stats:', error);
@@ -202,12 +202,12 @@ document.addEventListener('DOMContentLoaded', () => {
         emitUserConnected = () => {
             if (socket.connected && username && userId && readyToConnectUser) {
                 const userConsole = document.getElementById('current-user-console-icon') ? (document.getElementById('current-user-console-icon').dataset.consoleName || '') : '';
-                const avatarUrl = document.getElementById('current-user-avatar-desktop')?.src || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`;
-                console.log('Emitindo user connected:', { username, id: userId, avatarUrl, console: userConsole });
+                const avatarInitial = document.getElementById('user-initial-desktop')?.textContent || '';
+                console.log('Emitindo user connected:', { username, id: userId, avatarInitial, console: userConsole });
                 socket.emit('user connected', {
                     username,
                     id: userId,
-                    avatarUrl,
+                    avatarInitial,
                     console: userConsole
                 });
             }

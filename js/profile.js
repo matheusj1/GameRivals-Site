@@ -20,15 +20,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const profileForm = document.getElementById('profile-form');
     const usernameInput = document.getElementById('username');
-    // const phoneInput = document.getElementById('phone'); // CAMPO DE TELEFONE REMOVIDO
     const bioTextarea = document.getElementById('bio');
     const descriptionTextarea = document.getElementById('description');
     const consoleSelect = document.getElementById('console');
-    const avatarUploadInput = document.getElementById('avatar-upload');
-    const avatarPreview = document.getElementById('profile-avatar-preview');
+    const profileInitialPreview = document.getElementById('profile-initial-preview');
     const profileError = document.getElementById('profile-error');
-    const logoutButton = document.getElementById('logout-button'); // Botão de logout no header do profile.html
-    const dashboardLink = document.querySelector('header nav ul li a[href="dashboard.html"]'); // Link para Dashboard
+    const logoutButton = document.getElementById('logout-button');
+    const dashboardLink = document.querySelector('header nav ul li a[href="dashboard.html"]');
 
     // NOVOS ELEMENTOS DA CARTEIRA
     const walletCurrentBalanceSpan = document.getElementById('wallet-current-balance');
@@ -63,15 +61,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const userData = await response.json();
 
             usernameInput.value = userData.username || '';
-            // phoneInput.value = userData.phone || ''; // CAMPO DE TELEFONE REMOVIDO
             bioTextarea.value = userData.bio || '';
             descriptionTextarea.value = userData.description || '';
             consoleSelect.value = userData.console || '';
 
-            if (userData.avatarUrl) {
-                avatarPreview.src = userData.avatarUrl;
-            } else {
-                avatarPreview.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`;
+            if (profileInitialPreview) {
+                profileInitialPreview.textContent = userData.username ? userData.username.charAt(0).toUpperCase() : '';
             }
         } catch (error) {
             console.error('Erro ao buscar perfil:', error);
@@ -120,44 +115,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     await fetchUserProfile();
     await fetchWalletBalance();
 
-
-    // Pré-visualização da imagem do avatar
-    avatarUploadInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                avatarPreview.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        } else {
-            avatarPreview.src = `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`;
-        }
-    });
-
     // Lógica de submissão do formulário de perfil
     profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         profileError.textContent = '';
 
-        const formData = new FormData();
-        formData.append('username', usernameInput.value);
-        // formData.append('phone', phoneInput.value); // CAMPO DE TELEFONE REMOVIDO
-        formData.append('bio', bioTextarea.value);
-        formData.append('description', descriptionTextarea.value);
-        formData.append('console', consoleSelect.value);
-
-        if (avatarUploadInput.files.length > 0) {
-            formData.append('avatar', avatarUploadInput.files[0]);
-        }
+        const formData = {
+            username: usernameInput.value,
+            bio: bioTextarea.value,
+            description: descriptionTextarea.value,
+            console: consoleSelect.value
+        };
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/users/profile`, {
                 method: 'PATCH',
                 headers: {
+                    'Content-Type': 'application/json',
                     'x-auth-token': token
                 },
-                body: formData
+                body: JSON.stringify(formData)
             });
 
             const data = await response.json();
@@ -170,10 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (data.user.username) {
                     localStorage.setItem('username', data.user.username);
                     usernameInput.value = data.user.username;
-                }
-                if (data.user.avatarUrl) {
-                    localStorage.setItem('avatarUrl', data.user.avatarUrl);
-                    avatarPreview.src = data.user.avatarUrl;
+                    profileInitialPreview.textContent = data.user.username.charAt(0).toUpperCase();
                 }
                 localStorage.setItem('profileCompleted', data.user.profileCompleted);
 
@@ -207,13 +181,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (amount === 10) {
                 const pixKey = '00020126360014BR.GOV.BCB.PIX0114+5511972519097520400005303986540510.005802BR5923Matheus Jose dos Santos6009SAO PAULO62140510aUom3cX4yZ63041BB7';
-                const qrCodeUrl = 'https://github.com/matheusj1/GameRivals-Site/raw/main/img/10%20reais.jpeg'; // CORRIGIDO PARA O LINK BRUTO DO GITHUB
+                const qrCodeUrl = 'https://github.com/matheusj1/GameRivals-Site/raw/main/img/10%20reais.jpeg';
                 
                 pixQrCodeImg.src = qrCodeUrl;
                 pixKeyCopyInput.value = pixKey;
                 pixPaymentDetailsDiv.style.display = 'block';
 
-                // Cria o novo botão de notificação
                 notifyButton = document.createElement('button');
                 notifyButton.id = 'pix-notify-payment-btn';
                 notifyButton.className = 'cta-button form-submit-btn';
@@ -247,7 +220,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
             } else {
-                // Lógica para outros botões (se houver) ou apenas mostrar um aviso
                 showNotification(`Nenhuma chave Pix configurada para ${amount} moedas.`, 'info');
             }
         });
@@ -305,7 +277,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
 
     // Logout
     if (logoutButton) {

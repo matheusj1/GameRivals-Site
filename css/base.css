@@ -113,26 +113,52 @@ header .container {
     align-items: center;
     gap: 25px;
 }
-
 /* Perfil para Mobile */
 .user-nav-mobile {
-    display: none; /* Escondido por padrão */
+    display: none; /* Escondido por padrão em desktop */
 }
-.user-nav-mobile .user-avatar-mobile {
+
+/* Novo estilo para o círculo com a inicial do usuário */
+.user-initial-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 45px;
     height: 45px;
     border-radius: 50%;
+    background-color: var(--primary-neon);
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
     border: 2px solid var(--primary-neon);
-    object-fit: cover;
     box-shadow: var(--glow-soft);
     cursor: pointer;
     transition: all 0.3s ease;
 }
-.user-nav-mobile .user-avatar-mobile:hover {
+
+.user-initial-circle:hover {
     transform: scale(1.1);
     box-shadow: var(--glow-medium);
 }
-
+.user-initial-circle-large {
+    width: 120px;
+    height: 120px;
+    font-size: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: var(--primary-neon);
+    color: #fff;
+    font-weight: 700;
+    border: 3px solid var(--primary-neon);
+    box-shadow: var(--glow-medium);
+    transition: all 0.3s ease;
+}
+.user-initial-circle-large:hover {
+    transform: scale(1.05);
+    box-shadow: var(--glow-strong);
+}
 
 header nav ul#main-nav-links {
     list-style: none;
@@ -552,53 +578,92 @@ textarea[readonly] {
     
     .challenges-header {
         flex-direction: column;
+        align-items: flex-start;
         gap: 15px;
+        padding: 18px 25px;
     }
-    
-    .challenges-header h2 {
-        margin-bottom: 0;
-    }
-    
-    .challenges-header #create-challenge-btn {
+
+    .challenges-header h2 { font-size: 24px; margin-bottom: 0; }
+    .challenges-header .cta-button {
         width: 100%;
-    }
-    
-    .friends-tabs {
-        flex-wrap: wrap;
-        gap: 5px;
-    }
-    
-    .friends-tab-btn {
-        padding: 8px 12px;
-        font-size: 14px;
-        flex: 1 0 calc(50% - 10px);
-    }
-    
-    .chat-input-area input {
-        width: 70%;
-    }
-
-
-    /* Ajustes gerais para telas menores */
-    section { padding: 40px 0; }
-    section h2 { 
-        font-size: 30px;
-        margin-bottom: 30px; 
-    }
-    .cta-button {
-        padding: 12px 25px !important;
+        text-align: center;
+        padding: 12px 20px !important;
         font-size: 15px;
     }
 
-    footer {
-        padding: 25px 0;
+    .my-challenge-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding: 15px;
+        gap: 15px;
     }
-    footer ul li {
-        margin: 0 10px;
+    .my-challenge-card .game-info,
+    .my-challenge-card .players-info,
+    .my-challenge-card .status-indicator,
+    .my-challenge-card .action-area {
+        width: 100%;
+        justify-content: center;
     }
-    footer p {
+
+    .my-challenge-card .game-info { flex-direction: column; text-align: center; margin-bottom: 5px; }
+    .my-challenge-card .game-info img { margin-bottom: 5px; }
+
+    .my-challenge-card .players-info { flex-direction: column; margin-bottom: 5px; }
+    .my-challenge-card .players-info .username { font-size: 15px; }
+    .my-challenge-card .players-info .vs-text { margin: 3px 0; font-size: 11px; }
+
+    .report-result-btn, .delete-challenge-btn { width: 100%; max-width: 180px; margin: 0 auto; padding: 10px 15px; font-size: 14px; }
+    .show-more-btn { width: 100%; padding: 12px 20px; font-size: 15px; }
+    
+    .sidebar-column { gap: 25px; }
+    .friends-section-container, .chat-container { padding: 18px; }
+    .friends-section-container h3, .chat-container h3 { font-size: 18px; }
+    .player-list, .friends-list, .friend-requests-list, .sent-friend-requests-list, .search-results-list, .blocked-users-list { max-height: unset; overflow-y: visible; }
+    .friends-tabs { 
+        justify-content: flex-start; 
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch; 
+        padding-bottom: 5px; 
+        -ms-overflow-style: none; 
+        scrollbar-width: none; 
+    }
+    .friends-tabs::-webkit-scrollbar { display: none; }
+
+    .friends-tab-btn { flex-shrink: 0; font-size: 13px; padding: 10px 8px; }
+    .friends-content { padding: 15px; }
+    .app-list-item { 
+        flex-wrap: wrap; 
+        justify-content: flex-start;
+        gap: 8px; 
+        padding: 8px 0; 
+    }
+    .app-list-item-initial {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+        margin-right: 5px; 
+    }
+    .app-list-item-initial-text {
         font-size: 14px;
     }
+    .app-list-item-main-content { 
+        flex-basis: calc(100% - 45px); 
+        margin-bottom: 5px; 
+    }
+    .app-list-item-actions { 
+        width: 100%; 
+        justify-content: flex-end; 
+        margin-top: 5px; 
+    }
+    .chat-messages { max-height: 250px; }
+    .chat-input-area input { width: calc(100% - 90px); }
+    .chat-input-area button { padding: 0 15px; }
+    .emoji-toggle-btn { margin-left: auto; width: 40px; height: 40px; font-size: 20px;}
+    .emoji-palette { bottom: 90px; right: 10px; max-width: unset; width: calc(100% - 20px); }
+    .private-chat-window { width: calc(100% - 40px); max-width: 320px; right: 10px; height: 350px; }
+    .private-chat-header { font-size: 16px; padding: 10px 15px; }
+    .close-private-chat { font-size: 24px; }
+    .private-chat-messages { padding: 10px; }
 }
 
 /* Para telas muito pequenas */

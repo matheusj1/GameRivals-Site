@@ -201,6 +201,10 @@ export const fetchAndDisplayFriends = async (token) => {
                 if (String(friend._id) === String(currentUserId)) {
                     return;
                 }
+                if (!friend.username) {
+                    console.warn(`[friends_and_chat] Amigo sem nome de usuário ao renderizar:`, friend);
+                    return;
+                }
 
                 const friendItem = friendItemTemplate.content.cloneNode(true).firstElementChild;
                 if (friend._id) {
@@ -210,21 +214,23 @@ export const fetchAndDisplayFriends = async (token) => {
                     console.warn(`[friends_and_chat] Amigo sem ID ao renderizar: ${friend.username}`);
                     return;
                 }
+                
+                const initial = friend.username.charAt(0).toUpperCase();
+                friendItem.querySelector('.app-list-item-initial-text').textContent = initial;
 
-                friendItem.querySelector('.app-list-item-avatar').src = friend.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
                 const consoleIconHtml = getConsoleIconPath(friend.console) ? `<img src="${getConsoleIconPath(friend.console)}" alt="${friend.console}" class="console-icon">` : '';
                 friendItem.querySelector('.app-list-item-username').innerHTML = `${friend.username} ${consoleIconHtml}`;
                 friendItem.querySelector('.app-list-item-sub-info.console-name').textContent = friend.console || '';
 
-                const onlineStatusTextSpan = friendItem.querySelector('.app-list-item-sub-info.online-status'); // Renomeado para evitar conflito com classe app-list-item
+                const onlineStatusTextSpan = friendItem.querySelector('.app-list-item-sub-info.online-status');
                 if (currentOnlineUsers.has(String(friend._id))) {
-                    friendItem.classList.add('is-online'); // Adiciona classe para borda online
+                    friendItem.classList.add('is-online');
                     friendItem.classList.remove('is-offline');
                     onlineStatusTextSpan.textContent = 'Online';
                     onlineStatusTextSpan.classList.add('online');
                     onlineStatusTextSpan.classList.remove('offline');
                 } else {
-                    friendItem.classList.add('is-offline'); // Adiciona classe para borda offline
+                    friendItem.classList.add('is-offline');
                     friendItem.classList.remove('is-online');
                     onlineStatusTextSpan.textContent = 'Offline';
                     onlineStatusTextSpan.classList.add('offline');
@@ -259,11 +265,18 @@ export const fetchAndDisplayFriendRequests = async (token) => {
                     console.warn(`[friends_and_chat] Solicitação recebida sem ID ou senderId ao renderizar:`, request);
                     return;
                 }
+                if (!request.senderUsername) {
+                    console.warn(`[friends_and_chat] Solicitação recebida sem nome de usuário ao renderizar:`, request);
+                    return;
+                }
 
                 const requestItem = requestItemTemplate.content.cloneNode(true).firstElementChild;
                 requestItem.dataset.requestId = request.requestId;
                 requestItem.dataset.senderId = request.senderId;
-                requestItem.querySelector('.app-list-item-avatar').src = request.senderAvatar || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
+
+                const initial = request.senderUsername.charAt(0).toUpperCase();
+                requestItem.querySelector('.app-list-item-initial-text').textContent = initial;
+
                 const consoleIconHtml = getConsoleIconPath(request.senderConsole) ? `<img src="${getConsoleIconPath(request.senderConsole)}" alt="${request.senderConsole}" class="console-icon">` : '';
                 requestItem.querySelector('.app-list-item-username').innerHTML = `Solicitação De ${request.senderUsername} ${consoleIconHtml}`;
                 requestItem.querySelector('.app-list-item-sub-info.console-name').textContent = request.senderConsole || '';
@@ -296,10 +309,18 @@ export const fetchAndDisplaySentFriendRequests = async (token) => {
                     console.warn(`[friends_and_chat] Solicitação enviada sem ID ou receiverId ao renderizar:`, invite);
                     return;
                 }
+                if (!invite.receiverUsername) {
+                    console.warn(`[friends_and_chat] Solicitação enviada sem nome de usuário ao renderizar:`, invite);
+                    return;
+                }
+
                 const requestItem = sentRequestItemTemplate.content.cloneNode(true).firstElementChild;
                 requestItem.dataset.requestId = invite.requestId;
                 requestItem.dataset.receiverId = invite.receiverId;
-                requestItem.querySelector('.app-list-item-avatar').src = invite.receiverAvatar || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
+
+                const initial = invite.receiverUsername.charAt(0).toUpperCase();
+                requestItem.querySelector('.app-list-item-initial-text').textContent = initial;
+
                 const consoleIconHtml = getConsoleIconPath(invite.receiverConsole) ? `<img src="${getConsoleIconPath(invite.receiverConsole)}" alt="${invite.receiverConsole}" class="console-icon">` : '';
                 requestItem.querySelector('.app-list-item-username').innerHTML = `Enviado Para ${invite.receiverUsername} ${consoleIconHtml}`;
                 requestItem.querySelector('.app-list-item-sub-info.console-name').textContent = invite.receiverConsole || '';
@@ -331,10 +352,18 @@ export const fetchAndDisplayBlockedUsers = async (token) => {
                     console.warn(`[friends_and_chat] Usuário bloqueado sem ID ao renderizar:`, user);
                     return;
                 }
+                if (!user.username) {
+                    console.warn(`[friends_and_chat] Usuário bloqueado sem nome de usuário ao renderizar:`, user);
+                    return;
+                }
+
                 const blockedItem = blockedUserItemTemplate.content.cloneNode(true).firstElementChild;
                 blockedItem.dataset.id = user._id;
                 blockedItem.dataset.username = user.username;
-                blockedItem.querySelector('.app-list-item-avatar').src = user.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
+
+                const initial = user.username.charAt(0).toUpperCase();
+                blockedItem.querySelector('.app-list-item-initial-text').textContent = initial;
+
                 const consoleIconHtml = getConsoleIconPath(user.console) ? `<img src="${getConsoleIconPath(user.console)}" alt="${user.console}" class="console-icon">` : '';
                 blockedItem.querySelector('.app-list-item-username').innerHTML = `${user.username} ${consoleIconHtml}`;
                 blockedItem.querySelector('.app-list-item-sub-info.console-name').textContent = user.console || '';
@@ -393,14 +422,14 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                 const searchResultItemTemplate = document.getElementById('search-result-item-template');
                 otherUsers.forEach(user => {
                     if (user.id && user.username) {
-                        const avatarSrc = user.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
+                        const initial = user.username.charAt(0).toUpperCase();
                         const consoleIconHtml = getConsoleIconPath(user.console) ? `<img src="${getConsoleIconPath(user.console)}" alt="${user.console}" class="console-icon">` : '';
                         const playerItem = searchResultItemTemplate.content.cloneNode(true).firstElementChild;
                         playerItem.dataset.id = user.id;
                         playerItem.dataset.username = user.username;
-                        playerItem.querySelector('.app-list-item-avatar').src = avatarSrc; // Use a nova classe de avatar
-                        playerItem.querySelector('.app-list-item-username').innerHTML = `${user.username} ${consoleIconHtml}`; // Use a nova classe de username
-                        playerItem.querySelector('.app-list-item-sub-info.console-name').textContent = user.console || ''; // Use a nova classe de sub-info
+                        playerItem.querySelector('.app-list-item-initial-text').textContent = initial;
+                        playerItem.querySelector('.app-list-item-username').innerHTML = `${user.username} ${consoleIconHtml}`;
+                        playerItem.querySelector('.app-list-item-sub-info.console-name').textContent = user.console || '';
 
                         playerListUl.appendChild(playerItem);
                     }
@@ -602,7 +631,9 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                     const userData = await response.json();
 
                     document.getElementById('other-user-profile-username').textContent = userData.username;
-                    document.getElementById('other-user-avatar-preview').src = userData.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
+                    const initial = userData.username.charAt(0).toUpperCase();
+                    document.getElementById('other-user-initial-preview').textContent = initial;
+
                     document.getElementById('other-user-wins').textContent = userData.wins;
                     document.getElementById('other-user-losses').textContent = userData.losses;
                     document.getElementById('other-user-bio').textContent = userData.bio || 'N/A';
@@ -998,21 +1029,21 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
 
             if (query.length < 3) {
                 friendSearchError.textContent = 'Digite pelo menos 3 caracteres para pesquisar.';
-                friendSearchInput.classList.add('error'); // Feedback de erro no input
+                friendSearchInput.classList.add('error');
                 return;
             } else {
                 friendSearchInput.classList.remove('error');
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`, { // Atualizado
+                const response = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`, {
                     headers: { 'x-auth-token': token }
                 });
                 const data = await response.json();
 
                 if (!response.ok) {
                     friendSearchError.textContent = data.message || 'Erro ao pesquisar usuários.';
-                    friendSearchInput.classList.add('error'); // Feedback de erro no input
+                    friendSearchInput.classList.add('error');
                     return;
                 }
 
@@ -1028,28 +1059,28 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                             if (String(result._id) === String(currentUserId)) {
                                 return;
                             }
-                            if (!result._id) {
-                                console.warn(`[friends_and_chat] Usuário da pesquisa sem ID ao renderizar:`, result);
+                            if (!result._id || !result.username) {
+                                console.warn(`[friends_and_chat] Usuário da pesquisa sem ID ou nome ao renderizar:`, result);
                                 return;
                             }
+                            const initial = result.username.charAt(0).toUpperCase();
 
                             const searchItem = searchResultItemTemplate.content.cloneNode(true).firstElementChild;
                             searchItem.dataset.id = result._id;
                             searchItem.dataset.username = result.username;
-                            searchItem.querySelector('.app-list-item-avatar').src = result.avatarUrl || `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
+                            searchItem.querySelector('.app-list-item-initial-text').textContent = initial;
                             const consoleIconHtml = getConsoleIconPath(result.console) ? `<img src="${getConsoleIconPath(result.console)}" alt="${result.console}" class="console-icon">` : '';
-                            searchItem.querySelector('.app-list-item-username').innerHTML = `${result.username} ${consoleIconHtml}`; // Use a nova classe de username
-                            searchItem.querySelector('.app-list-item-sub-info.console-name').textContent = result.console || ''; // Adiciona o console
+                            searchItem.querySelector('.app-list-item-username').innerHTML = `${result.username} ${consoleIconHtml}`;
+                            searchItem.querySelector('.app-list-item-sub-info.console-name').textContent = result.console || '';
 
                             searchResultsListUl.appendChild(searchItem);
                         }
-
                     });
                 }
             } catch (error) {
                 console.error('[friends_and_chat] Erro na pesquisa de amigos/grupos:', error);
                 friendSearchError.textContent = 'Não foi possível conectar ao servidor para pesquisar.';
-                friendSearchInput.classList.add('error'); // Feedback de erro no input
+                friendSearchInput.classList.add('error');
             }
         };
 
@@ -1073,5 +1104,4 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
             showNotification('A funcionalidade de grupos foi desativada.', 'info');
         });
     }
-
 };

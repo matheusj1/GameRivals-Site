@@ -237,23 +237,33 @@
     border-bottom: none;
 }
 
-.app-list-item-avatar { 
-    width: 35px; 
-    height: 35px; 
-    border-radius: 50%; 
-    object-fit: cover;
-    border: 1px solid var(--primary-neon); /* Borda padrão para avatares */
-    flex-shrink: 0; 
-    transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Transição para a borda */
+/* NOVO: Estilos para o avatar de inicial */
+.app-list-item-initial {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.app-list-item-initial-text {
+    color: var(--primary-neon);
+    font-weight: 500;
+    font-size: 16px;
+    text-transform: uppercase;
 }
 
 /* NOVAS: Classes para a borda do avatar de status online/offline */
-.app-list-item.is-online .app-list-item-avatar {
+.app-list-item.is-online .app-list-item-initial {
     border: 2px solid var(--win-color); /* Borda verde para online */
     box-shadow: 0 0 5px var(--win-color); /* Brilho suave */
 }
 
-.app-list-item.is-offline .app-list-item-avatar {
+.app-list-item.is-offline .app-list-item-initial {
     border: 2px solid var(--loss-color); /* Borda vermelha para offline */
     box-shadow: none; /* Sem brilho ou brilho bem sutil para offline */
 }
@@ -534,11 +544,14 @@
         padding: 6px 0; 
     }
     /* MUDANÇA: Atualiza a borda do avatar no mobile */
-    .app-list-item-avatar { /* Usar a classe base */
+    .app-list-item-initial { /* Usar a classe base */
         margin-right: 4px; 
         width: 28px; /* Avatares menores */
         height: 28px; 
         border: none; /* Garante que a borda padrão seja removida aqui se necessário */
+    }
+    .app-list-item-initial-text {
+        font-size: 13px;
     }
     .app-list-item-main-content { /* Usar a classe base */
         flex-basis: calc(100% - 38px); 
