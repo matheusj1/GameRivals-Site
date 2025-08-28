@@ -9,11 +9,6 @@ const myChallengesListContainer = document.querySelector('.my-challenges-list');
 const showMoreContainer = document.getElementById('my-challenges-show-more-container');
 const showMoreBtn = document.getElementById('my-challenges-show-more-btn');
 const createChallengeBtn = document.getElementById('create-challenge-btn');
-const createModalBackdrop = document.querySelector('#challenge-modal-backdrop');
-const createChallengeForm = document.querySelector('#create-challenge-form');
-const closeCreateModalBtn = createModalBackdrop?.querySelector('.close-modal-btn');
-const cancelCreateChallengeBtn = document.getElementById('cancel-create-challenge-btn');
-
 
 // Elementos do novo modal de desafio privado
 const privateChallengeModalBackdrop = document.getElementById('private-challenge-modal-backdrop');
@@ -41,7 +36,7 @@ function applyButtonFeedback(button, isSuccess) {
     button.classList.remove('action-success', 'action-error', 'flash-success', 'flash-error');
     button.style.backgroundColor = ''; 
     button.style.color = '';
-    button.style.box-shadow = '';
+    button.style.boxShadow = '';
 
 
     if (isSuccess) {
@@ -60,7 +55,7 @@ function applyButtonFeedback(button, isSuccess) {
         button.textContent = originalText;
         button.style.backgroundColor = originalBg;
         button.style.color = originalColor;
-        button.style.box-shadow = originalBoxShadow;
+        button.style.boxShadow = originalBoxShadow;
         button.disabled = false; // Reabilita o botão
     }, 1000); // Duração da animação + um pequeno atraso
 }
@@ -80,8 +75,6 @@ export const fetchAndDisplayChallenges = async (token, userId) => {
             challengesListContainer.innerHTML = '<p class="no-challenges-message">Nenhum desafio aberto no momento.</p>';
         } else {
             openChallenges.forEach(challenge => {
-                const isMyChallenge = challenge.createdBy && String(challenge.createdBy._id) === String(userId);
-
                 const challengerUsername = challenge.createdBy ? challenge.createdBy.username : 'Usuário Deletado';
                 const challengerAvatar = challenge.createdBy && challenge.createdBy.avatarUrl ? challenge.createdBy.avatarUrl : `${FRONTEND_BASE_URL}/img/avatar-placeholder.png`; // Atualizado
 
@@ -92,13 +85,6 @@ export const fetchAndDisplayChallenges = async (token, userId) => {
                     gameIconSrc = 'img/ea25.avif';
                 } else if (challenge.game === 'Rocket League') {
                     gameIconSrc = 'img/rl.jpg';
-                }
-
-                let actionsHTML = '';
-                if (isMyChallenge) {
-                    actionsHTML = `<button class="cancel-challenge-btn" title="Cancelar Desafio">❌</button>`;
-                } else {
-                    actionsHTML = `<button class="accept-challenge-btn">Aceitar</button>`;
                 }
 
                 const scheduledTimeHTML = challenge.scheduledTime ? `<p>Horário Sugerido: ${challenge.scheduledTime}</p>` : '';
@@ -121,7 +107,7 @@ export const fetchAndDisplayChallenges = async (token, userId) => {
                             <span class="coin-icon">💰</span>
                             <span class="bet-amount">${challenge.betAmount}</span>
                         </div>
-                        ${actionsHTML}
+                        <button class="accept-challenge-btn">Aceitar</button>
                     </div>
                 `;
                 challengesListContainer.innerHTML += challengeCardHTML;
@@ -169,7 +155,6 @@ export const renderMyChallenges = (userId) => {
                 cancelled: 'Cancelado'
             };
             const statusClass = challenge.status;
-            const isMyChallenge = String(challenge.createdBy._id) === String(userId);
 
             let outcomeClass = '';
             if (challenge.status === 'completed' && challenge.winner) {
@@ -181,14 +166,14 @@ export const renderMyChallenges = (userId) => {
             }
 
             let actionButtonHTML = '';
-            if (challenge.status === 'open' && isMyChallenge) {
-                 actionButtonHTML = '<button class="cancel-challenge-btn" title="Cancelar Desafio">❌</button>';
-            } else if (challenge.status === 'accepted') {
-                const hasUserReported = challenge.results && challenge.results.some(r => String(r.reportedBy) === String(userId));
-                const otherPlayerId = challenge.opponent ? (String(challenge.createdBy._id) === String(userId) ? challenge.opponent._id : challenge.createdBy._id) : null;
-                const otherPlayerUsername = challenge.opponent ? (String(challenge.createdBy._id) === String(userId) ? challenge.opponent.username : challenge.createdBy.username) : null;
+            const hasUserReported = challenge.results && challenge.results.some(r => String(r.reportedBy) === String(userId));
+            const otherPlayerId = challenge.opponent ? (String(challenge.createdBy._id) === String(userId) ? challenge.opponent._id : challenge.createdBy._id) : null;
+            const otherPlayerUsername = challenge.opponent ? (String(challenge.createdBy._id) === String(userId) ? challenge.opponent.username : challenge.createdBy.username) : null;
 
-                if (otherPlayerId && otherPlayerUsername) {
+
+            if (challenge.status === 'accepted') {
+                // Adiciona o botão de chat privado
+                if (otherPlayerId && otherPlayerUsername) { // Garante que oponente exista
                     actionButtonHTML += `<button class="start-private-chat-from-challenge-btn" data-opponent-id="${otherPlayerId}" data-opponent-username="${otherPlayerUsername}" title="Chat Privado">💬</button>`;
                 }
                 if (!hasUserReported) {
@@ -256,95 +241,18 @@ export const openPrivateChallengeModal = (opponentId, opponentUsername) => {
 };
 
 export const setupChallengeListeners = (token, userId, refreshDashboard, socket) => { // Receber o socket
-    const closeCreateModal = () => createModalBackdrop.classList.remove('active');
-
     if (showMoreBtn) {
         showMoreBtn.addEventListener('click', () => {
             challengesToShow += 3;
             renderMyChallenges(userId);
         });
     }
-    
-    // Adicionado: Event listener para o novo botão de cancelar
-    if (cancelCreateChallengeBtn) {
-        cancelCreateChallengeBtn.addEventListener('click', closeCreateModal);
-    }
-    
-    // As outras lógicas de listeners do modal de criação de desafios permanecem inalteradas
-    if (createChallengeBtn) {
-        createChallengeBtn.addEventListener('click', () => createModalBackdrop.classList.add('active'));
-    }
-
-    if (closeCreateModalBtn) {
-        closeCreateModalBtn.addEventListener('click', closeCreateModal);
-    }
-
-    if (createModalBackdrop) {
-        createModalBackdrop.addEventListener('click', (e) => {
-            if (e.target === createModalBackdrop) closeCreateModal();
-        });
-    }
-    
-    if (createChallengeForm) {
-        createChallengeForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const game = document.getElementById('game-select');
-            const consoleValue = document.getElementById('console-select');
-            const betAmount = document.getElementById('bet-amount');
-            const scheduledTime = document.getElementById('scheduled-time'); // Get the scheduled time
-            const errorElement = document.getElementById('challenge-error');
-            errorElement.textContent = '';
-
-            // Limpa classes de erro anteriores
-            [game, consoleValue, betAmount].forEach(input => input.classList.remove('error'));
-
-
-            let hasError = false;
-            if (!game.value) { game.classList.add('error'); hasError = true; }
-            if (!consoleValue.value) { consoleValue.classList.add('error'); hasError = true; }
-            if (!betAmount.value || Number(betAmount.value) < 10) { betAmount.classList.add('error'); hasError = true; }
-
-            if (hasError) {
-                errorElement.textContent = 'Por favor, preencha todos os campos obrigatórios e com valores válidos.';
-                return;
-            }
-
-            const submitButton = createChallengeForm.querySelector('button[type="submit"]');
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/challenges`, { // Atualizado
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
-                    body: JSON.stringify({ game: game.value, console: consoleValue.value, betAmount: Number(betAmount.value), scheduledTime: scheduledTime.value }), // Include scheduledTime
-                });
-                const data = await response.json();
-                if (!response.ok) {
-                    showNotification(data.message, 'error');
-                    applyButtonFeedback(submitButton, false); // Feedback de erro
-                } else {
-                    showNotification('Desafio criado com sucesso!', 'success');
-                    applyButtonFeedback(submitButton, true); // Feedback de sucesso
-                    closeCreateModal();
-                    createChallengeForm.reset();
-                    refreshDashboard();
-                }
-            } catch (error) {
-                console.error('Erro ao criar desafio:', error);
-                showNotification('Não foi possível conectar ao servidor.', 'error');
-                applyButtonFeedback(submitButton, false); // Feedback de erro
-            }
-        });
-    }
 
     if (challengesListContainer) {
         challengesListContainer.addEventListener('click', async (e) => {
             const targetButton = e.target;
-            const challengeCard = targetButton.closest('.challenge-card');
-            if (!challengeCard) return;
-            
-            const challengeId = challengeCard.dataset.challengeId;
-
             if (targetButton.classList.contains('accept-challenge-btn')) {
+                const challengeId = targetButton.closest('.challenge-card').dataset.challengeId;
                 if (!challengeId) return;
 
                 try {
@@ -371,33 +279,15 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
     }
 
     if (myChallengesListContainer) {
-        myChallengesListContainer.addEventListener('click', async (e) => {
+        myChallengesListContainer.addEventListener('click', (e) => {
             const target = e.target;
             const challengeCard = target.closest('.my-challenge-card');
             if (!challengeCard) return;
 
             const challengeId = challengeCard.dataset.challengeId;
 
-            if (target.classList.contains('cancel-challenge-btn')) {
-                 if (confirm('Tem certeza que deseja cancelar este desafio? Suas moedas serão devolvidas.')) {
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/api/challenges/${challengeId}/cancel`, {
-                            method: 'PATCH',
-                            headers: { 'x-auth-token': token }
-                        });
-                        const data = await response.json();
-                        if (!response.ok) {
-                            showNotification(data.message || 'Erro ao cancelar desafio.', 'error');
-                        } else {
-                            showNotification(data.message, 'success');
-                            refreshDashboard();
-                        }
-                    } catch (error) {
-                        console.error('Erro ao cancelar desafio:', error);
-                        showNotification('Não foi possível conectar ao servidor.', 'error');
-                    }
-                }
-            } else if (target.classList.contains('start-private-chat-from-challenge-btn')) {
+            // NOVO: Lógica para o botão de chat privado
+            if (target.classList.contains('start-private-chat-from-challenge-btn')) {
                 const opponentId = target.dataset.opponentId;
                 const opponentUsername = target.dataset.opponentUsername;
                 const privateChatsContainer = document.getElementById('private-chats-container'); // Precisa ser acessível
@@ -505,6 +395,71 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
                 } catch (error) {
                     console.error('Erro ao reportar resultado:', error);
                     errorElement.textContent = 'Não foi possível conectar ao servidor.';
+                    applyButtonFeedback(submitButton, false); // Feedback de erro
+                }
+            });
+        }
+    }
+
+    const createModalBackdrop = document.querySelector('#challenge-modal-backdrop');
+    if (createChallengeBtn && createModalBackdrop) {
+        const closeCreateModalBtn = createModalBackdrop.querySelector('.close-modal-btn');
+        const createChallengeForm = document.querySelector('#create-challenge-form');
+
+        createChallengeBtn.addEventListener('click', () => createModalBackdrop.classList.add('active'));
+
+        const closeCreateModal = () => createModalBackdrop.classList.remove('active');
+        if (closeCreateModalBtn) closeCreateModalBtn.addEventListener('click', closeCreateModal);
+        createModalBackdrop.addEventListener('click', (e) => {
+            if (e.target === createModalBackdrop) closeCreateModal();
+        });
+
+        if (createChallengeForm) {
+            createChallengeForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const game = document.getElementById('game-select');
+                const consoleValue = document.getElementById('console-select');
+                const betAmount = document.getElementById('bet-amount');
+                const scheduledTime = document.getElementById('scheduled-time'); // Get the scheduled time
+                const errorElement = document.getElementById('challenge-error');
+                errorElement.textContent = '';
+
+                // Limpa classes de erro anteriores
+                [game, consoleValue, betAmount].forEach(input => input.classList.remove('error'));
+
+
+                let hasError = false;
+                if (!game.value) { game.classList.add('error'); hasError = true; }
+                if (!consoleValue.value) { consoleValue.classList.add('error'); hasError = true; }
+                if (!betAmount.value || Number(betAmount.value) < 10) { betAmount.classList.add('error'); hasError = true; }
+
+                if (hasError) {
+                    errorElement.textContent = 'Por favor, preencha todos os campos obrigatórios e com valores válidos.';
+                    return;
+                }
+
+                const submitButton = createChallengeForm.querySelector('button[type="submit"]');
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/challenges`, { // Atualizado
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+                        body: JSON.stringify({ game: game.value, console: consoleValue.value, betAmount: Number(betAmount.value), scheduledTime: scheduledTime.value }), // Include scheduledTime
+                    });
+                    const data = await response.json();
+                    if (!response.ok) {
+                        showNotification(data.message, 'error');
+                        applyButtonFeedback(submitButton, false); // Feedback de erro
+                    } else {
+                        showNotification('Desafio criado com sucesso!', 'success');
+                        applyButtonFeedback(submitButton, true); // Feedback de sucesso
+                        closeCreateModal();
+                        createChallengeForm.reset();
+                        refreshDashboard();
+                    }
+                } catch (error) {
+                    console.error('Erro ao criar desafio:', error);
+                    showNotification('Não foi possível conectar ao servidor.', 'error');
                     applyButtonFeedback(submitButton, false); // Feedback de erro
                 }
             });
