@@ -706,3 +706,29 @@ textarea[readonly] {
         width: 65%;
     }
 }
+
+/* arquivo: site_de_jogos/css/base.css */
+
+/* ... (código CSS existente) ... */
+
+/* Adicione esta regra ao final do arquivo ou na seção de responsividade */
+/* Esconde a navegação mobile e seus componentes em telas grandes */
+.user-nav-mobile {
+    display: none;
+    align-items: center;
+    gap: 15px; /* Espaço entre o avatar e o botão */
+}
+/* Altera o display para block ou flex apenas em telas menores */
+@media (max-width: 768px) {
+    .user-nav-mobile {
+        display: flex; /* Ou flex, dependendo do layout desejado */
+    }
+    .user-nav-desktop {
+        display: none;
+    }
+    /* Oculta a navegação principal para telas pequenas */
+    header nav {
+        display: none;
+    }
+}
+/* ... (restante do código CSS) ... */

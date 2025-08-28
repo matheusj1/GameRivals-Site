@@ -25,7 +25,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const consoleSelect = document.getElementById('console');
     const profileInitialPreview = document.getElementById('profile-initial-preview');
     const profileError = document.getElementById('profile-error');
-    const logoutButton = document.getElementById('logout-button');
+
+    // Seletor para os botões de logout, agora pegando ambos por ID
+    const logoutButtonDesktop = document.getElementById('logout-button-desktop');
+    const logoutButtonMobile = document.getElementById('logout-button-mobile');
+    
     const dashboardLink = document.querySelector('header nav ul li a[href="dashboard.html"]');
 
     // NOVOS ELEMENTOS DA CARTEIRA
@@ -67,6 +71,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (profileInitialPreview) {
                 profileInitialPreview.textContent = userData.username ? userData.username.charAt(0).toUpperCase() : '';
+            }
+            
+            // Adicionado: Atualiza o inicial do avatar mobile também
+            const userInitialMobile = document.getElementById('user-initial-mobile');
+            if (userInitialMobile) {
+                userInitialMobile.textContent = userData.username ? userData.username.charAt(0).toUpperCase() : '';
             }
         } catch (error) {
             console.error('Erro ao buscar perfil:', error);
@@ -278,14 +288,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Logout
-    if (logoutButton) {
-        logoutButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.clear();
-            showNotification('Você foi desconectado com sucesso.', 'info');
-            setTimeout(() => { window.location.href = 'login-split-form.html'; }, 1000);
-        });
+    // Lógica de Logout - Agora aplicável a ambos os botões
+    const handleLogout = (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        showNotification('Você foi desconectado com sucesso.', 'info');
+        setTimeout(() => { window.location.href = 'login-split-form.html'; }, 1000);
+    };
+
+    if (logoutButtonDesktop) {
+        logoutButtonDesktop.addEventListener('click', handleLogout);
+    }
+    if (logoutButtonMobile) {
+        logoutButtonMobile.addEventListener('click', handleLogout);
     }
 
     // Link para Dashboard
