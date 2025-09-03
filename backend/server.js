@@ -20,6 +20,7 @@ const Challenge = require('./models/Challenge');
 const Message = require('./models/Message');
 const FriendRequest = require('./models/FriendRequest');
 const PixPaymentNotification = require('./models/PixPaymentNotification'); // NOVO: Importe o novo modelo
+const WithdrawalRequest = require('./models/WithdrawalRequest'); // NOVO: Importe o modelo de saque
 
 const auth = require('./middleware/auth');
 const adminAuth = require('./middleware/adminAuth');
@@ -227,7 +228,7 @@ io.on('connection', async (socket) => {
             const senderDB = await User.findById(senderUserId);
             const recipientDB = await User.findById(data.toUserId);
 
-            if (senderDB.blockedUsers.includes(data.toUserId) || recipientDB.blockedUsers.includes(senderUserId)) {
+            if (senderDB.blockedUsers.includes(data.toUserId) || recipientDB.blockedUsers.includes(senderId)) {
                 console.log('[SOCKET PRIVATE CHAT] Tentativa de enviar mensagem privada para/de um usuário bloqueado. Ação negada.');
                 return;
             }
@@ -469,7 +470,7 @@ app.post('/api/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
         const newUser = new User({ username, fullName, cpf, email, password: hashedPassword, wins: 0, losses: 0, coins: 1000, role: 'user', isActive: true, profileCompleted: false });
         await newUser.save();
-        res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
+        res.status(201).json({ message: 'Usuário cadastrado com sucesso.' });
     }
     catch (error) {
         console.error('[API REGISTER] Erro no cadastro:', error);
@@ -498,7 +499,7 @@ app.post('/api/login', async (req, res) => {
         const payload = { id: user.id, username: user.username, role: user.role };
         const token = jwt.sign(payload, process.env.JWT_SECRET || 'seu_segredo_jwt_padrao', { expiresIn: '1h' });
 
-        res.status(200).json({ message: 'Login bem-sucedido!', token: token, username: user.username, userId: user.id, userRole: user.role, profileCompleted: user.profileCompleted });
+        res.status(200).json({ message: 'Login bem-sucedido.', token: token, username: user.username, userId: user.id, userRole: user.role, profileCompleted: user.profileCompleted });
     }
     catch (error) {
         console.error('[API LOGIN] Erro no login:', error);
@@ -571,7 +572,7 @@ app.patch('/api/admin/confirm-pix/:paymentId', adminAuth, async (req, res) => {
             io.to(onlineUsers.get(String(user._id)).socketId).emit('wallet updated', { newBalance: user.coins });
         }
 
-        res.status(200).json({ message: 'Pagamento confirmado e saldo atualizado com sucesso!' });
+        res.status(200).json({ message: 'Pagamento confirmado e saldo atualizado com sucesso.' });
 
     } catch (error) {
         console.error('[API ADMIN] Erro ao confirmar pagamento Pix:', error);
@@ -579,23 +580,127 @@ app.patch('/api/admin/confirm-pix/:paymentId', adminAuth, async (req, res) => {
     }
 });
 
+// NOVO: Rota para o usuário solicitar um saque
+app.post('/api/wallet/withdraw-request', auth, async (req, res) => {
+    const { amount, pixKeyType, pixKeyValue } = req.body;
+    const userId = req.user.id;
 
-app.post('/api/wallet/withdraw', auth, async (req, res) => {
     try {
-        const { amount } = req.body;
-        const userId = req.user.id;
-        if (typeof amount !== 'number' || amount <= 0) { return res.status(400).json({ message: 'Valor de saque inválido. Deve ser um número positivo.' }); }
+        // 1. Validação básica
+        if (typeof amount !== 'number' || amount <= 0) {
+            return res.status(400).json({ message: 'Valor de saque inválido. Deve ser um número positivo.' });
+        }
+        if (!pixKeyType || !pixKeyValue) {
+            return res.status(400).json({ message: 'Tipo ou valor da chave Pix ausente.' });
+        }
+
+        // 2. Verifica se o usuário tem saldo suficiente
         const user = await User.findById(userId);
-        if (!user) { return res.status(404).json({ message: 'Usuário não encontrado.' }); }
-        if (user.coins < amount) { return res.status(400).json({ message: 'Saldo insuficiente para realizar este saque.' }); }
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não encontrado.' });
+        }
+        if (user.coins < amount) {
+            return res.status(400).json({ message: 'Saldo insuficiente para realizar este saque.' });
+        }
+
+        // 3. Cria a nova solicitação de saque
+        const newWithdrawal = new WithdrawalRequest({
+            userId: userId,
+            amount: amount,
+            pixKeyType: pixKeyType,
+            pixKeyValue: pixKeyValue
+        });
+        await newWithdrawal.save();
+
+        // 4. Debita as moedas do saldo do usuário imediatamente
         user.coins -= amount;
         await user.save();
-        res.status(200).json({ message: `Saque de ${amount} moedas realizado com sucesso!`, newBalance: user.coins });
+
+        console.log(`[WITHDRAWAL REQUEST] Usuário ${user.username} solicitou um saque de ${amount} moedas para a chave Pix (${pixKeyType}): ${pixKeyValue}`);
+
+        res.status(200).json({ message: 'Solicitação de saque enviada com sucesso! Aguarde a aprovação.' });
+
     } catch (error) {
-        console.error('[API WALLET] Erro ao processar saque:', error);
-        res.status(500).json({ message: 'Erro no servidor ao processar saque.' });
+        console.error('[API WALLET] Erro ao solicitar saque:', error);
+        res.status(500).json({ message: 'Erro no servidor ao processar a solicitação de saque.' });
     }
 });
+
+// NOVO: Rota de admin para listar solicitações de saque pendentes
+app.get('/api/admin/pending-withdrawals', adminAuth, async (req, res) => {
+    try {
+        const pendingWithdrawals = await WithdrawalRequest.find({ status: 'pending' })
+            .populate('userId', 'username email cpf')
+            .sort({ createdAt: 1 });
+        
+        res.status(200).json(pendingWithdrawals);
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao buscar solicitações de saque pendentes:', error);
+        res.status(500).json({ message: 'Erro no servidor ao buscar solicitações de saque.' });
+    }
+});
+
+// NOVO: Rota de admin para aprovar uma solicitação de saque
+app.patch('/api/admin/withdrawals/:id/approve', adminAuth, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const withdrawal = await WithdrawalRequest.findById(id);
+        if (!withdrawal || withdrawal.status !== 'pending') {
+            return res.status(404).json({ message: 'Solicitação de saque pendente não encontrada ou já processada.' });
+        }
+
+        withdrawal.status = 'approved';
+        withdrawal.processedAt = Date.now();
+        await withdrawal.save();
+
+        // Opcional: Notificar o usuário
+        const userSocketId = onlineUsers.get(String(withdrawal.userId))?.socketId;
+        if (userSocketId) {
+            io.to(userSocketId).emit('withdrawal status updated', { status: 'approved', amount: withdrawal.amount });
+        }
+
+        res.status(200).json({ message: 'Solicitação de saque aprovada com sucesso.' });
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao aprovar solicitação de saque:', error);
+        res.status(500).json({ message: 'Erro no servidor ao aprovar a solicitação.' });
+    }
+});
+
+// NOVO: Rota de admin para rejeitar uma solicitação de saque
+app.patch('/api/admin/withdrawals/:id/reject', adminAuth, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const withdrawal = await WithdrawalRequest.findById(id);
+        if (!withdrawal || withdrawal.status !== 'pending') {
+            return res.status(404).json({ message: 'Solicitação de saque pendente não encontrada ou já processada.' });
+        }
+
+        // Devolve o valor para o usuário
+        const user = await User.findById(withdrawal.userId);
+        if (user) {
+            user.coins += withdrawal.amount;
+            await user.save();
+        }
+
+        withdrawal.status = 'rejected';
+        withdrawal.processedAt = Date.now();
+        await withdrawal.save();
+
+        // Opcional: Notificar o usuário
+        const userSocketId = onlineUsers.get(String(withdrawal.userId))?.socketId;
+        if (userSocketId) {
+            io.to(userSocketId).emit('withdrawal status updated', { status: 'rejected', amount: withdrawal.amount, newBalance: user.coins });
+        }
+
+        res.status(200).json({ message: 'Solicitação de saque rejeitada e valor devolvido ao saldo do usuário.' });
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao rejeitar solicitação de saque:', error);
+        res.status(500).json({ message: 'Erro no servidor ao rejeitar a solicitação.' });
+    }
+});
+
 
 // MODIFICADO: Emite um evento de socket quando um desafio é criado
 app.post('/api/challenges', auth, async (req, res) => {
@@ -644,7 +749,7 @@ app.post('/api/challenges/private', auth, async (req, res) => {
         const creatorSocketId = onlineUsers.get(String(createdBy))?.socketId;
         io.to(creatorSocketId).emit('challenge updated');
         io.to(opponentSocketId).emit('challenge updated');
-        res.status(201).json({ message: 'Desafio privado criado com sucesso e enviado ao seu amigo!', challenge: newChallenge });
+        res.status(201).json({ message: 'Desafio privado criado com sucesso e enviado ao seu amigo.', challenge: newChallenge });
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao criar desafio privado:', error);
         res.status(500).json({ message: 'Erro no servidor ao criar desafio privado.' });
@@ -822,7 +927,7 @@ app.patch('/api/challenges/:id/cancel', auth, async (req, res) => {
             io.to(creatorSocketId).emit('challenge updated');
         }
 
-        res.json({ message: "Desafio cancelado com sucesso! Suas moedas foram devolvidas." });
+        res.json({ message: "Desafio cancelado com sucesso. Suas moedas foram devolvidas." });
 
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao cancelar desafio:', error);
@@ -945,7 +1050,7 @@ app.patch('/api/users/profile', auth, upload.single('avatar'), async (req, res) 
             onlineUser.username = user.username; onlineUser.avatarUrl = user.avatarUrl; onlineUser.console = user.console;
             onlineUsers.set(userId, onlineUser); emitUpdatedUserList();
         }
-        res.json({ message: 'Perfil atualizado com sucesso!', user: { username: user.username, avatarUrl: user.avatarUrl, profileCompleted: user.profileCompleted, console: user.console } });
+        res.json({ message: 'Perfil atualizado com sucesso.', user: { username: user.username, avatarUrl: user.avatarUrl, profileCompleted: user.profileCompleted, console: user.console } });
     } catch (error) {
         console.error('[API PROFILE] Erro ao atualizar perfil:', error);
         if (req.file) { fs.unlink(req.file.path, (err) => { if (err) console.error('Erro ao excluir arquivo de avatar após falha:', err); }); }
@@ -979,7 +1084,7 @@ app.post('/api/friends/request/:receiverId', auth, async (req, res) => {
             if (senderSocketId) io.to(senderSocketId).emit('friend request accepted', { user: receiver.username, userId: receiver._id });
             if (receiverSocketId) io.to(receiverSocketId).emit('friend request accepted', { user: sender.username, userId: sender._id });
             io.to(senderSocketId).emit('friend request resolved'); io.to(receiverSocketId).emit('friend request resolved');
-            return res.status(200).json({ message: `Vocês agora são amigos com ${receiver.username}! Solicitação aceita automaticamente.` });
+            return res.status(200).json({ message: `Vocês agora são amigos com ${receiver.username}. Solicitação aceita automaticamente.` });
         }
         const newRequest = new FriendRequest({ sender: senderId, receiver: receiverId });
         await newRequest.save();
@@ -987,7 +1092,7 @@ app.post('/api/friends/request/:receiverId', auth, async (req, res) => {
         await sender.save(); await receiver.save();
         const receiverSocketId = onlineUsers.get(receiverId)?.socketId;
         if (receiverSocketId) { io.to(receiverSocketId).emit('new friend request', { requestId: newRequest._id, senderId: sender._id, senderUsername: sender.username, senderAvatar: sender.avatarUrl, senderConsole: sender.console }); }
-        res.status(201).json({ message: 'Solicitação de amizade enviada com sucesso!' });
+        res.status(201).json({ message: 'Solicitação de amizade enviada com sucesso.' });
     } catch (error) {
         console.error('[API FRIENDS] Erro ao enviar solicitação de amizade:', error);
         if (error.code === 11000) { return res.status(400).json({ message: 'Já existe uma solicitação de amizade pendente para este usuário.' }); }
@@ -1012,7 +1117,7 @@ app.patch('/api/friends/request/:requestId/accept', auth, async (req, res) => {
         if (senderSocketId) io.to(senderSocketId).emit('friend request accepted', { user: receiver.username, userId: receiver._id });
         if (receiverSocketId) io.to(receiverSocketId).emit('friend request accepted', { user: sender.username, userId: sender._id });
         io.to(senderSocketId).emit('friend request resolved'); io.to(receiverSocketId).emit('friend request resolved');
-        return res.status(200).json({ message: `Você e ${sender.username} agora são amigos!` });
+        return res.status(200).json({ message: `Você e ${sender.username} agora são amigos.` });
     } catch (error) {
         console.error('[API FRIENDS] Erro ao aceitar solicitação de amizade:', error);
         res.status(500).json({ message: 'Erro no servidor ao aceitar solicitação de amizade.' });
@@ -1155,7 +1260,7 @@ app.patch('/api/admin/users/:id/update-coins', adminAuth, async (req, res) => {
         if (typeof coins !== 'number' || coins < 0) { return res.status(400).json({ message: 'Valor de moedas inválido.' }); }
         const user = await User.findByIdAndUpdate(req.params.id, { coins: coins }, { new: true }).select('-password');
         if (!user) { return res.status(404).json({ message: 'Usuário não encontrado.' }); }
-        res.json({ message: 'Moedas atualizadas com sucesso!', user });
+        res.json({ message: 'Moedas atualizadas com sucesso.', user });
     } catch (error) {
         console.error('[API ADMIN] Erro ao atualizar moedas do usuário (admin):', error);
         res.status(500).json({ message: 'Erro no servidor ao atualizar moedas.' });
@@ -1167,7 +1272,7 @@ app.patch('/api/admin/users/:id/toggle-active', adminAuth, async (req, res) => {
         const user = await User.findById(req.params.id);
         if (!user) { return res.status(404).json({ message: 'Usuário não encontrado.' }); }
         user.isActive = !user.isActive; await user.save();
-        res.json({ message: `Conta ${user.isActive ? 'ativada' : 'desativada'} com sucesso!`, user });
+        res.json({ message: `Conta ${user.isActive ? 'ativada' : 'desativada'} com sucesso.`, user });
     } catch (error) {
         console.error('[API ADMIN] Erro ao ativar/desativar usuário (admin):', error);
         res.status(500).json({ message: 'Erro no servidor ao ativar/desativar usuário.' });
@@ -1244,7 +1349,7 @@ app.post('/api/reset-password/:token', async (req, res) => {
         user.resetPasswordToken = undefined; user.resetPasswordExpires = undefined; await user.save();
         const mailOptionsConfirm = { to: user.email, from: process.env.EMAIL_USER, subject: 'GameRivals - Sua senha foi redefinida com sucesso', html: '<p>Sua senha da conta GameRivals foi redefinida com sucesso.</p><p>Se você não fez esta alteração, por favor, entre em contato com o suporte imediatamente.</p>' };
         await transporter.sendMail(mailOptionsConfirm);
-        res.status(200).json({ message: 'Sua senha foi redefinida com sucesso!' });
+        res.status(200).json({ message: 'Sua senha foi redefinida com sucesso.' });
     } catch (error) {
         console.error('[API RESET PASSWORD] Erro ao redefinir senha:', error);
         res.status(500).json({ message: 'Erro no servidor ao redefinir a senha.' });

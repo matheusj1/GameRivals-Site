@@ -87,6 +87,29 @@
                 </div>
             </div>
         </section>
+        
+        <section id="admin-withdrawal-management">
+            <h3>Gerenciamento de Saques</h3>
+            <div class="table-container">
+                <table id="withdrawals-table">
+                    <thead>
+                        <tr>
+                            <th>ID Saque</th>
+                            <th>ID Usuário</th>
+                            <th>Nome de Usuário</th>
+                            <th>CPF</th>
+                            <th>Valor</th>
+                            <th>Tipo de Chave</th>
+                            <th>Chave Pix</th>
+                            <th>Solicitado em</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </section>
 
         <section id="admin-user-management">
             <h3>Gerenciamento de Usuários</h3>
@@ -199,6 +222,19 @@
                 <input type="hidden" id="dispute-challenge-id">
             </form>
             <span id="resolve-dispute-error" style="color: red;"></span>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="reject-withdrawal-modal-backdrop">
+        <div class="modal" id="reject-withdrawal-modal">
+            <button class="close-modal-btn">&times;</button>
+            <h2>Rejeitar Saque</h2>
+            <p>Tem certeza que deseja rejeitar o saque de <strong id="reject-withdrawal-amount"></strong> moedas?</p>
+            <p>O valor será estornado para a conta do usuário.</p>
+            <div class="modal-actions-profile" style="margin-top: 20px;">
+                <button class="cta-button form-submit-btn" id="confirm-reject-withdrawal-btn" style="background-color: var(--loss-color);">Confirmar Rejeição</button>
+                <button class="cta-button form-submit-btn" id="cancel-reject-withdrawal-btn" style="background-color: var(--text-muted);">Cancelar</button>
+            </div>
         </div>
     </div>
 
