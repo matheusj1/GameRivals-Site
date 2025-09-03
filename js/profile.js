@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Seletor para os botões de logout, agora pegando ambos por ID
     const logoutButtonDesktop = document.getElementById('logout-button-desktop');
-    const logoutButtonMobile = document.getElementById('logout-button-mobile');
+    const logoutButtonMobile = document = document.getElementById('logout-button-mobile');
     
     const dashboardLink = document.querySelector('header nav ul li a[href="dashboard.html"]');
 
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         showNotification('Não foi possível conectar ao servidor.', 'error');
                     }
                 });
-            } else if (amount === 20) { // NOVO: Lógica para o pagamento de 20 moedas
+            } else if (amount === 20) {
                 const pixKey = '00020126360014BR.GOV.BCB.PIX0114+5511972519097520400005303986540520.005802BR5923Matheus Jose dos Santos6009SAO PAULO62140510pTNOooDFeP630433B5';
                 const qrCodeUrl = 'img/20-reais-pix.png';
                 
@@ -268,6 +268,123 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 });
 
+            } else if (amount === 50) { // NOVO: Lógica para o pagamento de 50 moedas
+                const pixKey = '00020126360014BR.GOV.BCB.PIX0114+5511972519097520400005303986540550.005802BR5923Matheus Jose dos Santos6009SAO PAULO62140510MuARDyORmu630461B8';
+                const qrCodeUrl = 'img/50-reais-pix.png';
+                
+                pixQrCodeImg.src = qrCodeUrl;
+                pixKeyCopyInput.value = pixKey;
+                pixPaymentDetailsDiv.style.display = 'block';
+
+                notifyButton = document.createElement('button');
+                notifyButton.id = 'pix-notify-payment-btn';
+                notifyButton.className = 'cta-button form-submit-btn';
+                notifyButton.textContent = 'Já paguei, me notifique';
+                notifyButton.style.marginTop = '20px';
+                depositCard.appendChild(notifyButton);
+
+                notifyButton.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/payment/notify-pix`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-auth-token': token
+                            },
+                            body: JSON.stringify({ amount, userId })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            showNotification(data.message, 'success');
+                            notifyButton.disabled = true;
+                            notifyButton.textContent = 'Notificação enviada!';
+                        } else {
+                            showNotification(data.message || 'Erro ao enviar notificação.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao enviar notificação de Pix:', error);
+                        showNotification('Não foi possível conectar ao servidor.', 'error');
+                    }
+                });
+            } else if (amount === 100) { // NOVO: Lógica para o pagamento de 100 moedas
+                const pixKey = '00020126360014BR.GOV.BCB.PIX0114+55119725190975204000053039865406100.005802BR5923Matheus Jose dos Santos6009SAO PAULO621405103EzQ96Wskb63044EEE';
+                const qrCodeUrl = 'img/100-reais-pix.png';
+                
+                pixQrCodeImg.src = qrCodeUrl;
+                pixKeyCopyInput.value = pixKey;
+                pixPaymentDetailsDiv.style.display = 'block';
+
+                notifyButton = document.createElement('button');
+                notifyButton.id = 'pix-notify-payment-btn';
+                notifyButton.className = 'cta-button form-submit-btn';
+                notifyButton.textContent = 'Já paguei, me notifique';
+                notifyButton.style.marginTop = '20px';
+                depositCard.appendChild(notifyButton);
+
+                notifyButton.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/payment/notify-pix`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-auth-token': token
+                            },
+                            body: JSON.stringify({ amount, userId })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            showNotification(data.message, 'success');
+                            notifyButton.disabled = true;
+                            notifyButton.textContent = 'Notificação enviada!';
+                        } else {
+                            showNotification(data.message || 'Erro ao enviar notificação.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao enviar notificação de Pix:', error);
+                        showNotification('Não foi possível conectar ao servidor.', 'error');
+                    }
+                });
+            } else if (amount === 1000) { // NOVO: Lógica para o pagamento de 1000 moedas
+                const pixKey = '00020126360014BR.GOV.BCB.PIX0114+551197251909752040000530398654071000.005802BR5923Matheus Jose dos Santos6009SAO PAULO62140510BAZXWlITcd63046A51';
+                const qrCodeUrl = 'img/1000-reais-pix.png';
+                
+                pixQrCodeImg.src = qrCodeUrl;
+                pixKeyCopyInput.value = pixKey;
+                pixPaymentDetailsDiv.style.display = 'block';
+
+                notifyButton = document.createElement('button');
+                notifyButton.id = 'pix-notify-payment-btn';
+                notifyButton.className = 'cta-button form-submit-btn';
+                notifyButton.textContent = 'Já paguei, me notifique';
+                notifyButton.style.marginTop = '20px';
+                depositCard.appendChild(notifyButton);
+
+                notifyButton.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/payment/notify-pix`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-auth-token': token
+                            },
+                            body: JSON.stringify({ amount, userId })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            showNotification(data.message, 'success');
+                            notifyButton.disabled = true;
+                            notifyButton.textContent = 'Notificação enviada!';
+                        } else {
+                            showNotification(data.message || 'Erro ao enviar notificação.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao enviar notificação de Pix:', error);
+                        showNotification('Não foi possível conectar ao servidor.', 'error');
+                    }
+                });
             } else {
                 showNotification(`Nenhuma chave Pix configurada para ${amount} moedas.`, 'info');
             }
