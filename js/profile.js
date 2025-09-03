@@ -44,6 +44,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pixKeyCopyInput = document.getElementById('pix-key-copy');
     const copyPixKeyBtn = document.getElementById('copy-pix-key-btn');
 
+    // NOVOS ELEMENTOS DOS MODAIS DE SAQUE
+    const withdrawModalBackdrop = document.getElementById('withdraw-modal-backdrop');
+    const withdrawModal = document.getElementById('withdraw-modal');
+    const withdrawPixForm = document.getElementById('withdraw-pix-form');
+    const withdrawAmountDisplay = document.getElementById('withdraw-amount-display');
+    const pixKeyTypeSelect = document.getElementById('pix-key-type');
+    const pixKeyValueInput = document.getElementById('pix-key-value');
+    const withdrawPixError = document.getElementById('withdraw-pix-error');
+    const withdrawSuccessModalBackdrop = document.getElementById('withdraw-success-modal-backdrop');
+
 
     // Preencher campos com dados existentes do usuário
     const fetchUserProfile = async () => {
@@ -406,40 +416,90 @@ document.addEventListener('DOMContentLoaded', async () => {
         withdrawBtn.addEventListener('click', async () => {
             walletError.textContent = '';
             const amount = parseInt(withdrawAmountInput.value);
+            const currentBalance = parseInt(walletCurrentBalanceSpan.textContent.replace(/\./g, ''));
 
             if (isNaN(amount) || amount <= 0) {
                 walletError.textContent = 'Por favor, insira um valor de saque válido (maior que 0).';
                 return;
             }
+            if (amount > currentBalance) {
+                walletError.textContent = 'Você não tem saldo suficiente para este saque.';
+                return;
+            }
+
+            // Abre o modal de saque
+            withdrawAmountDisplay.textContent = amount;
+            withdrawModalBackdrop.classList.add('active');
+        });
+    }
+
+    // Lógica para o formulário de saque Pix
+    if (withdrawPixForm) {
+        withdrawPixForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            withdrawPixError.textContent = '';
+
+            const amount = parseInt(withdrawAmountInput.value);
+            const pixKeyType = pixKeyTypeSelect.value;
+            const pixKeyValue = pixKeyValueInput.value.trim();
+
+            if (!pixKeyType || !pixKeyValue) {
+                withdrawPixError.textContent = 'Por favor, preencha todos os campos.';
+                return;
+            }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/wallet/withdraw`, {
+                // Nova rota de backend para solicitar saque
+                const response = await fetch(`${API_BASE_URL}/api/wallet/withdraw-request`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'x-auth-token': token
                     },
-                    body: JSON.stringify({ amount })
+                    body: JSON.stringify({ amount, pixKeyType, pixKeyValue })
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    walletError.textContent = data.message || 'Erro ao processar saque.';
-                    showNotification(data.message || 'Erro ao sacar moedas.', 'error');
+                    withdrawPixError.textContent = data.message || 'Erro ao solicitar saque.';
+                    showNotification(data.message || 'Erro ao solicitar saque.', 'error');
                 } else {
-                    showNotification(data.message, 'success');
-                    walletCurrentBalanceSpan.textContent = data.newBalance.toLocaleString('pt-BR');
+                    withdrawModalBackdrop.classList.remove('active');
+                    document.getElementById('confirmed-withdraw-amount').textContent = amount;
+                    withdrawSuccessModalBackdrop.classList.add('active');
+                    // Limpa o formulário de saque
+                    withdrawPixForm.reset();
                     withdrawAmountInput.value = '';
-                    const coinBalanceDesktop = document.getElementById('coin-balance-desktop');
-                    const coinBalanceMobile = document.getElementById('coin-balance-mobile');
-                    if (coinBalanceDesktop) coinBalanceDesktop.textContent = data.newBalance.toLocaleString('pt-BR');
-                    if (coinBalanceMobile) coinBalanceMobile.textContent = data.newBalance.toLocaleString('pt-BR');
+                    fetchWalletBalance();
                 }
             } catch (error) {
-                console.error('Erro ao sacar moedas:', error);
-                walletError.textContent = 'Não foi possível conectar ao servidor.';
+                console.error('Erro ao solicitar saque:', error);
+                withdrawPixError.textContent = 'Não foi possível conectar ao servidor.';
                 showNotification('Não foi possível conectar ao servidor.', 'error');
+            }
+        });
+    }
+
+    // Lógica para fechar os modais de saque
+    if (withdrawModalBackdrop) {
+        const closeBtn = withdrawModalBackdrop.querySelector('.close-modal-btn');
+        closeBtn.addEventListener('click', () => withdrawModalBackdrop.classList.remove('active'));
+        withdrawModalBackdrop.addEventListener('click', (e) => {
+            if (e.target === withdrawModalBackdrop) withdrawModalBackdrop.classList.remove('active');
+        });
+    }
+
+    if (withdrawSuccessModalBackdrop) {
+        const closeBtn = withdrawSuccessModalBackdrop.querySelector('.close-modal-btn');
+        closeBtn.addEventListener('click', () => {
+            withdrawSuccessModalBackdrop.classList.remove('active');
+            location.reload(); // Recarrega a página para atualizar o saldo e os desafios
+        });
+        withdrawSuccessModalBackdrop.addEventListener('click', (e) => {
+            if (e.target === withdrawSuccessModalBackdrop) {
+                withdrawSuccessModalBackdrop.classList.remove('active');
+                location.reload();
             }
         });
     }

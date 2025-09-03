@@ -175,6 +175,47 @@
             </div>
         </div>
 
+        <div class="modal-backdrop" id="withdraw-modal-backdrop">
+            <div class="modal" id="withdraw-modal">
+                <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
+                <h2>Detalhes do Saque</h2>
+                <form id="withdraw-pix-form">
+                    <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px;">
+                        Valor do saque: <strong id="withdraw-amount-display"></strong> moedas
+                    </p>
+
+                    <div class="input-group">
+                        <label for="pix-key-type">Tipo de Chave Pix</label>
+                        <select id="pix-key-type" name="pix-key-type" required>
+                            <option value="" disabled selected>Selecione o tipo de chave</option>
+                            <option value="email">E-mail</option>
+                            <option value="cpf">CPF</option>
+                            <option value="phone">Telefone</option>
+                            <option value="cnpj">CNPJ</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="pix-key-value">Chave Pix</label>
+                        <input type="text" id="pix-key-value" name="pix-key-value" placeholder="Insira a chave Pix" required>
+                    </div>
+
+                    <p class="form-error-message" id="withdraw-pix-error"></p>
+                    <button type="submit" class="cta-button form-submit-btn">Confirmar Saque</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal-backdrop" id="withdraw-success-modal-backdrop">
+            <div class="modal" id="withdraw-success-modal">
+                <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
+                <h2 style="color: var(--win-color);">Solicitação Enviada!</h2>
+                <p style="text-align: center; margin-bottom: 10px;">Sua solicitação de saque de <strong id="confirmed-withdraw-amount"></strong> moedas foi enviada com sucesso!</p>
+                <p style="text-align: center; color: var(--text-muted);">Aguarde a aprovação de um administrador. Você será notificado sobre o status do seu saque.</p>
+                <button class="cta-button form-submit-btn" style="margin-top: 20px;" onclick="location.reload()">OK</button>
+            </div>
+        </div>
+        
         <script type="module" src="js/main.js"></script>
         <script type="module" src="js/profile.js"></script>
     </body>
