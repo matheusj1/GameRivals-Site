@@ -268,6 +268,46 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 });
 
+            } else if (amount === 50) {
+                const pixKey = '00020126360014BR.GOV.BCB.PIX0114+5511972519097520400005303986540550.005802BR5923Matheus Jose dos Santos6009SAO PAULO62140510MuARDyORmu630461B8';
+                const qrCodeUrl = 'img/50-reais-pix.png';
+
+                pixQrCodeImg.src = qrCodeUrl;
+                pixKeyCopyInput.value = pixKey;
+                pixPaymentDetailsDiv.style.display = 'block';
+
+                notifyButton = document.createElement('button');
+                notifyButton.id = 'pix-notify-payment-btn';
+                notifyButton.className = 'cta-button form-submit-btn';
+                notifyButton.textContent = 'Já paguei, me notifique';
+                notifyButton.style.marginTop = '20px';
+                depositCard.appendChild(notifyButton);
+
+                notifyButton.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/payment/notify-pix`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-auth-token': token
+                            },
+                            body: JSON.stringify({ amount, userId })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            showNotification(data.message, 'success');
+                            notifyButton.disabled = true;
+                            notifyButton.textContent = 'Notificação enviada!';
+                        } else {
+                            showNotification(data.message || 'Erro ao enviar notificação.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao enviar notificação de Pix:', error);
+                        showNotification('Não foi possível conectar ao servidor.', 'error');
+                    }
+                });
+
             } else {
                 showNotification(`Nenhuma chave Pix configurada para ${amount} moedas.`, 'info');
             }
