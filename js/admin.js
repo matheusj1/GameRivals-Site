@@ -172,6 +172,39 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     };
+    
+    // --- NOVO: CARREGAR E RENDERIZAR SOLICITAÇÕES DE SAQUE ---
+    const loadPendingWithdrawals = async () => {
+        const pendingWithdrawals = await fetchAdminData('pending-withdrawals');
+        const withdrawalsTableBody = document.querySelector('#withdrawals-table tbody');
+        if (withdrawalsTableBody) {
+            withdrawalsTableBody.innerHTML = '';
+            if (pendingWithdrawals && pendingWithdrawals.length > 0) {
+                pendingWithdrawals.forEach(withdrawal => {
+                    const row = `
+                        <tr data-withdrawal-id="${withdrawal._id}" data-withdrawal-amount="${withdrawal.amount}">
+                            <td>${withdrawal._id.substring(0, 8)}...</td>
+                            <td>${withdrawal.userId._id.substring(0, 8)}...</td>
+                            <td>${withdrawal.userId.username}</td>
+                            <td>${withdrawal.userId.cpf || 'N/A'}</td>
+                            <td>${withdrawal.amount.toLocaleString('pt-BR')}</td>
+                            <td>${withdrawal.pixKeyType}</td>
+                            <td>${withdrawal.pixKeyValue}</td>
+                            <td>${formatDate(withdrawal.createdAt)}</td>
+                            <td class="table-actions">
+                                <button class="approve-withdrawal-btn cta-button resolve" title="Aprovar Saque">✅</button>
+                                <button class="reject-withdrawal-btn cta-button cancel" title="Rejeitar Saque">❌</button>
+                            </td>
+                        </tr>
+                    `;
+                    withdrawalsTableBody.innerHTML += row;
+                });
+            } else {
+                withdrawalsTableBody.innerHTML = '<tr><td colspan="9">Nenhuma solicitação de saque pendente.</td></tr>';
+            }
+        }
+    };
+
 
     // --- NOVO: CARREGAR E RENDERIZAR PAGAMENTOS PIX PENDENTES ---
     const loadPendingPixPayments = async () => {
@@ -207,6 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadUsers();
         loadChallenges();
         loadPendingPixPayments(); // NOVO: Carrega os pagamentos Pix
+        loadPendingWithdrawals(); // NOVO: Carrega as solicitações de saque
     };
 
     initializeAdminPage();
@@ -390,6 +424,90 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .catch(() => showNotification('Não foi possível conectar ao servidor.', 'error')); // cite: 1
                 }
             }
+        });
+    }
+    
+    // NOVO: Delegando eventos para a tabela de solicitações de saque
+    const withdrawalsTableBody = document.querySelector('#withdrawals-table tbody');
+    if (withdrawalsTableBody) {
+        withdrawalsTableBody.addEventListener('click', async (e) => {
+            const target = e.target;
+            const row = target.closest('tr[data-withdrawal-id]');
+            if (!row) return;
+
+            const withdrawalId = row.dataset.withdrawalId;
+
+            // Botão Aprovar Saque
+            if (target.classList.contains('approve-withdrawal-btn')) {
+                if (confirm("Tem certeza que deseja APROVAR este saque? Isso não pode ser desfeito.")) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/admin/withdrawals/${withdrawalId}/approve`, {
+                            method: 'PATCH',
+                            headers: {
+                                'x-auth-token': token
+                            }
+                        });
+                        const data = await response.json();
+                        if (response.ok) {
+                            showNotification(data.message, 'success');
+                            loadPendingWithdrawals(); // Recarrega a tabela de saques
+                            loadUsers(); // Recarrega a tabela de usuários para atualizar o saldo
+                            loadDashboardStats(); // Recarrega as estatísticas
+                        } else {
+                            showNotification(data.message || 'Erro ao aprovar saque.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao aprovar saque:', error);
+                        showNotification('Não foi possível conectar ao servidor.', 'error');
+                    }
+                }
+            }
+
+            // Botão Rejeitar Saque
+            if (target.classList.contains('reject-withdrawal-btn')) {
+                 const withdrawalAmount = row.dataset.withdrawalAmount;
+                 document.getElementById('reject-withdrawal-amount').textContent = withdrawalAmount;
+                 document.getElementById('confirm-reject-withdrawal-btn').dataset.withdrawalId = withdrawalId;
+                 document.getElementById('reject-withdrawal-modal-backdrop').classList.add('active');
+            }
+        });
+    }
+
+    // Lógica para o modal de rejeição de saque
+    const rejectWithdrawalModalBackdrop = document.getElementById('reject-withdrawal-modal-backdrop');
+    if (rejectWithdrawalModalBackdrop) {
+        const closeModalBtn = rejectWithdrawalModalBackdrop.querySelector('.close-modal-btn');
+        const confirmBtn = document.getElementById('confirm-reject-withdrawal-btn');
+        const cancelBtn = document.getElementById('cancel-reject-withdrawal-btn');
+        
+        const closeModal = () => rejectWithdrawalModalBackdrop.classList.remove('active');
+        
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        
+        confirmBtn.addEventListener('click', async () => {
+             const withdrawalId = confirmBtn.dataset.withdrawalId;
+             try {
+                 const response = await fetch(`${API_BASE_URL}/api/admin/withdrawals/${withdrawalId}/reject`, {
+                     method: 'PATCH',
+                     headers: {
+                         'x-auth-token': token
+                     }
+                 });
+                 const data = await response.json();
+                 if (response.ok) {
+                     showNotification(data.message, 'info');
+                     closeModal();
+                     loadPendingWithdrawals();
+                     loadUsers();
+                     loadDashboardStats();
+                 } else {
+                     showNotification(data.message || 'Erro ao rejeitar saque.', 'error');
+                 }
+             } catch (error) {
+                 console.error('Erro ao rejeitar saque:', error);
+                 showNotification('Não foi possível conectar ao servidor.', 'error');
+             }
         });
     }
 
