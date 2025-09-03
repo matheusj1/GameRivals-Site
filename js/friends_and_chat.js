@@ -528,7 +528,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/friends/request/${targetUserId}`, { // Atualizado
                         method: 'POST',
-                        headers: { 'x-auth-token': token }
+                        headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
                     });
                     const data = await response.json();
                     if (response.ok) {

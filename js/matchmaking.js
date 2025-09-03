@@ -67,7 +67,6 @@ export const setupMatchmaking = (socket, userId, refreshDashboard) => {
             if (socket) {
                 isInMatchmakingQueue = true; // Define o estado antes de emitir
                 updateMatchmakingUI(); // Atualiza a UI para o estado de carregamento
-                showNotification('Entrando na fila de espera...', 'info');
 
                 socket.emit('join matchmaking queue', {
                     id: userId,

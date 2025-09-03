@@ -217,10 +217,24 @@ io.on('connection', async (socket) => {
         }
     });
 
-    socket.on('private message', (data) => {
+    socket.on('private message', async (data) => {
         const senderUserId = socketIdToUserId.get(socket.id);
         const sender = onlineUsers.get(senderUserId);
         const recipient = onlineUsers.get(data.toUserId);
+
+        // NOVO: Verificação de bloqueio
+        try {
+            const senderDB = await User.findById(senderUserId);
+            const recipientDB = await User.findById(data.toUserId);
+
+            if (senderDB.blockedUsers.includes(data.toUserId) || recipientDB.blockedUsers.includes(senderUserId)) {
+                console.log('[SOCKET PRIVATE CHAT] Tentativa de enviar mensagem privada para/de um usuário bloqueado. Ação negada.');
+                return;
+            }
+        } catch (error) {
+            console.error('[SOCKET PRIVATE CHAT] Erro ao verificar bloqueio:', error);
+            return;
+        }
 
         if (recipient && sender && String(recipient.id) !== String(sender.id) && data.text && data.text.trim() !== '') {
             const messageData = {
@@ -273,9 +287,15 @@ io.on('connection', async (socket) => {
                 for (const [betKey, userMap] of betAmountMap.entries()) {
                     for (const [entryUserId, entry] of userMap.entries()) {
                         if (entry && String(entryUserId) !== String(userId)) {
-                            foundOpponentObject = entry;
-                            userMap.delete(entryUserId);
-                            break;
+                            // NOVO: Verificar se o oponente não está na lista de bloqueados do usuário atual e vice-versa
+                            const currentUserDB = await User.findById(userId);
+                            const opponentUserDB = await User.findById(entryUserId);
+
+                            if (currentUserDB && opponentUserDB && !currentUserDB.blockedUsers.includes(entryUserId) && !opponentUserDB.blockedUsers.includes(userId)) {
+                                foundOpponentObject = entry;
+                                userMap.delete(entryUserId);
+                                break;
+                            }
                         }
                     }
                     if (foundOpponentObject) break;
@@ -607,8 +627,15 @@ app.post('/api/challenges/private', auth, async (req, res) => {
         const opponentUser = await User.findById(opponentId);
         if (!creatorUser || !opponentUser) { return res.status(404).json({ message: 'Criador ou oponente não encontrado.' }); }
         if (!creatorUser.friends.includes(opponentId)) { return res.status(400).json({ message: 'Você só pode desafiar amigos diretamente.' }); }
-        if (betAmount > 0 && creatorUser.coins < betAmount) { return res.status(400).json({ message: `${opponentUser.username} não tem moedas suficientes para aceitar esta aposta.` }); }
+        
+        // NOVO: Verificação de bloqueio
+        if (creatorUser.blockedUsers.includes(opponentId) || opponentUser.blockedUsers.includes(createdBy)) {
+            return res.status(403).json({ message: 'Você não pode desafiar um usuário que você bloqueou, ou que te bloqueou.' });
+        }
+        
+        if (betAmount > 0 && creatorUser.coins < betAmount) { return res.status(400).json({ message: 'Você não tem moedas suficientes para esta aposta.' }); }
         if (betAmount > 0 && opponentUser.coins < betAmount) { return res.status(400).json({ message: `${opponentUser.username} não tem moedas suficientes para aceitar esta aposta.` }); }
+        
         const newChallenge = new Challenge({ game, console: platform, betAmount, createdBy: createdBy, opponent: opponentId, status: 'open' });
         await newChallenge.save();
         const opponentSocketId = onlineUsers.get(String(opponentId))?.socketId;
@@ -626,7 +653,21 @@ app.post('/api/challenges/private', auth, async (req, res) => {
 
 app.get('/api/challenges', auth, async (req, res) => {
     try {
-        const challenges = await Challenge.find({ status: 'open' }).populate('createdBy', 'username avatarUrl').sort({ createdAt: -1 });
+        const userId = req.user.id;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não encontrado.' });
+        }
+
+        const blockedUsers = user.blockedUsers;
+        
+        // NOVO: Filtrar desafios criados por usuários que estão na lista de bloqueio
+        const challenges = await Challenge.find({ 
+            status: 'open',
+            createdBy: { $nin: blockedUsers } 
+        }).populate('createdBy', 'username avatarUrl').sort({ createdAt: -1 });
+
         res.json(challenges);
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao buscar desafios:', error);
@@ -664,7 +705,21 @@ app.patch('/api/challenges/:id/accept', auth, async (req, res) => {
 app.get('/api/my-challenges', auth, async (req, res) => {
     try {
         const userId = req.user.id;
-        const myChallenges = await Challenge.find({ $or: [{ createdBy: userId }, { opponent: userId }], archivedBy: { $ne: userId } }).populate('createdBy', 'username avatarUrl').populate('opponent', 'username avatarUrl').sort({ createdAt: -1 });
+        // NOVO: Adiciona um filtro para não mostrar desafios onde o oponente está na lista de bloqueados do usuário
+        const user = await User.findById(userId);
+        const blockedUsers = user.blockedUsers;
+        
+        const myChallenges = await Challenge.find({ 
+            $or: [
+                { createdBy: userId, opponent: { $nin: blockedUsers } }, 
+                { opponent: userId, createdBy: { $nin: blockedUsers } }
+            ], 
+            archivedBy: { $ne: userId } 
+        })
+        .populate('createdBy', 'username avatarUrl')
+        .populate('opponent', 'username avatarUrl')
+        .sort({ createdAt: -1 });
+
         res.json(myChallenges);
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao buscar meus desafios:', error);
@@ -830,7 +885,19 @@ app.get('/api/search', auth, async (req, res) => {
         const query = req.query.q;
         const userId = req.user.id;
         if (!query || query.length < 3) { return res.status(400).json({ message: 'A pesquisa deve ter pelo menos 3 caracteres.' }); }
-        const users = await User.find({ username: { $regex: query, $options: 'i' }, _id: { $ne: userId }, role: 'user' }).select('username avatarUrl console');
+
+        const user = await User.findById(userId);
+        const blockedUsers = user.blockedUsers;
+        
+        // NOVO: Excluir usuários bloqueados e que bloquearam o usuário atual dos resultados da pesquisa
+        const users = await User.find({ 
+            username: { $regex: query, $options: 'i' }, 
+            _id: { $ne: userId, $nin: blockedUsers }, 
+            role: 'user' 
+        })
+        .where('_id').nin(await User.find({ blockedUsers: userId }).distinct('_id'))
+        .select('username avatarUrl console');
+
         const formattedResults = [];
         users.forEach(user => { formattedResults.push({ type: 'player', _id: user._id, username: user.username, avatarUrl: user.avatarUrl, console: user.console }); });
         res.status(200).json(formattedResults);
@@ -894,6 +961,12 @@ app.post('/api/friends/request/:receiverId', auth, async (req, res) => {
         const sender = await User.findById(senderId); const receiver = await User.findById(receiverId);
         if (!sender || !receiver) { return res.status(404).json({ message: 'Usuário remetente ou destinatário não encontrado.' }); }
         if (sender.friends.includes(receiverId)) { return res.status(400).json({ message: 'Vocês já são amigos.' }); }
+        
+        // NOVO: Verificação de bloqueio
+        if (sender.blockedUsers.includes(receiverId) || receiver.blockedUsers.includes(senderId)) {
+            return res.status(403).json({ message: 'Não é possível enviar uma solicitação para um usuário bloqueado ou que te bloqueou.' });
+        }
+        
         const existingRequest = await FriendRequest.findOne({ sender: senderId, receiver: receiverId, status: 'pending' });
         if (existingRequest) { return res.status(400).json({ message: 'Solicitação de amizade já enviada.' }); }
         const reverseRequest = await FriendRequest.findOne({ sender: receiverId, receiver: senderId, status: 'pending' });
@@ -967,9 +1040,15 @@ app.patch('/api/friends/request/:requestId/reject', auth, async (req, res) => {
 app.get('/api/friends/requests/received', auth, async (req, res) => {
     try {
         const userId = req.user.id;
-        const user = await User.findById(userId).populate({ path: 'receivedFriendRequests', match: { status: 'pending' }, populate: { path: 'sender', select: 'username avatarUrl console' } });
-        if (!user) { return res.status(404).json({ message: 'Usuário não encontrado.' }); }
-        const pendingRequests = user.receivedFriendRequests.map(req => ({ requestId: req._id, senderId: req.sender._id, senderUsername: req.sender.username, senderAvatar: req.sender.avatarUrl, senderConsole: req.sender.console, createdAt: req.createdAt }));
+        // NOVO: Adicionar filtro para não mostrar solicitações de quem o usuário bloqueou
+        const user = await User.findById(userId);
+        const blockedUsers = user.blockedUsers;
+
+        const receivedRequests = await FriendRequest.find({ receiver: userId, status: 'pending', sender: { $nin: blockedUsers } })
+            .populate('sender', 'username avatarUrl console');
+
+        const pendingRequests = receivedRequests.map(req => ({ requestId: req._id, senderId: req.sender._id, senderUsername: req.sender.username, senderAvatar: req.sender.avatarUrl, senderConsole: req.sender.console, createdAt: req.createdAt }));
+
         res.status(200).json(pendingRequests);
     } catch (error) {
         console.error('[API FRIENDS] Erro ao listar solicitações de amizade recebidas:', error);
@@ -995,7 +1074,19 @@ app.get('/api/friends', auth, async (req, res) => {
         const userId = req.user.id;
         const user = await User.findById(userId).populate('friends', 'username avatarUrl console');
         if (!user) { return res.status(404).json({ message: 'Usuário não encontrado.' }); }
-        const friendsWithStatus = user.friends.map(friend => ({ _id: friend._id, username: friend.username, avatarUrl: friend.avatarUrl, console: friend.console, isOnline: onlineUsers.has(String(friend._id)) }));
+        
+        // NOVO: Filtra amigos que o usuário bloqueou
+        const blockedUsers = user.blockedUsers;
+        const friendsWithStatus = user.friends
+            .filter(friend => !blockedUsers.includes(friend._id))
+            .map(friend => ({ 
+                _id: friend._id, 
+                username: friend.username, 
+                avatarUrl: friend.avatarUrl, 
+                console: friend.console, 
+                isOnline: onlineUsers.has(String(friend._id)) 
+            }));
+            
         res.status(200).json(friendsWithStatus);
     } catch (error) {
         console.error('[API FRIENDS] Erro ao listar amigos:', error);
