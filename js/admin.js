@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     
-    // --- NOVO: CARREGAR E RENDERIZAR SOLICITAÇÕES DE SAQUE ---
+    // NOVO: CARREGAR E RENDERIZAR SOLICITAÇÕES DE SAQUE
     const loadPendingWithdrawals = async () => {
         const pendingWithdrawals = await fetchAdminData('pending-withdrawals');
         const withdrawalsTableBody = document.querySelector('#withdrawals-table tbody');
@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
 
-    // --- NOVO: CARREGAR E RENDERIZAR PAGAMENTOS PIX PENDENTES ---
+    // NOVO: CARREGAR E RENDERIZAR PAGAMENTOS PIX PENDENTES
     const loadPendingPixPayments = async () => {
         const pendingPayments = await fetchAdminData('pending-pix');
         const paymentsTableBody = document.querySelector('#pix-payments-table tbody');
@@ -511,7 +511,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- NOVO: Lógica para a tabela de pagamentos Pix ---
+    // NOVO: Lógica para a tabela de pagamentos Pix
     const paymentsTableBody = document.querySelector('#pix-payments-table tbody');
     if (paymentsTableBody) {
         paymentsTableBody.addEventListener('click', async (e) => {
