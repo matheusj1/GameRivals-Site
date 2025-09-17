@@ -1,59 +1,69 @@
 // arquivo: site_de_jogos/js/admin.js
 
 // NOVO: Importa showNotification e API_BASE_URL de utils.js
-import { showNotification, API_BASE_URL } from './utils.js'; // cite: 1
+import { showNotification, API_BASE_URL, FRONTEND_BASE_URL } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const token = localStorage.getItem('token'); // cite: 1
-    const userRole = localStorage.getItem('userRole'); // Pega a role do localStorage
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('userRole');
 
     // --- VERIFICAÇÃO DE ADMIN ---
-    if (!token || userRole !== 'admin') { // cite: 1
-        showNotification('Acesso negado. Você não tem permissão de administrador.', 'error'); // cite: 1
+    if (!token || userRole !== 'admin') {
+        showNotification('Acesso negado. Você não tem permissão de administrador.', 'error');
         setTimeout(() => {
-            window.location.href = 'login-split-form.html'; // ALTERADO
+            window.location.href = 'login-split-form.html';
         }, 1500);
         return;
     }
 
     // --- SOCKET.IO para atualização de usuários online (apenas a contagem) ---
     if (typeof io !== 'undefined') {
-        const socket = io(API_BASE_URL); // ATUALIZADO: Usando API_BASE_URL
+        const socket = io(API_BASE_URL);
 
-        socket.on('connect', () => { // cite: 1
-            console.log('Admin Frontend: Conectado ao Socket.IO.'); // cite: 1
+        socket.on('connect', () => {
+            console.log('Admin Frontend: Conectado ao Socket.IO.');
             // O admin também precisa se identificar para a contagem de onlineUsers
-            const adminUserId = localStorage.getItem('userId'); // cite: 1
-            const adminUsername = localStorage.getItem('username'); // cite: 1
+            const adminUserId = localStorage.getItem('userId');
+            const adminUsername = localStorage.getItem('username');
             if (adminUserId && adminUsername) {
-                 socket.emit('user connected', { username: adminUsername, id: adminUserId }); // cite: 1
+                 socket.emit('user connected', { username: adminUsername, id: adminUserId });
             }
         });
 
         // Adicionar um listener para o evento de reconexão do Socket.IO.
-        socket.on('reconnect', () => { // cite: 1
-            console.log('Admin Frontend: Socket.IO reconnected. Re-emitting user connected.'); // cite: 1
-            const adminUserId = localStorage.getItem('userId'); // cite: 1
-            const adminUsername = localStorage.getItem('username'); // cite: 1
+        socket.on('reconnect', () => {
+            console.log('Admin Frontend: Socket.IO reconnected. Re-emitting user connected.');
+            const adminUserId = localStorage.getItem('userId');
+            const adminUsername = localStorage.getItem('username');
             if (adminUserId && adminUsername) {
-                socket.emit('user connected', { username: adminUsername, id: adminUserId }); // cite: 1
+                socket.emit('user connected', { username: adminUsername, id: adminUserId });
             }
         });
 
-        socket.on('update user list', (users) => { // cite: 1
-            const onlineUsersCountElement = document.getElementById('online-users-count'); // cite: 1
+        socket.on('update user list', (users) => {
+            const onlineUsersCountElement = document.getElementById('online-users-count');
             if (onlineUsersCountElement) {
                 // A contagem no admin deve incluir todos os usuários conectados (incluindo o próprio admin, se aplicável ao seu cálculo de "online users")
-                onlineUsersCountElement.textContent = users.length; // cite: 1
+                onlineUsersCountElement.textContent = users.length;
             }
         });
+        
+        // NOVO: Escuta por atualizações de campeonatos
+        socket.on('tournament_created', () => {
+            showNotification('Um novo campeonato foi criado ou atualizado!', 'info');
+            loadTournaments();
+        });
+        socket.on('tournament_updated', () => {
+            showNotification('Um campeonato foi atualizado!', 'info');
+            loadTournaments();
+        });
 
-        socket.on('error', (err) => { // cite: 1
-            console.error('Admin Frontend: Erro no socket:', err); // cite: 1
-            showNotification('Erro na conexão com o servidor de chat. Algumas informações podem não estar em tempo real.', 'error'); // cite: 1
+        socket.on('error', (err) => {
+            console.error('Admin Frontend: Erro no socket:', err);
+            showNotification('Erro na conexão com o servidor de chat. Algumas informações podem não estar em tempo real.', 'error');
         });
     } else {
-        console.warn('Biblioteca Socket.IO não carregada. Contagem de usuários online pode não ser em tempo real.'); // cite: 1
+        console.warn('Biblioteca Socket.IO não carregada. Contagem de usuários online pode não ser em tempo real.');
     }
 
 
@@ -65,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const fetchAdminData = async (endpoint) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/${endpoint}`, { // ATUALIZADO: Usando API_BASE_URL
+            const response = await fetch(`${API_BASE_URL}/api/admin/${endpoint}`, {
                 headers: {
                     'x-auth-token': token
                 }
@@ -77,34 +87,92 @@ document.addEventListener('DOMContentLoaded', async () => {
             return await response.json();
         } catch (error) {
             console.error(`Erro em fetchAdminData (${endpoint}):`, error);
-            showNotification(error.message, 'error'); // cite: 1
+            showNotification(error.message, 'error');
             return null;
         }
     };
+    
+    // NOVO: Função para renderizar o chaveamento
+    const renderBracket = (bracket) => {
+        const bracketContainer = document.getElementById('tournament-bracket-display');
+        bracketContainer.innerHTML = ''; // Limpa o container
+        
+        if (!bracket || bracket.length === 0) {
+            bracketContainer.innerHTML = '<p>Chaveamento não gerado.</p>';
+            return;
+        }
+        
+        // Agrupa os matches por round
+        const rounds = bracket.reduce((acc, match) => {
+            (acc[match.round] = acc[match.round] || []).push(match);
+            return acc;
+        }, {});
+        
+        for (const roundName in rounds) {
+            const roundDiv = document.createElement('div');
+            roundDiv.className = 'tournament-round';
+            roundDiv.innerHTML = `<h4>${roundName}</h4>`;
+            
+            rounds[roundName].forEach(match => {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'tournament-match';
+                matchDiv.innerHTML = `
+                    <p>
+                        <span>${match.player1 ? match.player1.username : 'Aguardando...'}</span>
+                        vs
+                        <span>${match.player2 ? match.player2.username : 'Aguardando...'}</span>
+                    </p>
+                `;
+                // Adiciona um botão para resolver o match se o status for pendente
+                if (match.status !== 'completed' && match.player1 && match.player2) {
+                    const resolveBtn = document.createElement('button');
+                    resolveBtn.textContent = 'Resolver';
+                    resolveBtn.className = 'cta-button resolve-match-btn';
+                    resolveBtn.dataset.matchId = match._id;
+                    matchDiv.appendChild(resolveBtn);
+                }
+                
+                if (match.winner) {
+                    const winnerP = document.createElement('p');
+                    winnerP.innerHTML = `Vencedor: <strong>${match.winner.username}</strong>`;
+                    matchDiv.appendChild(winnerP);
+                }
+                
+                roundDiv.appendChild(matchDiv);
+            });
+            
+            bracketContainer.appendChild(roundDiv);
+        }
+        
+        bracketContainer.style.display = 'block';
+    };
+
 
     // --- CARREGAR DADOS DO DASHBOARD ---
     const loadDashboardStats = async () => {
-        const stats = await fetchAdminData('dashboard-stats'); // cite: 1
+        const stats = await fetchAdminData('dashboard-stats');
         if (stats) {
-            document.getElementById('total-users').textContent = stats.totalUsers; // cite: 1
-            document.getElementById('total-challenges').textContent = stats.totalChallenges; // cite: 1
-            document.getElementById('completed-challenges').textContent = stats.completedChallenges; // cite: 1
-            document.getElementById('disputed-challenges').textContent = stats.disputedChallenges; // cite: 1
-            document.getElementById('total-coins-bet').textContent = stats.totalCoinsBet.toLocaleString('pt-BR'); // cite: 1
-            // online-users-count é atualizado pelo Socket.IO, mas podemos inicializar aqui se a API admin retornar
-            document.getElementById('online-users-count').textContent = stats.onlineUsersCount; // cite: 1
+            document.getElementById('total-users').textContent = stats.totalUsers;
+            document.getElementById('total-challenges').textContent = stats.totalChallenges;
+            document.getElementById('completed-challenges').textContent = stats.completedChallenges;
+            document.getElementById('disputed-challenges').textContent = stats.disputedChallenges;
+            document.getElementById('total-coins-bet').textContent = stats.totalCoinsBet.toLocaleString('pt-BR');
+            document.getElementById('online-users-count').textContent = stats.onlineUsersCount;
+            // NOVO: Atualiza os stats de campeonatos
+            document.getElementById('total-tournaments').textContent = stats.totalTournaments;
+            document.getElementById('active-tournaments').textContent = stats.activeTournaments;
         }
     };
 
     // --- CARREGAR E RENDERIZAR USUÁRIOS ---
-    let allUsers = []; // Variável para armazenar todos os usuários carregados
+    let allUsers = [];
     const loadUsers = async () => {
-        const users = await fetchAdminData('users'); // cite: 1
+        const users = await fetchAdminData('users');
         const usersTableBody = document.querySelector('#users-table tbody');
         if (usersTableBody) {
-            usersTableBody.innerHTML = ''; // Limpa a tabela
+            usersTableBody.innerHTML = '';
             if (users && users.length > 0) {
-                allUsers = users; // Armazena todos os usuários
+                allUsers = users;
                 users.forEach(user => {
                     const row = `
                         <tr data-user-id="${user._id}">
@@ -131,14 +199,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // --- CARREGAR E RENDERIZAR DESAFIOS ---
-    let allChallenges = []; // Variável para armazenar todos os desafios carregados
+    let allChallenges = [];
     const loadChallenges = async () => {
-        const challenges = await fetchAdminData('challenges'); // cite: 1
+        const challenges = await fetchAdminData('challenges');
         const challengesTableBody = document.querySelector('#challenges-table tbody');
         if (challengesTableBody) {
-            challengesTableBody.innerHTML = ''; // Limpa a tabela
+            challengesTableBody.innerHTML = '';
             if (challenges && challenges.length > 0) {
-                allChallenges = challenges; // Armazena todos os desafios
+                allChallenges = challenges;
                 challenges.forEach(challenge => {
                     const createdByUsername = challenge.createdBy ? challenge.createdBy.username : 'N/A';
                     const opponentUsername = challenge.opponent ? challenge.opponent.username : 'Aguardando';
@@ -169,6 +237,45 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             } else {
                 challengesTableBody.innerHTML = '<tr><td colspan="10">Nenhum desafio encontrado.</td></tr>';
+            }
+        }
+    };
+
+    // NOVO: CARREGAR E RENDERIZAR CAMPEONATOS
+    let allTournaments = [];
+    const loadTournaments = async () => {
+        const tournaments = await fetchAdminData('all-tournaments'); // Nova rota para pegar todos os torneios
+        const tournamentsTableBody = document.querySelector('#tournaments-table tbody');
+        if (tournamentsTableBody) {
+            tournamentsTableBody.innerHTML = '';
+            if (tournaments && tournaments.length > 0) {
+                allTournaments = tournaments;
+                tournaments.forEach(tournament => {
+                    let actionsHtml = '';
+                    if (tournament.status === 'registration') {
+                        actionsHtml = `<button class="manage-tournament-btn cta-button" title="Gerenciar Campeonato">🔧</button>`;
+                    } else if (tournament.status === 'in-progress') {
+                        actionsHtml = `<button class="manage-tournament-btn cta-button" title="Gerenciar Campeonato">🔧</button>`;
+                    } else {
+                        actionsHtml = `<button class="view-tournament-btn cta-button edit" title="Ver Detalhes">👁️</button>`;
+                    }
+                    
+                    const row = `
+                        <tr data-tournament-id="${tournament._id}">
+                            <td>${tournament._id.substring(0, 8)}...</td>
+                            <td>${tournament.name}</td>
+                            <td>${tournament.game}</td>
+                            <td>${tournament.betAmount.toLocaleString('pt-BR')}</td>
+                            <td>${tournament.participants.length}</td>
+                            <td>${tournament.maxParticipants}</td>
+                            <td>${tournament.status}</td>
+                            <td class="table-actions">${actionsHtml}</td>
+                        </tr>
+                    `;
+                    tournamentsTableBody.innerHTML += row;
+                });
+            } else {
+                tournamentsTableBody.innerHTML = '<tr><td colspan="8">Nenhum campeonato encontrado.</td></tr>';
             }
         }
     };
@@ -239,8 +346,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadDashboardStats();
         loadUsers();
         loadChallenges();
-        loadPendingPixPayments(); // NOVO: Carrega os pagamentos Pix
-        loadPendingWithdrawals(); // NOVO: Carrega as solicitações de saque
+        loadPendingPixPayments();
+        loadPendingWithdrawals();
+        loadTournaments();
     };
 
     initializeAdminPage();
@@ -252,11 +360,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (adminLogoutButton) {
         adminLogoutButton.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('Botão Sair Admin clicado!'); // Adicione esta linha
+            console.log('Botão Sair Admin clicado!');
             localStorage.clear();
-            console.log('Local Storage limpo. Redirecionando...'); // Adicione esta linha
+            console.log('Local Storage limpo. Redirecionando...');
             showNotification('Sessão de admin encerrada.', 'info');
-            window.location.href = 'login-split-form.html'; // ALTERADO
+            window.location.href = 'login-split-form.html';
         });
     }
 
@@ -295,7 +403,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users/${userIdToEdit}/update-coins`, { // ATUALIZADO: Usando API_BASE_URL
+            const response = await fetch(`${API_BASE_URL}/api/admin/users/${userIdToEdit}/update-coins`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -307,10 +415,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) {
                 errorElement.textContent = data.message || 'Erro ao atualizar moedas.';
             } else {
-                showNotification(data.message, 'success'); // cite: 1
+                showNotification(data.message, 'success');
                 document.getElementById('edit-coins-modal-backdrop').classList.remove('active');
-                loadUsers(); // Recarrega a tabela de usuários
-                loadDashboardStats(); // Recarrega as estatísticas
+                loadUsers();
+                loadDashboardStats();
             }
         } catch (error) {
             errorElement.textContent = 'Não foi possível conectar ao servidor.';
@@ -329,13 +437,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Botão Editar Moedas
             if (target.classList.contains('edit-coins-btn')) {
-                // Encontra o usuário específico no array allUsers para preencher os dados
                 const userToEdit = allUsers.find(u => u._id === userId);
                 if (userToEdit) {
                     document.getElementById('edit-coins-user-id').value = userToEdit._id;
                     document.getElementById('edit-coins-username').textContent = userToEdit.username;
-                    document.getElementById('new-coins-amount').value = userToEdit.coins; // Preenche com o valor atual
-                    document.getElementById('edit-coins-error').textContent = ''; // Limpa erro
+                    document.getElementById('new-coins-amount').value = userToEdit.coins;
+                    document.getElementById('edit-coins-error').textContent = '';
                     document.getElementById('edit-coins-modal-backdrop').classList.add('active');
                 }
             }
@@ -345,7 +452,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const isActive = row.querySelector('td:nth-child(8)').textContent === 'Sim';
                 const action = isActive ? 'desativar' : 'ativar';
                 if (confirm(`Tem certeza que deseja ${action} a conta deste usuário?`)) {
-                    fetch(`${API_BASE_URL}/api/admin/users/${userId}/toggle-active`, { // ATUALIZADO: Usando API_BASE_URL
+                    fetch(`${API_BASE_URL}/api/admin/users/${userId}/toggle-active`, {
                         method: 'PATCH',
                         headers: {
                             'x-auth-token': token
@@ -354,13 +461,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .then(res => res.json())
                     .then(data => {
                         if (data.message) {
-                            showNotification(data.message, 'success'); // cite: 1
-                            loadUsers(); // Recarrega a tabela de usuários
+                            showNotification(data.message, 'success');
+                            loadUsers();
                         } else {
-                            showNotification(data.message || 'Erro ao alterar status.', 'error'); // cite: 1
+                            showNotification(data.message || 'Erro ao alterar status.', 'error');
                         }
                     })
-                    .catch(() => showNotification('Não foi possível conectar ao servidor.', 'error')); // cite: 1
+                    .catch(() => showNotification('Não foi possível conectar ao servidor.', 'error'));
                 }
             }
         });
@@ -406,7 +513,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Botão Cancelar Desafio
             if (target.classList.contains('cancel-challenge-btn')) {
                 if (confirm("Tem certeza que deseja CANCELAR este desafio?")) {
-                    fetch(`${API_BASE_URL}/api/admin/challenges/${challengeId}/cancel`, { // ATUALIZADO: Usando API_BASE_URL
+                    fetch(`${API_BASE_URL}/api/admin/challenges/${challengeId}/cancel`, {
                         method: 'PATCH',
                         headers: {
                             'x-auth-token': token
@@ -415,13 +522,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .then(res => res.json())
                     .then(data => {
                         if (data.message) {
-                            showNotification(data.message, 'success'); // cite: 1
-                            loadChallenges(); // Recarrega a tabela de desafios
+                            showNotification(data.message, 'success');
+                            loadChallenges();
                         } else {
-                            showNotification(data.message || 'Erro ao cancelar desafio.', 'error'); // cite: 1
+                            showNotification(data.message || 'Erro ao cancelar desafio.', 'error');
                         }
                     })
-                    .catch(() => showNotification('Não foi possível conectar ao servidor.', 'error')); // cite: 1
+                    .catch(() => showNotification('Não foi possível conectar ao servidor.', 'error'));
                 }
             }
         });
@@ -450,9 +557,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const data = await response.json();
                         if (response.ok) {
                             showNotification(data.message, 'success');
-                            loadPendingWithdrawals(); // Recarrega a tabela de saques
-                            loadUsers(); // Recarrega a tabela de usuários para atualizar o saldo
-                            loadDashboardStats(); // Recarrega as estatísticas
+                            loadPendingWithdrawals();
+                            loadUsers();
+                            loadDashboardStats();
                         } else {
                             showNotification(data.message || 'Erro ao aprovar saque.', 'error');
                         }
@@ -534,9 +641,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const data = await response.json();
                         if (response.ok) {
                             showNotification(data.message, 'success');
-                            loadPendingPixPayments(); // Recarrega a tabela de pagamentos pendentes
-                            loadUsers(); // Recarrega a tabela de usuários para atualizar o saldo
-                            loadDashboardStats(); // Recarrega as estatísticas
+                            loadPendingPixPayments();
+                            loadUsers();
+                            loadDashboardStats();
                         } else {
                             showNotification(data.message || 'Erro ao confirmar pagamento.', 'error');
                         }
@@ -549,10 +656,265 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // NOVO: Lógica para os modais de Campeonato
+    const createTournamentModalBackdrop = document.getElementById('create-tournament-modal-backdrop');
+    const openCreateTournamentBtn = document.getElementById('open-create-tournament-modal-btn');
+    const createTournamentForm = document.getElementById('create-tournament-form');
+    
+    if (openCreateTournamentBtn && createTournamentModalBackdrop) {
+        openCreateTournamentBtn.addEventListener('click', () => {
+            createTournamentModalBackdrop.classList.add('active');
+        });
+        const closeBtn = createTournamentModalBackdrop.querySelector('.close-modal-btn');
+        closeBtn.addEventListener('click', () => {
+            createTournamentModalBackdrop.classList.remove('active');
+        });
+        createTournamentModalBackdrop.addEventListener('click', (e) => {
+            if (e.target === createTournamentModalBackdrop) createTournamentModalBackdrop.classList.remove('active');
+        });
+    }
+
+    if (createTournamentForm) {
+        createTournamentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = {
+                name: document.getElementById('tournament-name').value,
+                game: document.getElementById('tournament-game-select').value,
+                console: document.getElementById('tournament-console-select').value,
+                betAmount: document.getElementById('tournament-bet-amount').value,
+                maxParticipants: document.getElementById('tournament-max-participants').value,
+                scheduledTime: document.getElementById('tournament-scheduled-time').value
+            };
+            const errorElement = document.getElementById('create-tournament-error');
+            errorElement.textContent = '';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/tournaments`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify(formData)
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showNotification(data.message, 'success');
+                    createTournamentForm.reset();
+                    createTournamentModalBackdrop.classList.remove('active');
+                    loadTournaments();
+                    loadDashboardStats();
+                } else {
+                    errorElement.textContent = data.message || 'Erro ao criar campeonato.';
+                }
+            } catch (error) {
+                console.error('Erro ao criar campeonato:', error);
+                errorElement.textContent = 'Não foi possível conectar ao servidor.';
+            }
+        });
+    }
+
+    const tournamentsTableBody = document.querySelector('#tournaments-table tbody');
+    const manageTournamentModalBackdrop = document.getElementById('manage-tournament-modal-backdrop');
+    const manageTournamentModal = document.getElementById('manage-tournament-modal');
+
+    if (tournamentsTableBody) {
+        tournamentsTableBody.addEventListener('click', async (e) => {
+            const target = e.target;
+            const row = target.closest('tr[data-tournament-id]');
+            if (!row) return;
+
+            const tournamentId = row.dataset.tournamentId;
+            const tournament = allTournaments.find(t => t._id === tournamentId);
+            if (!tournament) return;
+
+            if (target.classList.contains('manage-tournament-btn') || target.classList.contains('view-tournament-btn')) {
+                // Preenche o modal de gerenciamento
+                document.getElementById('manage-tournament-title').textContent = `Gerenciar ${tournament.name}`;
+                manageTournamentModal.dataset.tournamentId = tournamentId;
+
+                const participantsList = document.getElementById('tournament-participants-list');
+                const participantsCountSpan = document.getElementById('tournament-participants-count');
+                const maxParticipantsCountSpan = document.getElementById('tournament-max-participants-count');
+
+                participantsList.innerHTML = '';
+                participantsCountSpan.textContent = tournament.participants.length;
+                maxParticipantsCountSpan.textContent = tournament.maxParticipants;
+                
+                // Mostra/esconde o botão de iniciar
+                const startBtn = document.getElementById('start-tournament-btn');
+                if (tournament.status === 'registration') {
+                    startBtn.style.display = 'inline-block';
+                    if (tournament.participants.length < 2) {
+                        startBtn.disabled = true;
+                        startBtn.textContent = 'Precisa de 2+ participantes';
+                    } else {
+                        startBtn.disabled = false;
+                        startBtn.textContent = 'Iniciar Campeonato';
+                    }
+                } else {
+                    startBtn.style.display = 'none';
+                }
+
+                if (tournament.participants && tournament.participants.length > 0) {
+                    tournament.participants.forEach(p => {
+                        const li = document.createElement('li');
+                        li.textContent = p.username;
+                        // Adiciona botão para remover participante
+                        const removeBtn = document.createElement('button');
+                        removeBtn.textContent = 'Remover';
+                        removeBtn.className = 'cta-button remove-participant-btn';
+                        removeBtn.style.backgroundColor = 'var(--loss-color)';
+                        removeBtn.style.marginLeft = '10px';
+                        removeBtn.dataset.userId = p._id;
+                        li.appendChild(removeBtn);
+                        participantsList.appendChild(li);
+                    });
+                } else {
+                     participantsList.innerHTML = '<p class="no-challenges-message">Nenhum participante inscrito.</p>';
+                }
+                
+                // Busca e exibe o chaveamento, se existir
+                const bracketDisplay = document.getElementById('tournament-bracket-display');
+                if (tournament.status === 'in-progress' || tournament.status === 'completed') {
+                    const fullTournamentDetails = await fetchAdminData(`tournament/${tournamentId}`);
+                    if (fullTournamentDetails && fullTournamentDetails.bracket) {
+                        renderBracket(fullTournamentDetails.bracket);
+                        bracketDisplay.style.display = 'block';
+                    }
+                } else {
+                    bracketDisplay.style.display = 'none';
+                }
+
+                manageTournamentModalBackdrop.classList.add('active');
+            }
+        });
+    }
+    
+    // Eventos dentro do modal de gerenciamento
+    if(manageTournamentModalBackdrop){
+         const closeBtn = manageTournamentModalBackdrop.querySelector('.close-modal-btn');
+         closeBtn.addEventListener('click', () => {
+             manageTournamentModalBackdrop.classList.remove('active');
+         });
+         manageTournamentModalBackdrop.addEventListener('click', (e) => {
+             if (e.target === manageTournamentModalBackdrop) manageTournamentModalBackdrop.classList.remove('active');
+         });
+         
+         manageTournamentModalBackdrop.addEventListener('click', async (e) => {
+             const target = e.target;
+             const tournamentId = manageTournamentModal.dataset.tournamentId;
+
+             if(target.classList.contains('remove-participant-btn')) {
+                 const userIdToRemove = target.dataset.userId;
+                 if(confirm('Tem certeza que deseja remover este participante?')) {
+                     try {
+                         const response = await fetch(`${API_BASE_URL}/api/admin/tournaments/${tournamentId}/remove-participant`, {
+                             method: 'PATCH',
+                             headers: {
+                                 'Content-Type': 'application/json',
+                                 'x-auth-token': token
+                             },
+                             body: JSON.stringify({ userId: userIdToRemove })
+                         });
+                         const data = await response.json();
+                         if(response.ok){
+                             showNotification(data.message, 'success');
+                             loadTournaments();
+                             const updatedTournament = allTournaments.find(t => t._id === tournamentId);
+                             const userIndex = updatedTournament.participants.indexOf(userIdToRemove);
+                             if(userIndex !== -1) updatedTournament.participants.splice(userIndex, 1);
+                             const participantCountSpan = document.getElementById('tournament-participants-count');
+                             participantCountSpan.textContent = updatedTournament.participants.length;
+                             target.closest('li').remove();
+                         } else {
+                             showNotification(data.message || 'Erro ao remover participante.', 'error');
+                         }
+                     } catch(error) {
+                         showNotification('Erro de conexão ao remover participante.', 'error');
+                     }
+                 }
+             }
+
+             if(target.id === 'start-tournament-btn'){
+                 if(confirm('Tem certeza que deseja iniciar o campeonato? As inscrições serão encerradas.')){
+                     try {
+                         const response = await fetch(`${API_BASE_URL}/api/admin/tournaments/${tournamentId}/start`, {
+                             method: 'POST',
+                             headers: { 'x-auth-token': token }
+                         });
+                         const data = await response.json();
+                         if(response.ok){
+                             showNotification(data.message, 'success');
+                             manageTournamentModalBackdrop.classList.remove('active');
+                             loadTournaments();
+                         } else {
+                             showNotification(data.message || 'Erro ao iniciar campeonato.', 'error');
+                         }
+                     } catch(error) {
+                         showNotification('Erro de conexão ao iniciar campeonato.', 'error');
+                     }
+                 }
+             }
+             
+             if (target.id === 'send-message-btn') {
+                 const tournament = allTournaments.find(t => t._id === tournamentId);
+                 if (tournament) {
+                     document.getElementById('message-tournament-name').textContent = tournament.name;
+                     document.getElementById('message-tournament-id').value = tournament._id;
+                     document.getElementById('message-text').value = '';
+                     document.getElementById('send-message-error').textContent = '';
+                     document.getElementById('send-message-modal-backdrop').classList.add('active');
+                 }
+             }
+         });
+    }
+    
+    // Lógica para o modal de envio de mensagem
+    const sendMessageModalBackdrop = document.getElementById('send-message-modal-backdrop');
+    if (sendMessageModalBackdrop) {
+        const closeBtn = sendMessageModalBackdrop.querySelector('.close-modal-btn');
+        closeBtn.addEventListener('click', () => sendMessageModalBackdrop.classList.remove('active'));
+        sendMessageModalBackdrop.addEventListener('click', (e) => {
+             if (e.target === sendMessageModalBackdrop) sendMessageModalBackdrop.classList.remove('active');
+         });
+         
+        document.getElementById('send-message-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const tournamentId = document.getElementById('message-tournament-id').value;
+            const message = document.getElementById('message-text').value;
+            const errorElement = document.getElementById('send-message-error');
+            errorElement.textContent = '';
+            
+            if (!message) {
+                 errorElement.textContent = 'A mensagem não pode ser vazia.';
+                 return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/tournaments/${tournamentId}/message-participants`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify({ message })
+                });
+                const data = await response.json();
+                if(response.ok) {
+                    showNotification(data.message, 'success');
+                    sendMessageModalBackdrop.classList.remove('active');
+                } else {
+                    errorElement.textContent = data.message || 'Erro ao enviar a mensagem.';
+                }
+            } catch(error) {
+                console.error('Erro ao enviar mensagem:', error);
+                errorElement.textContent = 'Erro de conexão ao enviar a mensagem.';
+            }
+        });
+    }
+
     // Inicializa o ano no rodapé
     const yearSpan = document.getElementById('currentYear');
     if (yearSpan) { yearSpan.textContent = new Date().getFullYear(); }
-
-    const savedTheme = localStorage.getItem('theme') || 'light';
-document.documentElement.setAttribute('data-theme', savedTheme);
 });

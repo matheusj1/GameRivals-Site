@@ -85,6 +85,39 @@
                     <h4>Moedas Apostadas</h4>
                     <p id="total-coins-bet">0</p>
                 </div>
+                <div class="stat-card">
+                    <h4>Total de Torneios</h4>
+                    <p id="total-tournaments">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Torneios Ativos</h4>
+                    <p id="active-tournaments">0</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin-tournament-management">
+            <h3>Gerenciamento de Campeonatos</h3>
+            <div style="margin-bottom: 20px;">
+                <button id="open-create-tournament-modal-btn" class="cta-button">Criar Novo Campeonato</button>
+            </div>
+            <div class="table-container">
+                <table id="tournaments-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Jogo</th>
+                            <th>Aposta</th>
+                            <th>Participantes</th>
+                            <th>Máx. Part.</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
             </div>
         </section>
         
@@ -241,7 +274,98 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" id="create-tournament-modal-backdrop">
+        <div class="modal" id="create-tournament-modal">
+            <button class="close-modal-btn">&times;</button>
+            <h2>Criar Novo Campeonato</h2>
+            <form id="create-tournament-form" class="modal-form">
+                <div class="input-group">
+                    <label for="tournament-name">Nome do Campeonato</label>
+                    <input type="text" id="tournament-name" name="name" required>
+                </div>
+                 <div class="input-group">
+                    <label for="tournament-game-select">Jogo</label>
+                    <select id="tournament-game-select" name="game" required>
+                        <option value="" disabled selected>Selecione um jogo</option>
+                        <option value="Ea Sports 24">Ea Sports 24</option>
+                        <option value="Ea Sports 25">Ea Sports 25</option>
+                        <option value="Rocket League">Rocket League</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="tournament-console-select">Console</label>
+                    <select id="tournament-console-select" name="console" required>
+                        <option value="" disabled selected>Selecione um console</option>
+                        <option value="PS5">PlayStation 5</option>
+                        <option value="PS4">PlayStation 4</option>
+                        <option value="XBOX Series">Xbox Series S/X</option>
+                        <option value="Xbox One">Xbox One</option>
+                        <option value="PC">PC</option>
+                        <option value="Nintendo Switch">Nintendo Switch</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="tournament-bet-amount">Valor da Inscrição (em moedas)</label>
+                    <input type="number" id="tournament-bet-amount" name="betAmount" min="0" value="0" required>
+                    <small style="color: var(--text-muted);">Digite 0 para campeonato gratuito.</small>
+                </div>
+                <div class="input-group">
+                    <label for="tournament-max-participants">Máx. de Participantes</label>
+                    <select id="tournament-max-participants" name="maxParticipants" required>
+                        <option value="" disabled selected>Selecione a quantidade</option>
+                        <option value="8">8</option>
+                        <option value="16">16</option>
+                        <option value="32">32</option>
+                        <option value="64">64</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="tournament-scheduled-time">Horário Agendado (Opcional)</label>
+                    <input type="text" id="tournament-scheduled-time" name="scheduledTime" placeholder="Ex: 20/09/2025 às 20:00">
+                </div>
+                <p class="form-error-message" id="create-tournament-error"></p>
+                <button type="submit" class="cta-button form-submit-btn">Criar Campeonato</button>
+            </form>
+        </div>
+    </div>
 
+    <div class="modal-backdrop" id="manage-tournament-modal-backdrop">
+        <div class="modal" id="manage-tournament-modal">
+            <button class="close-modal-btn">&times;</button>
+            <h2 id="manage-tournament-title">Gerenciar Campeonato</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <button id="start-tournament-btn" class="cta-button" style="background-color: var(--win-color);">Iniciar Campeonato</button>
+                <button id="send-message-btn" class="cta-button" style="background-color: var(--secondary-neon);">Enviar Mensagem</button>
+            </div>
+            
+            <div id="tournament-bracket-display" style="display: none;">
+                <h3>Chaveamento</h3>
+                </div>
+            
+            <h3>Participantes (<span id="tournament-participants-count">0</span>/<span id="tournament-max-participants-count">0</span>)</h3>
+            <ul id="tournament-participants-list" class="player-list" style="margin-bottom: 20px;">
+                </ul>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="send-message-modal-backdrop">
+        <div class="modal" id="send-message-modal">
+            <button class="close-modal-btn">&times;</button>
+            <h2>Enviar Mensagem para Participantes</h2>
+            <form id="send-message-form" class="modal-form">
+                <p>Campeonato: <strong id="message-tournament-name"></strong></p>
+                <div class="input-group">
+                    <label for="message-text">Mensagem</label>
+                    <textarea id="message-text" name="message" rows="5" required></textarea>
+                </div>
+                <input type="hidden" id="message-tournament-id">
+                <p class="form-error-message" id="send-message-error"></p>
+                <button type="submit" class="cta-button form-submit-btn">Enviar</button>
+            </form>
+        </div>
+    </div>
+    
     <div id="notification-container"></div>
     <script src="https://gamerivals-site.onrender.com/socket.io/socket.io.js"></script> <script src="js/main.js"></script> <script type="module" src="js/admin.js"></script>
 </body>

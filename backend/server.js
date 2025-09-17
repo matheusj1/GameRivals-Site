@@ -21,6 +21,7 @@ const Message = require('./models/Message');
 const FriendRequest = require('./models/FriendRequest');
 const PixPaymentNotification = require('./models/PixPaymentNotification'); // NOVO: Importe o novo modelo
 const WithdrawalRequest = require('./models/WithdrawalRequest'); // NOVO: Importe o modelo de saque
+const Tournament = require('./models/Tournament'); // NOVO: Importe o modelo de Torneio
 
 const auth = require('./middleware/auth');
 const adminAuth = require('./middleware/adminAuth');
@@ -789,7 +790,7 @@ app.patch('/api/challenges/:id/accept', auth, async (req, res) => {
         if (challenge.createdBy.toString() === req.user.id) { return res.status(400).json({ message: 'Você não pode aceitar seu próprio desafio.' }); }
         if (challenge.opponent && String(challenge.opponent) !== String(req.user.id)) { return res.status(403).json({ message: 'Este desafio é privado e não foi feito para você.' }); }
         const acceptorUser = await User.findById(req.user.id);
-        if (challenge.betAmount > 0 && acceptorUser.coins < challenge.betAmount) { return res.status(400).json({ message: 'Você não tem moedas suficientes para aceitar esta aposta.' }); }
+        if (challenge.betAmount > 0 && acceptorUser.coins < challenge.betAmount) { return res.status(400).json({ message: 'Você não tem moedas suficientes para esta aposta.' }); }
         challenge.opponent = req.user.id;
         challenge.status = 'accepted';
         await challenge.save();
@@ -1237,7 +1238,22 @@ app.get('/api/admin/dashboard-stats', adminAuth, async (req, res) => {
         const disputedChallenges = await Challenge.countDocuments({ status: 'disputed' });
         const result = await Challenge.aggregate([ { $match: { status: 'completed' } }, { $group: { _id: null, totalBetAmount: { $sum: '$betAmount' } } } ]);
         const totalCoinsBet = result.length > 0 ? result[0].totalBetAmount : 0;
-        res.json({ totalUsers, totalChallenges, completedChallenges, disputedChallenges, totalCoinsBet, onlineUsersCount: onlineUsers.size });
+        // NOVO: Adiciona contagem de torneios
+        const totalTournaments = await Tournament.countDocuments();
+        const activeTournaments = await Tournament.countDocuments({ status: 'in-progress' });
+        const completedTournaments = await Tournament.countDocuments({ status: 'completed' });
+
+        res.json({ 
+            totalUsers, 
+            totalChallenges, 
+            completedChallenges, 
+            disputedChallenges, 
+            totalCoinsBet, 
+            onlineUsersCount: onlineUsers.size,
+            totalTournaments, // Adicionado
+            activeTournaments, // Adicionado
+            completedTournaments // Adicionado
+        });
     } catch (error) {
         console.error('[API ADMIN] Erro ao buscar stats do dashboard admin:', error);
         res.status(500).json({ message: 'Erro no servidor ao buscar estatísticas.' });
@@ -1355,3 +1371,324 @@ app.post('/api/reset-password/:token', async (req, res) => {
         res.status(500).json({ message: 'Erro no servidor ao redefinir a senha.' });
     }
 });
+
+// =========================================================================
+// NOVAS ROTAS PARA CAMPEONATOS (TOURNAMENTS)
+// =========================================================================
+
+// Função auxiliar para gerar o chaveamento de um torneio
+const generateBracket = (participants) => {
+    let matches = [];
+    const numParticipants = participants.length;
+    let numRounds = Math.ceil(Math.log2(numParticipants));
+    
+    // Primeiro round (Oitavas de final, se houver 8 participantes)
+    let currentRound = 'Oitavas';
+    const firstRoundMatches = [];
+    for (let i = 0; i < numParticipants; i += 2) {
+        firstRoundMatches.push({
+            player1: participants[i],
+            player2: participants[i + 1] || null,
+            round: currentRound
+        });
+    }
+
+    matches.push(...firstRoundMatches);
+
+    // Gerar os próximos rounds
+    let previousRoundMatches = firstRoundMatches;
+    for (let i = 1; i < numRounds; i++) {
+        let nextRoundName = '';
+        if (i === numRounds - 1) {
+            nextRoundName = 'Final';
+        } else if (i === numRounds - 2) {
+            nextRoundName = 'Semifinal';
+        } else if (i === numRounds - 3) {
+            nextRoundName = 'Quartas de final';
+        }
+
+        let nextRoundMatches = [];
+        for (let j = 0; j < previousRoundMatches.length; j += 2) {
+            nextRoundMatches.push({
+                round: nextRoundName,
+                player1: null,
+                player2: null
+            });
+        }
+        
+        // Atribui os próximos matches aos anteriores
+        for(let j = 0; j < previousRoundMatches.length; j++) {
+            previousRoundMatches[j].nextMatch = nextRoundMatches[Math.floor(j/2)];
+        }
+        
+        matches.push(...nextRoundMatches);
+        previousRoundMatches = nextRoundMatches;
+    }
+    return matches;
+};
+
+
+// Rota para o admin criar um novo campeonato
+app.post('/api/admin/tournaments', adminAuth, async (req, res) => {
+    try {
+        const { name, game, console, betAmount, maxParticipants, scheduledTime } = req.body;
+        if (!name || !game || !console || !maxParticipants) {
+            return res.status(400).json({ message: 'Dados incompletos para criar o campeonato.' });
+        }
+        if (maxParticipants < 2 || (Math.log2(maxParticipants) % 1 !== 0)) {
+            return res.status(400).json({ message: 'O número de participantes deve ser uma potência de 2 (ex: 2, 4, 8, 16, 32...).' });
+        }
+        
+        const newTournament = new Tournament({
+            name,
+            game,
+            console,
+            betAmount: Number(betAmount) || 0,
+            maxParticipants: Number(maxParticipants),
+            scheduledTime,
+            admin: req.user.id
+        });
+        await newTournament.save();
+
+        io.emit('tournament_created');
+        res.status(201).json({ message: 'Campeonato criado com sucesso!', tournament: newTournament });
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao criar campeonato:', error);
+        res.status(500).json({ message: 'Erro no servidor ao criar campeonato.' });
+    }
+});
+
+// Rota para listar campeonatos (visível para usuários e admin)
+app.get('/api/tournaments', auth, async (req, res) => {
+    try {
+        const tournaments = await Tournament.find({ status: { $in: ['registration', 'in-progress'] } })
+            .populate('participants', 'username avatarUrl')
+            .sort({ registeredAt: 1 });
+        res.json(tournaments);
+    } catch (error) {
+        console.error('[API] Erro ao listar campeonatos:', error);
+        res.status(500).json({ message: 'Erro no servidor ao buscar campeonatos.' });
+    }
+});
+
+// Rota para o usuário se inscrever em um campeonato
+app.post('/api/tournaments/:id/register', auth, async (req, res) => {
+    try {
+        const tournamentId = req.params.id;
+        const userId = req.user.id;
+
+        const tournament = await Tournament.findById(tournamentId);
+        const user = await User.findById(userId);
+
+        if (!tournament || !user) {
+            return res.status(404).json({ message: 'Campeonato ou usuário não encontrado.' });
+        }
+        if (tournament.status !== 'registration') {
+            return res.status(400).json({ message: 'O período de inscrições para este campeonato já encerrou.' });
+        }
+        if (tournament.participants.length >= tournament.maxParticipants) {
+            return res.status(400).json({ message: 'Este campeonato já atingiu o número máximo de participantes.' });
+        }
+        if (tournament.participants.includes(userId)) {
+            return res.status(400).json({ message: 'Você já está inscrito neste campeonato.' });
+        }
+        if (tournament.betAmount > 0 && user.coins < tournament.betAmount) {
+            return res.status(400).json({ message: 'Você não tem moedas suficientes para se inscrever.' });
+        }
+
+        if (tournament.betAmount > 0) {
+            user.coins -= tournament.betAmount;
+            await user.save();
+        }
+        tournament.participants.push(userId);
+        await tournament.save();
+        
+        io.emit('tournament_updated');
+        res.status(200).json({ message: 'Inscrição realizada com sucesso!', tournament });
+
+    } catch (error) {
+        console.error('[API] Erro ao registrar em campeonato:', error);
+        res.status(500).json({ message: 'Erro no servidor ao se inscrever no campeonato.' });
+    }
+});
+
+// Rota para o admin remover um participante
+app.patch('/api/admin/tournaments/:id/remove-participant', adminAuth, async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const tournament = await Tournament.findById(req.params.id);
+
+        if (!tournament) {
+            return res.status(404).json({ message: 'Campeonato não encontrado.' });
+        }
+        
+        const participantIndex = tournament.participants.indexOf(userId);
+        if (participantIndex === -1) {
+            return res.status(404).json({ message: 'Usuário não é um participante deste campeonato.' });
+        }
+        
+        tournament.participants.splice(participantIndex, 1);
+        await tournament.save();
+
+        io.emit('tournament_updated');
+        res.status(200).json({ message: 'Participante removido com sucesso!', tournament });
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao remover participante:', error);
+        res.status(500).json({ message: 'Erro no servidor ao remover participante.' });
+    }
+});
+
+
+// Rota para o admin iniciar o campeonato e gerar o chaveamento
+app.post('/api/admin/tournaments/:id/start', adminAuth, async (req, res) => {
+    try {
+        const tournament = await Tournament.findById(req.params.id).populate('participants', 'username');
+        if (!tournament) {
+            return res.status(404).json({ message: 'Campeonato não encontrado.' });
+        }
+        if (tournament.status !== 'registration') {
+            return res.status(400).json({ message: 'O campeonato não está no status de inscrição.' });
+        }
+        
+        // Embaralha os participantes para um chaveamento aleatório
+        const shuffledParticipants = tournament.participants.sort(() => 0.5 - Math.random());
+
+        // Gera o chaveamento do torneio
+        const bracket = generateBracket(shuffledParticipants.map(p => p._id));
+        tournament.bracket = bracket;
+        tournament.status = 'in-progress';
+        await tournament.save();
+
+        io.emit('tournament_updated');
+        res.status(200).json({ message: 'Campeonato iniciado e chaveamento gerado!', tournament });
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao iniciar campeonato:', error);
+        res.status(500).json({ message: 'Erro no servidor ao iniciar campeonato.' });
+    }
+});
+
+
+// Rota para o admin enviar uma mensagem para todos os participantes de um campeonato
+app.post('/api/admin/tournaments/:id/message-participants', adminAuth, async (req, res) => {
+    try {
+        const { message } = req.body;
+        const tournament = await Tournament.findById(req.params.id).populate('participants', 'email');
+        if (!tournament) {
+            return res.status(404).json({ message: 'Campeonato não encontrado.' });
+        }
+        
+        if (!message) {
+            return res.status(400).json({ message: 'A mensagem não pode ser vazia.' });
+        }
+
+        const participantEmails = tournament.participants.map(p => p.email);
+        
+        const mailOptions = {
+            to: participantEmails,
+            from: process.env.EMAIL_USER,
+            subject: `Atualização do Campeonato ${tournament.name}`,
+            html: `<p>Olá, participante!</p><p>Uma atualização importante sobre o campeonato "${tournament.name}":</p><p>${message}</p><p>Boa sorte!</p>`
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: 'Mensagem enviada para todos os participantes com sucesso.' });
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao enviar mensagem para participantes:', error);
+        res.status(500).json({ message: 'Erro no servidor ao enviar a mensagem.' });
+    }
+});
+
+
+app.get('/api/admin/tournaments', adminAuth, async (req, res) => {
+    try {
+        const tournaments = await Tournament.find().populate('participants', 'username').sort({ registeredAt: -1 });
+        res.json(tournaments);
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao buscar campeonatos:', error);
+        res.status(500).json({ message: 'Erro no servidor.' });
+    }
+});
+
+// Rota para o admin resolver um match do torneio
+app.patch('/api/admin/tournaments/:tournamentId/resolve-match/:matchId', adminAuth, async (req, res) => {
+    try {
+        const { tournamentId, matchId } = req.params;
+        const { winnerId } = req.body;
+
+        const tournament = await Tournament.findById(tournamentId).populate('participants', 'username');
+        if (!tournament) {
+            return res.status(404).json({ message: 'Campeonato não encontrado.' });
+        }
+
+        const match = tournament.bracket.id(matchId);
+        if (!match) {
+            return res.status(404).json({ message: 'Partida não encontrada.' });
+        }
+
+        // Verifica se o vencedor é um dos jogadores do match
+        if (String(winnerId) !== String(match.player1) && String(winnerId) !== String(match.player2)) {
+            return res.status(400).json({ message: 'O vencedor selecionado não é um dos jogadores desta partida.' });
+        }
+
+        match.winner = winnerId;
+        match.status = 'completed';
+
+        // Atualiza o próximo match com o vencedor
+        if (match.nextMatch) {
+            const nextMatch = tournament.bracket.id(match.nextMatch);
+            if (nextMatch) {
+                if (!nextMatch.player1) {
+                    nextMatch.player1 = winnerId;
+                } else {
+                    nextMatch.player2 = winnerId;
+                }
+            }
+        }
+        
+        await tournament.save();
+        io.emit('tournament_updated');
+        res.status(200).json({ message: 'Resultado do match registrado e chaveamento atualizado!', tournament });
+
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao resolver match do campeonato:', error);
+        res.status(500).json({ message: 'Erro no servidor.' });
+    }
+});
+
+app.get('/api/admin/all-tournaments', adminAuth, async (req, res) => {
+    try {
+        const tournaments = await Tournament.find().populate('participants', 'username');
+        res.json(tournaments);
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao buscar campeonatos para o admin:', error);
+        res.status(500).json({ message: 'Erro no servidor ao buscar campeonatos.' });
+    }
+});
+
+
+app.get('/api/admin/tournament/:id', adminAuth, async (req, res) => {
+    try {
+        const tournament = await Tournament.findById(req.params.id)
+            .populate('participants', 'username avatarUrl')
+            .populate('bracket.player1', 'username')
+            .populate('bracket.player2', 'username')
+            .populate('bracket.winner', 'username')
+            .populate('admin', 'username');
+
+        if (!tournament) {
+            return res.status(404).json({ message: 'Campeonato não encontrado.' });
+        }
+
+        res.json(tournament);
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao buscar detalhes do campeonato:', error);
+        res.status(500).json({ message: 'Erro no servidor.' });
+    }
+});
+
+// Fim das novas rotas para campeonatos
+
+// =========================================================================
+// FIM NOVAS ROTAS
+// =========================================================================
