@@ -658,7 +658,7 @@ app.patch('/api/admin/withdrawals/:id/approve', adminAuth, async (req, res) => {
         // Opcional: Notificar o usuário
         const userSocketId = onlineUsers.get(String(withdrawal.userId))?.socketId;
         if (userSocketId) {
-            io.to(userSocketId).emit('withdrawal status updated', { status: 'approved', amount: withdrawal.amount });
+            io.to(userSocketId).emit('wallet updated', { status: 'approved', amount: withdrawal.amount });
         }
 
         res.status(200).json({ message: 'Solicitação de saque aprovada com sucesso.' });
@@ -1380,45 +1380,46 @@ app.post('/api/reset-password/:token', async (req, res) => {
 const generateBracket = (participants) => {
     let matches = [];
     const numParticipants = participants.length;
-    let numRounds = Math.ceil(Math.log2(numParticipants));
-    
-    // Primeiro round (Oitavas de final, se houver 8 participantes)
-    let currentRound = 'Oitavas';
+    let numRounds = Math.log2(numParticipants);
+
+    if (!Number.isInteger(numRounds)) {
+        throw new Error('O número de participantes deve ser uma potência de 2.');
+    }
+
+    // Cria as partidas da primeira rodada (oitavas, se 8)
     const firstRoundMatches = [];
     for (let i = 0; i < numParticipants; i += 2) {
         firstRoundMatches.push({
             player1: participants[i],
             player2: participants[i + 1] || null,
-            round: currentRound
+            round: `Oitavas`
         });
     }
 
     matches.push(...firstRoundMatches);
 
-    // Gerar os próximos rounds
+    // Conecta as próximas rodadas
     let previousRoundMatches = firstRoundMatches;
-    for (let i = 1; i < numRounds; i++) {
-        let nextRoundName = '';
-        if (i === numRounds - 1) {
-            nextRoundName = 'Final';
-        } else if (i === numRounds - 2) {
-            nextRoundName = 'Semifinal';
-        } else if (i === numRounds - 3) {
-            nextRoundName = 'Quartas de final';
+    let roundsNames = ['Quartas', 'Semifinal', 'Final'];
+    for (let i = 0; i < numRounds - 1; i++) {
+        const nextRoundMatches = [];
+        for (let j = 0; j < previousRoundMatches.length / 2; j++) {
+            const newMatch = {
+                player1: null,
+                player2: null,
+                winner: null,
+                status: 'pending',
+                round: roundsNames[i]
+            };
+            nextRoundMatches.push(newMatch);
         }
 
-        let nextRoundMatches = [];
+        // Conecta as partidas do round atual com as do próximo
         for (let j = 0; j < previousRoundMatches.length; j += 2) {
-            nextRoundMatches.push({
-                round: nextRoundName,
-                player1: null,
-                player2: null
-            });
-        }
-        
-        // Atribui os próximos matches aos anteriores
-        for(let j = 0; j < previousRoundMatches.length; j++) {
-            previousRoundMatches[j].nextMatch = nextRoundMatches[Math.floor(j/2)];
+            previousRoundMatches[j].nextMatch = nextRoundMatches[j / 2];
+            if (previousRoundMatches[j + 1]) {
+                previousRoundMatches[j + 1].nextMatch = nextRoundMatches[j / 2];
+            }
         }
         
         matches.push(...nextRoundMatches);
@@ -1468,6 +1469,24 @@ app.get('/api/tournaments', auth, async (req, res) => {
     } catch (error) {
         console.error('[API] Erro ao listar campeonatos:', error);
         res.status(500).json({ message: 'Erro no servidor ao buscar campeonatos.' });
+    }
+});
+
+// NOVO: Rota para obter detalhes de um único torneio para o usuário
+app.get('/api/tournaments/:id', auth, async (req, res) => {
+    try {
+        const tournament = await Tournament.findById(req.params.id)
+            .populate('participants', 'username avatarUrl')
+            .populate('bracket.player1', 'username')
+            .populate('bracket.player2', 'username')
+            .populate('bracket.winner', 'username');
+        if (!tournament) {
+            return res.status(404).json({ message: 'Campeonato não encontrado.' });
+        }
+        res.json(tournament);
+    } catch (error) {
+        console.error('[API] Erro ao buscar detalhes do campeonato:', error);
+        res.status(500).json({ message: 'Erro no servidor ao buscar detalhes do campeonato.' });
     }
 });
 
@@ -1616,7 +1635,7 @@ app.patch('/api/admin/tournaments/:tournamentId/resolve-match/:matchId', adminAu
         const { tournamentId, matchId } = req.params;
         const { winnerId } = req.body;
 
-        const tournament = await Tournament.findById(tournamentId).populate('participants', 'username');
+        const tournament = await Tournament.findById(tournamentId);
         if (!tournament) {
             return res.status(404).json({ message: 'Campeonato não encontrado.' });
         }
@@ -1655,6 +1674,7 @@ app.patch('/api/admin/tournaments/:tournamentId/resolve-match/:matchId', adminAu
         res.status(500).json({ message: 'Erro no servidor.' });
     }
 });
+
 
 app.get('/api/admin/all-tournaments', adminAuth, async (req, res) => {
     try {

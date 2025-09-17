@@ -8,7 +8,6 @@ import { fetchAndDisplayChallenges, fetchAndDisplayMyChallenges, renderMyChallen
 import { initFriendsAndChat, fetchAndDisplayFriends, fetchAndDisplayFriendRequests, fetchAndDisplaySentFriendRequests, fetchAndDisplayBlockedUsers, refreshFriendsAndRequests } from './friends_and_chat.js';
 // Importa as funções de matchmaking
 import { setupMatchmaking } from './matchmaking.js';
-
 // NOVO: Importa as funções de campeonatos
 import { fetchAndDisplayTournaments, setupTournamentListeners } from './tournaments.js';
 

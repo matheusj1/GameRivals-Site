@@ -93,9 +93,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     
     // NOVO: Função para renderizar o chaveamento
-    const renderBracket = (bracket) => {
+    const renderBracket = (bracket, tournamentId) => {
         const bracketContainer = document.getElementById('tournament-bracket-display');
-        bracketContainer.innerHTML = ''; // Limpa o container
+        bracketContainer.innerHTML = '';
         
         if (!bracket || bracket.length === 0) {
             bracketContainer.innerHTML = '<p>Chaveamento não gerado.</p>';
@@ -116,19 +116,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             rounds[roundName].forEach(match => {
                 const matchDiv = document.createElement('div');
                 matchDiv.className = 'tournament-match';
-                matchDiv.innerHTML = `
+                
+                const player1Name = match.player1 ? match.player1.username : 'Aguardando...';
+                const player2Name = match.player2 ? match.player2.username : 'Aguardando...';
+                
+                let matchHtml = `
                     <p>
-                        <span>${match.player1 ? match.player1.username : 'Aguardando...'}</span>
-                        vs
-                        <span>${match.player2 ? match.player2.username : 'Aguardando...'}</span>
+                        <span>${player1Name}</span> vs <span>${player2Name}</span>
                     </p>
                 `;
+
                 // Adiciona um botão para resolver o match se o status for pendente
                 if (match.status !== 'completed' && match.player1 && match.player2) {
                     const resolveBtn = document.createElement('button');
                     resolveBtn.textContent = 'Resolver';
                     resolveBtn.className = 'cta-button resolve-match-btn';
                     resolveBtn.dataset.matchId = match._id;
+                    resolveBtn.dataset.tournamentId = tournamentId;
+                    resolveBtn.dataset.player1Id = match.player1._id;
+                    resolveBtn.dataset.player1Name = match.player1.username;
+                    resolveBtn.dataset.player2Id = match.player2._id;
+                    resolveBtn.dataset.player2Name = match.player2.username;
+                    
                     matchDiv.appendChild(resolveBtn);
                 }
                 
@@ -572,9 +581,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Botão Rejeitar Saque
             if (target.classList.contains('reject-withdrawal-btn')) {
-                 const withdrawalAmount = row.dataset.withdrawalAmount;
+                 const withdrawalAmount = row.dataset.withdrawal-amount;
                  document.getElementById('reject-withdrawal-amount').textContent = withdrawalAmount;
-                 document.getElementById('confirm-reject-withdrawal-btn').dataset.withdrawalId = withdrawalId;
+                 document.getElementById('confirm-reject-withdrawal-btn').dataset.withdrawal-id = withdrawalId;
                  document.getElementById('reject-withdrawal-modal-backdrop').classList.add('active');
             }
         });
@@ -779,7 +788,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (tournament.status === 'in-progress' || tournament.status === 'completed') {
                     const fullTournamentDetails = await fetchAdminData(`tournament/${tournamentId}`);
                     if (fullTournamentDetails && fullTournamentDetails.bracket) {
-                        renderBracket(fullTournamentDetails.bracket);
+                        renderBracket(fullTournamentDetails.bracket, tournamentId);
                         bracketDisplay.style.display = 'block';
                     }
                 } else {
@@ -865,6 +874,45 @@ document.addEventListener('DOMContentLoaded', async () => {
                      document.getElementById('message-text').value = '';
                      document.getElementById('send-message-error').textContent = '';
                      document.getElementById('send-message-modal-backdrop').classList.add('active');
+                 }
+             }
+             
+             // NOVO: Lógica para o botão de resolver match
+             if (target.classList.contains('resolve-match-btn')) {
+                 const matchId = target.dataset.matchId;
+                 const player1Id = target.dataset.player1Id;
+                 const player1Name = target.dataset.player1Name;
+                 const player2Id = target.dataset.player2Id;
+                 const player2Name = target.dataset.player2Name;
+
+                 const winnerId = prompt(`Quem venceu o match? Digite o ID do vencedor:\n1 - ${player1Name} (ID: ${player1Id})\n2 - ${player2Name} (ID: ${player2Id})`);
+
+                 if (winnerId && (winnerId === player1Id || winnerId === player2Id)) {
+                     try {
+                         const response = await fetch(`${API_BASE_URL}/api/admin/tournaments/${tournamentId}/resolve-match/${matchId}`, {
+                             method: 'PATCH',
+                             headers: {
+                                 'Content-Type': 'application/json',
+                                 'x-auth-token': token
+                             },
+                             body: JSON.stringify({ winnerId })
+                         });
+                         const data = await response.json();
+                         if (response.ok) {
+                             showNotification(data.message, 'success');
+                             // Recarrega o modal para mostrar o novo chaveamento
+                             const fullTournamentDetails = await fetchAdminData(`tournament/${tournamentId}`);
+                             if (fullTournamentDetails) {
+                                 renderBracket(fullTournamentDetails.bracket, tournamentId);
+                             }
+                         } else {
+                             showNotification(data.message || 'Erro ao resolver match.', 'error');
+                         }
+                     } catch(error) {
+                         showNotification('Erro de conexão ao resolver match.', 'error');
+                     }
+                 } else {
+                     showNotification('ID do vencedor inválido ou operação cancelada.', 'error');
                  }
              }
          });

@@ -69,12 +69,10 @@ const renderTournaments = (userId) => {
         
         const registerBtn = card.querySelector('.register-tournament-btn');
         if (tournament.status === 'registration' && !isRegistered && !isFull) {
-            registerBtn.textContent = 'Inscrever-se';
-            registerBtn.style.backgroundColor = 'var(--secondary-neon)';
-            registerBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                handleRegistration(tournament._id, token, userId);
-            });
+            registerBtn.textContent = 'Detalhes';
+            registerBtn.style.backgroundColor = '';
+            registerBtn.style.color = '';
+            registerBtn.disabled = false;
         } else if (isRegistered) {
             registerBtn.textContent = 'Inscrito ✔️';
             registerBtn.disabled = true;
@@ -90,11 +88,16 @@ const renderTournaments = (userId) => {
         } else {
              // Botão de detalhes
             registerBtn.textContent = 'Detalhes';
-            registerBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openTournamentDetailsModal(tournament, token, userId);
-            });
+            registerBtn.style.backgroundColor = 'var(--secondary-neon)';
+            registerBtn.style.color = '#fff';
+            registerBtn.disabled = false;
         }
+        
+        // Adiciona o listener para o botão "Detalhes"
+        registerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openTournamentDetailsModal(tournament._id, token, userId);
+        });
 
         const gameIcon = card.querySelector('.game-icon-container img');
         gameIcon.src = getGameIconPath(tournament.game);
@@ -103,13 +106,13 @@ const renderTournaments = (userId) => {
         card.querySelector('.tournament-name').textContent = tournament.name;
         card.querySelector('.tournament-game').textContent = tournament.game;
         card.querySelector('.tournament-console').textContent = tournament.console;
-        card.querySelector('.tournament-bet-amount').textContent = tournament.betAmount;
+        card.querySelector('.tournament-bet-amount').textContent = tournament.betAmount > 0 ? `${tournament.betAmount} moedas` : 'Gratuito';
 
         tournamentsListContainer.appendChild(card);
     });
 };
 
-const handleRegistration = async (tournamentId, token, userId) => {
+const handleRegistration = async (tournamentId, token) => {
     const tournament = allTournaments.find(t => t._id === tournamentId);
     if (!tournament) return;
 
@@ -131,83 +134,96 @@ const handleRegistration = async (tournamentId, token, userId) => {
         if (response.ok) {
             showNotification(data.message, 'success');
             // Atualiza a lista localmente para refletir a inscrição
-            tournament.participants.push(userId); 
+            const userId = localStorage.getItem('userId');
+            tournament.participants.push({ _id: userId, username: localStorage.getItem('username') });
             renderTournaments(userId);
+            return true;
         } else {
             showNotification(data.message || 'Erro ao se inscrever.', 'error');
+            return false;
         }
     } catch (error) {
         console.error('Erro na inscrição:', error);
         showNotification('Não foi possível conectar ao servidor.', 'error');
+        return false;
     }
 };
 
-const openTournamentDetailsModal = (tournament, token, userId) => {
+const openTournamentDetailsModal = async (tournamentId, token, userId) => {
     if (!tournamentDetailsModalBackdrop) return;
     
-    // Preenche o modal com os dados do campeonato
-    tournamentDetailsName.textContent = tournament.name;
-    tournamentDetailsGame.textContent = tournament.game;
-    tournamentDetailsConsole.textContent = tournament.console;
-    tournamentDetailsBetAmount.textContent = tournament.betAmount > 0 ? tournament.betAmount : 'Gratuito';
-    tournamentDetailsScheduledTime.textContent = tournament.scheduledTime || 'Não agendado';
-    tournamentDetailsParticipantsCount.textContent = tournament.participants.length;
-    tournamentDetailsMaxParticipants.textContent = tournament.maxParticipants;
-    
-    // Limpa a lista e preenche os participantes
-    tournamentDetailsParticipantsList.innerHTML = '';
-    if (tournament.participants.length > 0) {
-        tournament.participants.forEach(p => {
-            const li = document.createElement('li');
-            li.className = 'participant-item';
-            const initial = p.username.charAt(0).toUpperCase();
-            li.innerHTML = `
-                <div class="initial-circle">${initial}</div>
-                <span class="username">${p.username}</span>
-            `;
-            tournamentDetailsParticipantsList.appendChild(li);
+    // Busca os detalhes completos do torneio, incluindo o chaveamento populado
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/tournaments/${tournamentId}`, {
+            headers: { 'x-auth-token': token }
         });
-    } else {
-        tournamentDetailsParticipantsList.innerHTML = '<p class="no-challenges-message">Nenhum participante inscrito.</p>';
-    }
+        if (!response.ok) throw new Error('Erro ao buscar detalhes do campeonato.');
+        const tournament = await response.json();
 
-    // Configura o botão de inscrição
-    const isRegistered = tournament.participants.some(p => p._id === userId);
-    const isFull = tournament.participants.length >= tournament.maxParticipants;
-    
-    if (tournament.status === 'registration' && !isRegistered && !isFull) {
-        tournamentRegisterBtn.textContent = 'Inscrever-se';
-        tournamentRegisterBtn.style.display = 'block';
-        tournamentRegisterBtn.disabled = false;
-        tournamentRegisterBtn.style.backgroundColor = '';
-        tournamentRegisterBtn.dataset.tournamentId = tournament._id;
-        tournamentRegisterBtn.removeEventListener('click', handleRegistrationClick);
-        tournamentRegisterBtn.addEventListener('click', handleRegistrationClick);
-    } else {
-        tournamentRegisterBtn.style.display = 'none';
-    }
-    
-    // Exibe o chaveamento se o torneio estiver em andamento ou completo
-    const bracketSection = document.getElementById('tournament-details-bracket');
-    if (tournament.status === 'in-progress' || tournament.status === 'completed') {
-        renderBracketForUser(tournament.bracket, bracketSection);
-        bracketSection.style.display = 'block';
-    } else {
-        bracketSection.style.display = 'none';
-    }
+        // Preenche o modal com os dados do campeonato
+        tournamentDetailsName.textContent = tournament.name;
+        tournamentDetailsGame.textContent = tournament.game;
+        tournamentDetailsConsole.textContent = tournament.console;
+        tournamentDetailsBetAmount.textContent = tournament.betAmount > 0 ? tournament.betAmount : 'Gratuito';
+        tournamentDetailsScheduledTime.textContent = tournament.scheduledTime || 'Não agendado';
+        tournamentDetailsParticipantsCount.textContent = tournament.participants.length;
+        tournamentDetailsMaxParticipants.textContent = tournament.maxParticipants;
+        
+        // Limpa a lista e preenche os participantes
+        tournamentDetailsParticipantsList.innerHTML = '';
+        if (tournament.participants.length > 0) {
+            tournament.participants.forEach(p => {
+                const li = document.createElement('li');
+                li.className = 'participant-item';
+                const initial = p.username.charAt(0).toUpperCase();
+                li.innerHTML = `
+                    <div class="initial-circle">${initial}</div>
+                    <span class="username">${p.username}</span>
+                `;
+                tournamentDetailsParticipantsList.appendChild(li);
+            });
+        } else {
+            tournamentDetailsParticipantsList.innerHTML = '<p class="no-challenges-message">Nenhum participante inscrito.</p>';
+        }
 
-    tournamentDetailsModalBackdrop.classList.add('active');
-};
+        // Configura o botão de inscrição
+        const isRegistered = tournament.participants.some(p => p._id === userId);
+        const isFull = tournament.participants.length >= tournament.maxParticipants;
+        
+        if (tournament.status === 'registration' && !isRegistered && !isFull) {
+            tournamentRegisterBtn.textContent = `Inscrever-se (${tournament.betAmount} moedas)`;
+            tournamentRegisterBtn.style.display = 'block';
+            tournamentRegisterBtn.disabled = false;
+            tournamentRegisterBtn.style.backgroundColor = 'var(--primary-neon)';
+            tournamentRegisterBtn.onclick = async () => {
+                const success = await handleRegistration(tournamentId, token);
+                if (success) {
+                    openTournamentDetailsModal(tournamentId, token, userId); // Atualiza o modal
+                }
+            };
+        } else {
+            tournamentRegisterBtn.style.display = 'none';
+        }
+        
+        // Exibe o chaveamento se o torneio estiver em andamento ou completo
+        const bracketSection = document.getElementById('tournament-details-bracket');
+        const bracketContent = document.createElement('div');
+        bracketContent.className = 'tournament-bracket-content';
+        
+        if (tournament.status === 'in-progress' || tournament.status === 'completed') {
+            renderBracketForUser(tournament.bracket, bracketContent);
+            bracketSection.innerHTML = `<h4>Chaveamento</h4>`;
+            bracketSection.appendChild(bracketContent);
+            bracketSection.style.display = 'block';
+        } else {
+            bracketSection.style.display = 'none';
+        }
 
-const handleRegistrationClick = async (e) => {
-    const tournamentId = e.target.dataset.tournamentId;
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    await handleRegistration(tournamentId, token, userId);
-    // Após a inscrição, atualiza o modal para refletir o novo estado
-    const updatedTournament = allTournaments.find(t => t._id === tournamentId);
-    if(updatedTournament) {
-         openTournamentDetailsModal(updatedTournament, token, userId);
+        tournamentDetailsModalBackdrop.classList.add('active');
+
+    } catch (error) {
+        console.error('Erro ao abrir modal de detalhes do campeonato:', error);
+        showNotification('Não foi possível carregar os detalhes do campeonato.', 'error');
     }
 };
 
@@ -263,19 +279,6 @@ export const setupTournamentListeners = (token, userId, refreshDashboard) => {
         tournamentDetailsModalBackdrop.addEventListener('click', (e) => {
             if (e.target === tournamentDetailsModalBackdrop) {
                 tournamentDetailsModalBackdrop.classList.remove('active');
-            }
-        });
-    }
-
-    if (tournamentsListContainer) {
-        tournamentsListContainer.addEventListener('click', (e) => {
-            const card = e.target.closest('.tournament-card');
-            if (card) {
-                const tournamentId = card.dataset.tournamentId;
-                const tournament = allTournaments.find(t => t._id === tournamentId);
-                if (tournament) {
-                    openTournamentDetailsModal(tournament, token, userId);
-                }
             }
         });
     }
