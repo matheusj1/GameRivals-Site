@@ -1,0 +1,197 @@
+/* arquivo: site_de_jogos/css/tournaments.css */
+
+.tournaments-container {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.tournaments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.tournaments-header h3 {
+    margin: 0;
+    color: var(--primary-neon);
+    font-size: clamp(20px, 4vw, 24px);
+    text-shadow: var(--glow-soft);
+}
+
+.tournaments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.tournament-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--input-bg);
+    padding: 15px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+}
+
+.tournament-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08), var(--glow-hover-subtle-box);
+    border-color: var(--secondary-neon);
+}
+
+.tournament-card .details-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.tournament-card .game-icon-container {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+}
+
+.tournament-card .game-icon-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tournament-card .info-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.tournament-card .info-text h4 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-color);
+    font-weight: 700;
+}
+
+.tournament-card .info-text p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.tournament-card .register-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.tournament-card .register-section .bet-info {
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tournament-card .register-btn {
+    padding: 8px 15px;
+    font-size: 14px;
+    min-width: 120px;
+}
+
+/* Modal de Detalhes do Campeonato */
+.tournament-details-modal h2 {
+    text-align: center;
+}
+
+.tournament-details-modal .tournament-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.tournament-details-modal .tournament-info p {
+    margin: 5px 0;
+    color: var(--text-muted);
+}
+
+.tournament-details-modal .tournament-info p strong {
+    color: var(--text-color);
+}
+
+.tournament-details-modal .participants-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.tournament-details-modal .participant-item {
+    padding: 10px;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.tournament-details-modal .participant-item .initial-circle {
+    width: 35px;
+    height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: var(--primary-neon);
+    color: #fff;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.tournament-details-modal .participant-item .username {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.tournament-details-modal .bracket-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.tournament-details-modal .bracket-section h4 {
+    color: var(--primary-neon);
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.tournament-details-modal .bracket-match {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.tournament-details-modal .bracket-match .winner-name {
+    color: var(--win-color);
+    font-weight: bold;
+}

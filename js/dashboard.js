@@ -9,6 +9,9 @@ import { initFriendsAndChat, fetchAndDisplayFriends, fetchAndDisplayFriendReques
 // Importa as funções de matchmaking
 import { setupMatchmaking } from './matchmaking.js';
 
+// NOVO: Importa as funções de campeonatos
+import { fetchAndDisplayTournaments, setupTournamentListeners } from './tournaments.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- DADOS GLOBAIS E VERIFICAÇÃO DE AUTENTICAÇÃO ---
     const token = localStorage.getItem('token');
@@ -137,6 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchAndDisplayChallenges(token, userId);
         fetchAndDisplayMyChallenges(token, userId);
         fetchAndDisplayStats();
+        // NOVO: Atualiza a lista de campeonatos
+        fetchAndDisplayTournaments(token, userId);
     };
 
     // --- INICIALIZAÇÃO DA INTERFACE ---
@@ -236,6 +241,38 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.on('challenge created', () => {
              refreshDashboard();
         });
+        
+        // NOVO: Evento para quando o saldo da carteira é atualizado (ex: pagamento confirmado pelo admin)
+        socket.on('wallet updated', (data) => {
+            showNotification('Seu saldo foi atualizado! Verifique sua carteira.', 'success');
+            // Atualiza o saldo exibido no dashboard
+            const coinBalanceDesktop = document.getElementById('coin-balance-desktop');
+            const walletCurrentBalanceSpan = document.getElementById('wallet-current-balance');
+            if (coinBalanceDesktop) coinBalanceDesktop.textContent = data.newBalance.toLocaleString('pt-BR');
+            if (walletCurrentBalanceSpan) walletCurrentBalanceSpan.textContent = data.newBalance.toLocaleString('pt-BR');
+            // Recarrega o dashboard para garantir a consistência
+            refreshDashboard();
+        });
+        
+        // NOVO: Evento para quando o status de saque é atualizado
+        socket.on('withdrawal status updated', (data) => {
+            if (data.status === 'approved') {
+                showNotification('Sua solicitação de saque foi aprovada! Verifique sua conta Pix.', 'success');
+            } else if (data.status === 'rejected') {
+                showNotification(`Sua solicitação de saque foi rejeitada. O valor de ${data.amount} moedas foi devolvido à sua carteira.`, 'info');
+            }
+            refreshDashboard();
+        });
+        
+        // NOVO: Escuta por atualizações de campeonatos
+        socket.on('tournament_created', () => {
+            showNotification('Um novo campeonato foi criado! Dê uma olhada.', 'info');
+            fetchAndDisplayTournaments(token, userId);
+        });
+
+        socket.on('tournament_updated', () => {
+            fetchAndDisplayTournaments(token, userId);
+        });
 
 
         socket.on('connect_error', (err) => {
@@ -258,6 +295,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initFriendsAndChat(socket, token, userId, refreshDashboard);
         setupChallengeListeners(token, userId, refreshDashboard, socket);
         setupMatchmaking(socket, userId, refreshDashboard);
+        // NOVO: Adiciona o listener para campeonatos
+        setupTournamentListeners(token, userId, refreshDashboard);
 
     } else {
         console.error('Biblioteca Socket.IO não carregada. O chat e a lista de jogadores não funcionarão.');

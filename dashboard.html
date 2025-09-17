@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/chat-and-friends.css">
     <link rel="stylesheet" href="css/modals.css">
     <link rel="stylesheet" href="css/theme-and-utils.css">
+    <link rel="stylesheet" href="css/tournaments.css">
 </head>
 <body>
     <header>
@@ -50,6 +51,14 @@
 
     <main class="dashboard-main">
         <div class="challenges-column">
+            <section id="open-tournaments-section" class="tournaments-container">
+                <div class="tournaments-header">
+                    <h3>Campeonatos Abertos</h3>
+                </div>
+                <div class="tournaments-list">
+                    <p class="no-challenges-message" id="no-tournaments-message">Nenhum campeonato aberto no momento.</p>
+                </div>
+            </section>
             <div class="challenges-header">
                 <h2>Desafios Abertos</h2>
                 <button class="cta-button" id="create-challenge-btn">Criar Novo Desafio</button>
@@ -258,6 +267,28 @@
         </div>
     </div>
 
+    <div class="modal-backdrop" id="tournament-details-modal-backdrop">
+        <div class="modal tournament-details-modal">
+            <button class="close-modal-btn">&times;</button>
+            <h2 id="tournament-details-name">Nome do Campeonato</h2>
+            <div class="tournament-info">
+                <p>Jogo: <strong id="tournament-details-game"></strong></p>
+                <p>Console: <strong id="tournament-details-console"></strong></p>
+                <p>Inscrição: <strong id="tournament-details-bet-amount"></strong> moedas</p>
+                <p>Horário: <strong id="tournament-details-scheduled-time"></strong></p>
+            </div>
+            <h3>Participantes (<span id="tournament-details-participants-count"></span>/<span id="tournament-details-max-participants"></span>)</h3>
+            <ul id="tournament-details-participants-list" class="participants-list">
+                </ul>
+            <p class="form-error-message" id="tournament-register-error"></p>
+            <button class="cta-button form-submit-btn" id="tournament-register-btn">Inscrever-se</button>
+            <div id="tournament-details-bracket" class="bracket-section" style="display: none;">
+                <h4>Chaveamento</h4>
+                </div>
+        </div>
+    </div>
+
+
     <div id="notification-container"></div>
 <template id="user-profile-dropdown-template">
     <div class="user-profile-dropdown">
@@ -413,6 +444,25 @@
     </div>
 </template>
 
+<template id="tournament-card-template">
+    <div class="tournament-card" data-tournament-id="">
+        <div class="details-section">
+            <div class="game-icon-container">
+                <img src="" alt="Game Icon">
+            </div>
+            <div class="info-text">
+                <h4 class="tournament-name"></h4>
+                <p><span class="tournament-game"></span> - <span class="tournament-console"></span></p>
+            </div>
+        </div>
+        <div class="register-section">
+            <p class="bet-info">
+                Inscrição: <span class="tournament-bet-amount"></span> 💰
+            </p>
+            <button class="cta-button register-tournament-btn" data-tournament-id="">Detalhes</button>
+        </div>
+    </div>
+</template>
         <script src="https://gamerivals-site.onrender.com/socket.io/socket.io.js"></script> <script src="js/utils.js" type="module"></script>
         <script src="js/challenges.js" type="module"></script>
         <script src="js/friends_and_chat.js" type="module"></script>
