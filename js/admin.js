@@ -581,9 +581,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Botão Rejeitar Saque
             if (target.classList.contains('reject-withdrawal-btn')) {
-                 const withdrawalAmount = row.dataset.withdrawal-amount;
+                 const withdrawalAmount = row.dataset.withdrawalAmount;
                  document.getElementById('reject-withdrawal-amount').textContent = withdrawalAmount;
-                 document.getElementById('confirm-reject-withdrawal-btn').dataset.withdrawal-id = withdrawalId;
+                 document.getElementById('confirm-reject-withdrawal-btn').dataset.withdrawalId = withdrawalId;
                  document.getElementById('reject-withdrawal-modal-backdrop').classList.add('active');
             }
         });
@@ -784,13 +784,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 
                 // Busca e exibe o chaveamento, se existir
+                const fullTournamentDetails = await fetchAdminData(`tournament/${tournamentId}`);
                 const bracketDisplay = document.getElementById('tournament-bracket-display');
-                if (tournament.status === 'in-progress' || tournament.status === 'completed') {
-                    const fullTournamentDetails = await fetchAdminData(`tournament/${tournamentId}`);
-                    if (fullTournamentDetails && fullTournamentDetails.bracket) {
-                        renderBracket(fullTournamentDetails.bracket, tournamentId);
-                        bracketDisplay.style.display = 'block';
-                    }
+                if (fullTournamentDetails && fullTournamentDetails.bracket && (fullTournamentDetails.status === 'in-progress' || fullTournamentDetails.status === 'completed')) {
+                    renderBracket(fullTournamentDetails.bracket, tournamentId);
+                    bracketDisplay.style.display = 'block';
                 } else {
                     bracketDisplay.style.display = 'none';
                 }
