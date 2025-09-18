@@ -283,4 +283,16 @@ export const setupTournamentListeners = (token, userId, refreshDashboard) => {
         });
     }
     
+    // NOVO: Adiciona o listener para o clique nos cards de torneio
+    if (tournamentsListContainer) {
+        tournamentsListContainer.addEventListener('click', (e) => {
+            const tournamentCard = e.target.closest('.tournament-card');
+            if (tournamentCard) {
+                const tournamentId = tournamentCard.dataset.tournamentId;
+                if (tournamentId) {
+                    openTournamentDetailsModal(tournamentId, token, userId);
+                }
+            }
+        });
+    }
 };
