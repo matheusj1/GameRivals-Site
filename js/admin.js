@@ -269,6 +269,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         actionsHtml = `<button class="view-tournament-btn cta-button edit" title="Ver Detalhes">👁️</button>`;
                     }
                     
+                    // Adiciona o novo botão de exclusão
+                    actionsHtml += `<button class="delete-tournament-btn cta-button cancel" title="Excluir Campeonato">🗑️</button>`;
+
                     const row = `
                         <tr data-tournament-id="${tournament._id}">
                             <td>${tournament._id.substring(0, 8)}...</td>
@@ -736,6 +739,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tournamentId = row.dataset.tournamentId;
             const tournament = allTournaments.find(t => t._id === tournamentId);
             if (!tournament) return;
+            
+            if (target.classList.contains('delete-tournament-btn')) {
+                if(confirm(`Tem certeza que deseja EXCLUIR o campeonato "${tournament.name}"? Isso não pode ser desfeito.`)){
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/api/admin/tournaments/${tournamentId}`, {
+                            method: 'DELETE',
+                            headers: { 'x-auth-token': token }
+                        });
+                        const data = await response.json();
+                        if (response.ok) {
+                            showNotification(data.message, 'success');
+                            loadTournaments();
+                            loadDashboardStats();
+                        } else {
+                            showNotification(data.message || 'Erro ao excluir campeonato.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Erro ao excluir campeonato:', error);
+                        showNotification('Erro de conexão ao excluir campeonato.', 'error');
+                    }
+                }
+                return; // Impede que o código de gerenciamento seja executado
+            }
+
 
             if (target.classList.contains('manage-tournament-btn') || target.classList.contains('view-tournament-btn')) {
                 // Preenche o modal de gerenciamento

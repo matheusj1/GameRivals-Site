@@ -1707,6 +1707,34 @@ app.get('/api/admin/tournament/:id', adminAuth, async (req, res) => {
     }
 });
 
+// NOVO: Rota para o admin excluir um campeonato
+app.delete('/api/admin/tournaments/:id', adminAuth, async (req, res) => {
+    try {
+        const tournamentId = req.params.id;
+        const tournament = await Tournament.findByIdAndDelete(tournamentId);
+
+        if (!tournament) {
+            return res.status(404).json({ message: 'Campeonato não encontrado.' });
+        }
+
+        // Devolve o valor das inscrições aos participantes, se houver
+        if (tournament.betAmount > 0) {
+            await User.updateMany(
+                { _id: { $in: tournament.participants } },
+                { $inc: { coins: tournament.betAmount } }
+            );
+        }
+
+        io.emit('tournament_updated');
+        res.status(200).json({ message: `Campeonato "${tournament.name}" excluído com sucesso. O valor da inscrição foi devolvido aos participantes.` });
+
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao excluir campeonato:', error);
+        res.status(500).json({ message: 'Erro no servidor ao excluir campeonato.' });
+    }
+});
+
+
 // Fim das novas rotas para campeonatos
 
 // =========================================================================
