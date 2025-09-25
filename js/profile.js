@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const saveThemeButton = document.getElementById('save-theme-button');
     const openThemeModalBtn = document.getElementById('open-theme-modal-btn');
     const closeThemeModalBtn = themeModal?.querySelector('.close-modal-btn');
-    const themeSelector = document.getElementById('profile-theme-selector');
+    // const themeSelector = document.getElementById('profile-theme-selector'); // REMOVIDO: Era a provável causa do bug
 
 
     // Preencher campos com dados existentes do usuário
@@ -554,6 +554,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const savedTheme = localStorage.getItem('theme') || 'light';
             const radio = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
             if (radio) radio.checked = true;
+            // Garante que a pré-visualização seja o tema salvo, caso o usuário tenha saído sem salvar antes
+            document.documentElement.setAttribute('data-theme', savedTheme);
         });
     }
 
@@ -566,13 +568,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
-    // NOVO: Adiciona a lógica para salvar o tema
-    if (saveThemeButton && themeSelector && themeModal) {
+    // NOVO: Adiciona a lógica para salvar o tema (CORRIGIDO)
+    // A correção foi feita na condição e na forma de buscar o radio button selecionado.
+    if (saveThemeButton && themeModal) { 
         saveThemeButton.addEventListener('click', () => {
-            const selectedRadio = themeSelector.querySelector('input[name="theme"]:checked');
+            // Busca o radio button com name="theme" que está checado em qualquer lugar
+            const selectedRadio = document.querySelector('input[name="theme"]:checked'); 
+            
             if (selectedRadio) {
                 const selectedTheme = selectedRadio.value;
-                applyTheme(selectedTheme); // Usa a função local applyTheme
+                applyTheme(selectedTheme); // Usa a função local applyTheme para setar o data-theme e salvar no localStorage
                 showNotification(`Tema '${selectedTheme === 'dark' ? 'Escuro' : 'Claro'}' salvo com sucesso!`, 'success');
                 themeModal.classList.remove('active');
             } else {
