@@ -1,5 +1,11 @@
 // arquivo: site_de_jogos/js/profile.js
 
+// Função para aplicar o tema (copiada do main.js e modificada para ser local)
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+}
+
 // Função de Notificação Reutilizável (Importada de utils.js, a declaração local foi removida)
 import { showNotification, API_BASE_URL, FRONTEND_BASE_URL } from './utils.js'; // Adicionado API_BASE_URL e FRONTEND_BASE_URL
 
@@ -53,6 +59,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const pixKeyValueInput = document.getElementById('pix-key-value');
     const withdrawPixError = document.getElementById('withdraw-pix-error');
     const withdrawSuccessModalBackdrop = document.getElementById('withdraw-success-modal-backdrop');
+
+    // NOVOS ELEMENTOS DE TEMA
+    const themeModal = document.getElementById('theme-selection-modal-backdrop');
+    const saveThemeButton = document.getElementById('save-theme-button');
+    const openThemeModalBtn = document.getElementById('open-theme-modal-btn');
+    const closeThemeModalBtn = themeModal?.querySelector('.close-modal-btn');
+    const themeSelector = document.getElementById('profile-theme-selector');
 
 
     // Preencher campos com dados existentes do usuário
@@ -532,19 +545,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // Modal de seleção de tema
-    const themeModal = document.getElementById('theme-selection-modal-backdrop');
-    const openThemeModalBtn = document.getElementById('open-theme-modal-btn');
-    const closeThemeModalBtn = themeModal?.querySelector('.close-modal-btn');
-
+    
+    
     if (openThemeModalBtn) {
         openThemeModalBtn.addEventListener('click', () => {
             if (themeModal) themeModal.classList.add('active');
+            // Garante que o rádio correto esteja marcado ao abrir
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const radio = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+            if (radio) radio.checked = true;
         });
     }
 
     if (closeThemeModalBtn && themeModal) {
         closeThemeModalBtn.addEventListener('click', () => {
             themeModal.classList.remove('active');
+            // Garante que o tema ativo seja re-aplicado se o usuário não salvou
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+        });
+    }
+    
+    // NOVO: Adiciona a lógica para salvar o tema
+    if (saveThemeButton && themeSelector && themeModal) {
+        saveThemeButton.addEventListener('click', () => {
+            const selectedRadio = themeSelector.querySelector('input[name="theme"]:checked');
+            if (selectedRadio) {
+                const selectedTheme = selectedRadio.value;
+                applyTheme(selectedTheme); // Usa a função local applyTheme
+                showNotification(`Tema '${selectedTheme === 'dark' ? 'Escuro' : 'Claro'}' salvo com sucesso!`, 'success');
+                themeModal.classList.remove('active');
+            } else {
+                 showNotification('Selecione um tema para salvar.', 'error');
+            }
         });
     }
 

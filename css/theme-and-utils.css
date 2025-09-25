@@ -143,12 +143,42 @@
 }
 
 [data-theme="dark"] {
-    --bg-color: #343A40;
-    --card-bg: #23272B;
-    --text-color: #E0E0E0;
-    --text-muted: #B0B0B0;
-    --border-color: #444950;
-    /* ...outras variáveis para o tema escuro... */
+    /* Novo tema escuro */
+    --bg-color: #1A1A1A; /* Fundo muito escuro */
+    --card-bg: #2C2C2C; /* Fundo de card escuro */
+    --text-color: #E0E0E0; /* Texto claro padrão */
+    --text-muted: #B0B0B0; /* Texto cinza suave (mais claro) */
+    --border-color: #444950; /* Borda cinza escura */
+    --input-bg: #343A40; /* Fundo de input escuro */
+    --input-bg-disabled: #444950; /* Fundo de input desabilitado */
+    
+    /* Manter cores neon, mas ajustar o brilho para ser mais escuro e sutil no fundo escuro */
+    --primary-neon: #6F42C1; /* Roxo vibrante */
+    --secondary-neon: #17A2B8; /* Ciano */
+    
+    /* Ajuste dos glows para o fundo escuro */
+    --glow-strong: 0 0 15px rgba(111, 66, 193, 0.7), 0 0 30px rgba(111, 66, 193, 0.5); /* Brilho mais forte */
+    --glow-medium: 0 0 10px rgba(111, 66, 193, 0.6);
+    --glow-soft: 0 0 5px rgba(111, 66, 193, 0.4);
+    --glow-hover-subtle-text: 0 0 5px rgba(111, 66, 193, 0.8);
+    --glow-hover-subtle-box: 0 0 10px rgba(111, 66, 193, 0.4);
+    
+    /* Cores de status */
+    --win-color: #38C757; /* Verde para vitória (mais claro) */
+    --loss-color: #FF5A6E; /* Vermelho para derrota (mais claro) */
+    --pending-color: #FFD700; /* Amarelo para pendente (mais claro) */
+
+    /* Cores de status mais clean no fundo escuro */
+    --status-open-bg: rgba(23, 162, 184, 0.2);
+    --status-open-text: #69D2E7;
+    --status-accepted-bg: rgba(255, 193, 7, 0.2);
+    --status-accepted-text: #FFD700;
+    --status-disputed-bg: rgba(220, 53, 69, 0.2);
+    --status-disputed-text: #FF5A6E;
+    --status-completed-bg: rgba(40, 167, 69, 0.2);
+    --status-completed-text: #38C757;
+    --status-cancelled-bg: rgba(108, 117, 125, 0.2);
+    --status-cancelled-text: #B0B0B0;
 }
 
 [data-theme="light"] {
@@ -157,6 +187,30 @@
     --text-color: #343A40;
     --text-muted: #6C757D;
     --border-color: #E9ECEF;
-    /* ...outras variáveis para o tema claro... */
-}
+    --input-bg: #F0F2F5;
+    --input-bg-disabled: #E9ECEF;
+    
+    --primary-neon: #6F42C1; 
+    --secondary-neon: #17A2B8; 
+    
+    --glow-strong: 0 0 15px rgba(111, 66, 193, 0.5), 0 0 30px rgba(111, 66, 193, 0.3);
+    --glow-medium: 0 0 10px rgba(111, 66, 193, 0.4);
+    --glow-soft: 0 0 5px rgba(111, 66, 193, 0.2);
+    --glow-hover-subtle-text: 0 0 5px rgba(111, 66, 193, 0.5);
+    --glow-hover-subtle-box: 0 0 10px rgba(111, 66, 193, 0.2);
+    
+    --win-color: #28A745;
+    --loss-color: #DC3545;
+    --pending-color: #FFC107;
 
+    --status-open-bg: rgba(23, 162, 184, 0.1);
+    --status-open-text: #17A2B8;
+    --status-accepted-bg: rgba(255, 193, 7, 0.1);
+    --status-accepted-text: #FFC107;
+    --status-disputed-bg: rgba(220, 53, 69, 0.1);
+    --status-disputed-text: #DC3545;
+    --status-completed-bg: rgba(40, 167, 69, 0.1);
+    --status-completed-text: #28A745;
+    --status-cancelled-bg: rgba(108, 117, 125, 0.1);
+    --status-cancelled-text: #6C757D;
+}

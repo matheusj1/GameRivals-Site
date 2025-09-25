@@ -1,9 +1,9 @@
+// arquivo: site_de_jogos/js/theme-switch.js
+
 document.querySelectorAll('.theme-option input[type="radio"]').forEach(radio => {
     radio.addEventListener('change', function() {
-        if (this.value === 'dark') {
-            document.body.classList.add('theme-dark');
-        } else {
-            document.body.classList.remove('theme-dark');
-        }
+        const selectedTheme = this.value;
+        // Aplica o tema diretamente ao elemento raiz para feedback visual imediato
+        document.documentElement.setAttribute('data-theme', selectedTheme);
     });
 });
