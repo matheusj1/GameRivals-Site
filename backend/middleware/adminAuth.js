@@ -14,7 +14,8 @@ async function adminAuth(req, res, next) {
 
     try {
         // Verifica se o token é válido
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'seu_segredo_jwt_padrao');
+        // CORRIGIDO: Removido o segredo padrão inseguro.
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         // Adiciona o usuário (que estava no payload do token) ao objeto da requisição
         req.user = decoded;

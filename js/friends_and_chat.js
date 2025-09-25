@@ -54,13 +54,37 @@ const updatePageTitle = () => {
     }
 };
 
+// NOVO: Função auxiliar para inserir username e ícone de console de forma segura (XSS Prevention)
+const setUsernameAndIcon = (element, username, consoleName) => {
+    const consoleIconPath = getConsoleIconPath(consoleName);
+    const consoleIconHtml = consoleIconPath ? `<img src="${consoleIconPath}" alt="${consoleName}" class="console-icon">` : '';
+    // 1. Define o username (texto puro)
+    element.textContent = username; 
+    // 2. Adiciona o HTML do ícone (que é confiável)
+    element.innerHTML += consoleIconHtml ? ` ${consoleIconHtml}` : '';
+};
+
+
 const addUniversalMessageToUI = (msgObject) => {
     if (!universalChatMessages) return;
     const item = document.createElement('div');
     const isMe = msgObject.username === localStorage.getItem('username');
     item.classList.add('message', isMe ? 'sent' : 'received');
+    
+    // NOVO: Cria elementos para evitar innerHTML com dados de usuário
     const authorText = isMe ? 'Você' : msgObject.username;
-    item.innerHTML = `<span class="msg-author ${isMe ? 'you' : ''}">${authorText}:</span><p class="msg-text">${msgObject.text}</p>`;
+    
+    const authorSpan = document.createElement('span');
+    authorSpan.classList.add('msg-author', isMe ? 'you' : '');
+    authorSpan.textContent = `${authorText}:`; // Usa textContent (Seguro)
+
+    const textP = document.createElement('p');
+    textP.classList.add('msg-text');
+    textP.textContent = msgObject.text; // Usa textContent (Seguro)
+    
+    item.appendChild(authorSpan);
+    item.appendChild(textP);
+    
     universalChatMessages.appendChild(item);
     universalChatMessages.scrollTop = universalChatMessages.scrollHeight;
 };
@@ -107,6 +131,7 @@ export const openPrivateChat = (targetUser, socket, userId, privateChatsContaine
         chatWindow = chatTemplateElement.content.cloneNode(true).firstElementChild;
         chatWindow.id = chatWindowId;
         chatWindow.dataset.recipientId = targetUser.id;
+        // SEGURANÇA: Usando textContent para o nome do parceiro de chat
         chatWindow.querySelector('.chat-partner-name').textContent = targetUser.username;
 
         privateChatWindows.set(targetUser.id, chatWindow);
@@ -218,8 +243,9 @@ export const fetchAndDisplayFriends = async (token) => {
                 const initial = friend.username.charAt(0).toUpperCase();
                 friendItem.querySelector('.app-list-item-initial-text').textContent = initial;
 
-                const consoleIconHtml = getConsoleIconPath(friend.console) ? `<img src="${getConsoleIconPath(friend.console)}" alt="${friend.console}" class="console-icon">` : '';
-                friendItem.querySelector('.app-list-item-username').innerHTML = `${friend.username} ${consoleIconHtml}`;
+                // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de forma segura
+                setUsernameAndIcon(friendItem.querySelector('.app-list-item-username'), friend.username, friend.console);
+
                 friendItem.querySelector('.app-list-item-sub-info.console-name').textContent = friend.console || '';
 
                 const onlineStatusTextSpan = friendItem.querySelector('.app-list-item-sub-info.online-status');
@@ -277,8 +303,11 @@ export const fetchAndDisplayFriendRequests = async (token) => {
                 const initial = request.senderUsername.charAt(0).toUpperCase();
                 requestItem.querySelector('.app-list-item-initial-text').textContent = initial;
 
-                const consoleIconHtml = getConsoleIconPath(request.senderConsole) ? `<img src="${getConsoleIconPath(request.senderConsole)}" alt="${request.senderConsole}" class="console-icon">` : '';
-                requestItem.querySelector('.app-list-item-username').innerHTML = `Solicitação De ${request.senderUsername} ${consoleIconHtml}`;
+                // SEGURANÇA: Inserindo o texto "Solicitação De" e o nome do usuário de forma segura
+                const usernameElement = requestItem.querySelector('.app-list-item-username');
+                usernameElement.textContent = `Solicitação De ${request.senderUsername}`;
+                setUsernameAndIcon(usernameElement, usernameElement.textContent, request.senderConsole); // Re-seta para adicionar o ícone
+
                 requestItem.querySelector('.app-list-item-sub-info.console-name').textContent = request.senderConsole || '';
                 receivedFriendRequestsListUl.appendChild(requestItem);
             });
@@ -321,8 +350,11 @@ export const fetchAndDisplaySentFriendRequests = async (token) => {
                 const initial = invite.receiverUsername.charAt(0).toUpperCase();
                 requestItem.querySelector('.app-list-item-initial-text').textContent = initial;
 
-                const consoleIconHtml = getConsoleIconPath(invite.receiverConsole) ? `<img src="${getConsoleIconPath(invite.receiverConsole)}" alt="${invite.receiverConsole}" class="console-icon">` : '';
-                requestItem.querySelector('.app-list-item-username').innerHTML = `Enviado Para ${invite.receiverUsername} ${consoleIconHtml}`;
+                // SEGURANÇA: Inserindo o texto "Enviado Para" e o nome do usuário de forma segura
+                const usernameElement = requestItem.querySelector('.app-list-item-username');
+                usernameElement.textContent = `Enviado Para ${invite.receiverUsername}`;
+                setUsernameAndIcon(usernameElement, usernameElement.textContent, invite.receiverConsole); // Re-seta para adicionar o ícone
+
                 requestItem.querySelector('.app-list-item-sub-info.console-name').textContent = invite.receiverConsole || '';
                 sentFriendRequestsListUl.appendChild(requestItem);
             });
@@ -364,8 +396,9 @@ export const fetchAndDisplayBlockedUsers = async (token) => {
                 const initial = user.username.charAt(0).toUpperCase();
                 blockedItem.querySelector('.app-list-item-initial-text').textContent = initial;
 
-                const consoleIconHtml = getConsoleIconPath(user.console) ? `<img src="${getConsoleIconPath(user.console)}" alt="${user.console}" class="console-icon">` : '';
-                blockedItem.querySelector('.app-list-item-username').innerHTML = `${user.username} ${consoleIconHtml}`;
+                // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de forma segura
+                setUsernameAndIcon(blockedItem.querySelector('.app-list-item-username'), user.username, user.console);
+
                 blockedItem.querySelector('.app-list-item-sub-info.console-name').textContent = user.console || '';
                 blockedUsersListUl.appendChild(blockedItem);
             });
@@ -423,12 +456,14 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                 otherUsers.forEach(user => {
                     if (user.id && user.username) {
                         const initial = user.username.charAt(0).toUpperCase();
-                        const consoleIconHtml = getConsoleIconPath(user.console) ? `<img src="${getConsoleIconPath(user.console)}" alt="${user.console}" class="console-icon">` : '';
                         const playerItem = searchResultItemTemplate.content.cloneNode(true).firstElementChild;
                         playerItem.dataset.id = user.id;
                         playerItem.dataset.username = user.username;
                         playerItem.querySelector('.app-list-item-initial-text').textContent = initial;
-                        playerItem.querySelector('.app-list-item-username').innerHTML = `${user.username} ${consoleIconHtml}`;
+                        
+                        // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de forma segura
+                        setUsernameAndIcon(playerItem.querySelector('.app-list-item-username'), user.username, user.console);
+                        
                         playerItem.querySelector('.app-list-item-sub-info.console-name').textContent = user.console || '';
 
                         playerListUl.appendChild(playerItem);
@@ -443,6 +478,8 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
         universalChatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             if (universalChatInput.value.trim()) {
+                // NOTE: The chat message text is NOT sanitized here. It should be sanitized in the backend
+                // before being saved/broadcasted to prevent stored XSS.
                 socket.emit('chat message', { user: localStorage.getItem('username'), text: universalChatInput.value });
                 universalChatInput.value = '';
                 universalEmojiPalette.classList.remove('active');
@@ -505,7 +542,8 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
         if (startPrivateChatFromModalBtn) {
             startPrivateChatFromModalBtn.addEventListener('click', () => {
                 const targetUserId = startPrivateChatFromModalBtn.dataset.userId;
-                const targetUsername = document.getElementById('other-user-profile-username').textContent;
+                // SEGURANÇA: Lendo diretamente de textContent, que é seguro
+                const targetUsername = document.getElementById('other-user-profile-username').textContent; 
                 const loggedInUserId = localStorage.getItem('userId');
 
                 otherUserProfileModalBackdrop.classList.remove('active');
@@ -599,10 +637,12 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                 targetUsername = playerItem.dataset.friendUsername;
             } else if (playerItem.dataset.senderId) { // Para received-friend-request-item
                 targetUserId = playerItem.dataset.senderId;
-                targetUsername = playerItem.querySelector('.app-list-item-username').textContent.replace('Solicitação De ', '').trim();
+                // SEGURANÇA: Lendo de data-username ou obtendo de forma segura
+                targetUsername = playerItem.dataset.username || playerItem.querySelector('.app-list-item-username').textContent.replace('Solicitação De ', '').trim();
             } else if (playerItem.dataset.receiverId) { // Para sent-friend-request-item
                 targetUserId = playerItem.dataset.receiverId;
-                targetUsername = playerItem.querySelector('.app-list-item-username').textContent.replace('Enviado Para ', '').trim();
+                 // SEGURANÇA: Lendo de data-username ou obtendo de forma segura
+                targetUsername = playerItem.dataset.username || playerItem.querySelector('.app-list-item-username').textContent.replace('Enviado Para ', '').trim();
             }
 
             if (!targetUserId) {
@@ -630,6 +670,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                     }
                     const userData = await response.json();
 
+                    // SEGURANÇA: Usando textContent para inserir dados de usuário no modal
                     document.getElementById('other-user-profile-username').textContent = userData.username;
                     const initial = userData.username.charAt(0).toUpperCase();
                     document.getElementById('other-user-initial-preview').textContent = initial;
@@ -931,8 +972,22 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
         const item = document.createElement('div');
         const isMe = String(data.from.id) === String(userId);
         item.classList.add('message', isMe ? 'sent' : 'received');
+        
+        // SEGURANÇA: Cria elementos para evitar innerHTML com dados de usuário
         const authorText = isMe ? 'Você' : data.from.username;
-        item.innerHTML = `<span class="msg-author ${isMe ? 'you' : ''}">${authorText}:</span><p class="msg-text">${data.text}</p>`;
+        
+        const authorSpan = document.createElement('span');
+        authorSpan.classList.add('msg-author', isMe ? 'you' : '');
+        authorSpan.textContent = `${authorText}:`; // Usa textContent (Seguro)
+
+        const textP = document.createElement('p');
+        textP.classList.add('msg-text');
+        textP.textContent = data.text; // Usa textContent (Seguro)
+        
+        item.appendChild(authorSpan);
+        item.appendChild(textP);
+        // FIM SEGURANÇA
+        
         messagesContainer.appendChild(item);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
@@ -1060,8 +1115,10 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                             searchItem.dataset.id = result._id;
                             searchItem.dataset.username = result.username;
                             searchItem.querySelector('.app-list-item-initial-text').textContent = initial;
-                            const consoleIconHtml = getConsoleIconPath(result.console) ? `<img src="${getConsoleIconPath(result.console)}" alt="${result.console}" class="console-icon">` : '';
-                            searchItem.querySelector('.app-list-item-username').innerHTML = `${result.username} ${consoleIconHtml}`;
+                            
+                            // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de forma segura
+                            setUsernameAndIcon(searchItem.querySelector('.app-list-item-username'), result.username, result.console);
+                            
                             searchItem.querySelector('.app-list-item-sub-info.console-name').textContent = result.console || '';
 
                             searchResultsListUl.appendChild(searchItem);
