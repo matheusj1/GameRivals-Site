@@ -17,8 +17,12 @@ function loadTheme() {
     }
 }
 
+// NOVO: Chama loadTheme fora do DOMContentLoaded para aplicação imediata
+loadTheme();
+
 document.addEventListener('DOMContentLoaded', () => {
-    loadTheme();
+    // A chamada loadTheme() foi movida para fora do DOMContentLoaded.
+    // O restante da lógica de redirecionamento do main.js permanece aqui.
 
     const token = localStorage.getItem('token');
     const currentPage = window.location.pathname.split('/').pop();

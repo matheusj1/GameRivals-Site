@@ -1,11 +1,13 @@
 // arquivo: site_de_jogos/js/dashboard.js
 
-// --- FUNÇÕES DE TEMA (ADICIONADAS PARA GARANTIR EXECUÇÃO JÁ QUE main.js NÃO É INCLUÍDO) ---
+// --- FUNÇÕES DE TEMA (AUTOCONTIDAS E DE EXECUÇÃO IMEDIATA) ---
+// Função para aplicar o tema (light ou dark) - Necessária para a Dashboard que não carrega main.js
 function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
 }
 
+// Função para carregar o tema salvo ou o padrão
 function loadTheme() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
@@ -14,6 +16,9 @@ function loadTheme() {
         applyTheme('light');
     }
 }
+
+// Executa a função de carregar o tema imediatamente ao carregar o script
+loadTheme();
 // ---------------------------------------------------------------------------------------
 
 // Importa as funções utilitárias
@@ -27,8 +32,6 @@ import { setupMatchmaking } from './matchmaking.js';
 // NOVO: Importa as funções de campeonatos
 import { fetchAndDisplayTournaments, setupTournamentListeners } from './tournaments.js';
 
-// Executa a função de carregar o tema imediatamente ao carregar o script
-loadTheme();
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- DADOS GLOBAIS E VERIFICAÇÃO DE AUTENTICAÇÃO ---
