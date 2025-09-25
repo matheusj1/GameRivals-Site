@@ -14,14 +14,15 @@ const crypto = require('crypto');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const Joi = require('joi'); // NOVO: Importa o Joi para validação
 
 const User = require('./models/User');
 const Challenge = require('./models/Challenge');
 const Message = require('./models/Message');
 const FriendRequest = require('./models/FriendRequest');
-const PixPaymentNotification = require('./models/PixPaymentNotification'); // NOVO: Importe o novo modelo
-const WithdrawalRequest = require('./models/WithdrawalRequest'); // NOVO: Importe o modelo de saque
-const Tournament = require('./models/Tournament'); // NOVO: Importe o modelo de Torneio
+const PixPaymentNotification = require('./models/PixPaymentNotification');
+const WithdrawalRequest = require('./models/WithdrawalRequest');
+const Tournament = require('./models/Tournament');
 
 const auth = require('./middleware/auth');
 const adminAuth = require('./middleware/adminAuth');
@@ -31,23 +32,21 @@ const server = http.createServer(app);
 
 app.set('trust proxy', 1);
 
-// CORRIGIDO: O domínio do frontend é a origem 'https://matheusj1.github.io', sem o caminho.
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://matheusj1.github.io";
-const BACKEND_URL = process.env.BACKEND_URL || "https://gamerivals-site.onrender.com"; // Esta será a URL do seu serviço de backend no Render
+const BACKEND_URL = process.env.BACKEND_URL || "https://gamerivals-site.onrender.com";
 
 const io = new Server(server, {
     cors: {
-        origin: FRONTEND_URL, // Usa a URL dinâmica do frontend para CORS
+        origin: FRONTEND_URL,
         methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"]
     }
 });
 
-// NOVO: Use a porta fornecida pelo ambiente (Render usa process.env.PORT)
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-    origin: FRONTEND_URL, // Usa a URL dinâmica do frontend para CORS
+    origin: FRONTEND_URL,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
 }));
@@ -85,7 +84,6 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }
 });
 
-// Sirva os avatares estaticamente
 app.use('/avatars', express.static(avatarsDir));
 
 mongoose.connect(process.env.MONGO_URI)
@@ -128,6 +126,160 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+// =========================================================================
+// IMPLEMENTAÇÃO DA VALIDAÇÃO COM JOI
+// =========================================================================
+
+// Função utilitária de validação
+const validateSchema = (schema) => (req, res, next) => {
+    const { error } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+        const message = error.details.map(i => i.message.replace(/['"]/g, '')).join(', ');
+        return res.status(400).json({ message: message });
+    }
+    next();
+};
+
+// 1. SCHEMAS DE AUTENTICAÇÃO
+const registerSchema = Joi.object({
+    username: Joi.string().alphanum().min(3).max(30).required().messages({
+        'string.alphanum': 'Nome de usuário deve conter apenas letras e números.',
+        'string.min': 'Nome de usuário deve ter no mínimo 3 caracteres.',
+        'string.max': 'Nome de usuário deve ter no máximo 30 caracteres.',
+        'any.required': 'Nome de usuário é obrigatório.'
+    }),
+    fullName: Joi.string().min(3).required().messages({
+        'string.min': 'Nome completo deve ter no mínimo 3 caracteres.',
+        'any.required': 'Nome completo é obrigatório.'
+    }),
+    // Validação de CPF: string de 11 dígitos numéricos
+    cpf: Joi.string().pattern(/^[0-9]{11}$/).required().messages({
+        'string.pattern.base': 'CPF deve ter 11 dígitos (apenas números).',
+        'any.required': 'CPF é obrigatório.'
+    }),
+    email: Joi.string().email().required().messages({
+        'string.email': 'Formato de e-mail inválido.',
+        'any.required': 'E-mail é obrigatório.'
+    }),
+    password: Joi.string().min(6).required().messages({
+        'string.min': 'Senha deve ter no mínimo 6 caracteres.',
+        'any.required': 'Senha é obrigatória.'
+    })
+});
+
+const loginSchema = Joi.object({
+    email: Joi.string().email().required().messages({
+        'string.email': 'E-mail ou senha inválidos.',
+        'any.required': 'E-mail é obrigatório.'
+    }),
+    password: Joi.string().min(6).required().messages({
+        'string.min': 'E-mail ou senha inválidos.',
+        'any.required': 'Senha é obrigatória.'
+    })
+});
+
+// 2. SCHEMAS DE DESAFIOS E MATCHMAKING
+const consoleOptions = ['PS5', 'PS4', 'XBOX Series', 'Xbox One', 'PC', 'Nintendo Switch'];
+const challengeCreateSchema = Joi.object({
+    game: Joi.string().min(2).max(50).required().messages({ 'any.required': 'Jogo é obrigatório.' }),
+    console: Joi.string().valid(...consoleOptions).required().messages({
+        'any.required': 'Console é obrigatório.',
+        'any.only': 'Console inválido.'
+    }),
+    betAmount: Joi.number().integer().min(10).required().messages({
+        'number.min': 'A aposta mínima é de 10 moedas.',
+        'any.required': 'Valor da aposta é obrigatório.'
+    }),
+    scheduledTime: Joi.string().allow('').optional()
+});
+
+const challengePrivateSchema = Joi.object({
+    opponentId: Joi.string().length(24).required().messages({
+        'string.length': 'ID do oponente inválido.',
+        'any.required': 'ID do oponente é obrigatório.'
+    }),
+    game: Joi.string().min(2).max(50).required().messages({ 'any.required': 'Jogo é obrigatório.' }),
+    console: Joi.string().valid(...consoleOptions).required().messages({
+        'any.required': 'Console é obrigatório.',
+        'any.only': 'Console inválido.'
+    }),
+    betAmount: Joi.number().integer().min(0).required().messages({
+        'number.min': 'A aposta mínima é de 0 moedas.',
+        'any.required': 'Valor da aposta é obrigatório.'
+    })
+});
+
+// 3. SCHEMAS DE CARTEIRA
+const withdrawRequestSchema = Joi.object({
+    amount: Joi.number().integer().min(1).required().messages({
+        'number.min': 'O valor mínimo de saque é 1 moeda.',
+        'any.required': 'Valor do saque é obrigatório.'
+    }),
+    pixKeyType: Joi.string().valid('email', 'cpf', 'phone', 'cnpj').required().messages({
+        'any.required': 'Tipo de chave Pix é obrigatório.',
+        'any.only': 'Tipo de chave Pix inválido.'
+    }),
+    pixKeyValue: Joi.string().min(5).max(150).required().messages({
+        'string.min': 'Valor da chave Pix inválido.',
+        'any.required': 'Valor da chave Pix é obrigatório.'
+    })
+});
+
+const pixNotifySchema = Joi.object({
+    amount: Joi.number().integer().min(10).required().messages({
+        'number.min': 'O valor de notificação deve ser no mínimo 10.',
+        'any.required': 'Valor é obrigatório.'
+    }),
+    userId: Joi.string().length(24).required().messages({
+        'string.length': 'ID de usuário inválido.',
+        'any.required': 'ID de usuário é obrigatório.'
+    })
+});
+
+// 4. SCHEMAS DE PERFIL E ADMIN
+const profileUpdateSchema = Joi.object({
+    username: Joi.string().alphanum().min(3).max(30).optional().messages({
+        'string.alphanum': 'Nome de usuário deve conter apenas letras e números.',
+        'string.min': 'Nome de usuário deve ter no mínimo 3 caracteres.',
+        'string.max': 'Nome de usuário deve ter no máximo 30 caracteres.'
+    }),
+    bio: Joi.string().max(150).allow('').optional().messages({
+        'string.max': 'Bio deve ter no máximo 150 caracteres.'
+    }),
+    description: Joi.string().max(500).allow('').optional().messages({
+        'string.max': 'Descrição deve ter no máximo 500 caracteres.'
+    }),
+    console: Joi.string().valid('', ...consoleOptions).optional().messages({
+        'any.only': 'Console inválido.'
+    })
+});
+
+const adminTournamentSchema = Joi.object({
+    name: Joi.string().min(5).max(100).required().messages({
+        'string.min': 'Nome do campeonato deve ter no mínimo 5 caracteres.',
+        'any.required': 'Nome é obrigatório.'
+    }),
+    game: Joi.string().min(2).max(50).required().messages({ 'any.required': 'Jogo é obrigatório.' }),
+    console: Joi.string().valid(...consoleOptions).required().messages({
+        'any.required': 'Console é obrigatório.',
+        'any.only': 'Console inválido.'
+    }),
+    betAmount: Joi.number().integer().min(0).required().messages({
+        'number.min': 'A aposta mínima é de 0 moedas.',
+        'any.required': 'Valor da aposta é obrigatório.'
+    }),
+    maxParticipants: Joi.number().integer().valid(2, 4, 8, 16, 32, 64).required().messages({
+        'any.required': 'Número máximo de participantes é obrigatório.',
+        'any.only': 'Máx. participantes deve ser 2, 4, 8, 16, 32 ou 64.'
+    }),
+    scheduledTime: Joi.string().allow('').optional()
+});
+
+
+// =========================================================================
+// FIM JOI IMPLEMENTATION
+// =========================================================================
+
 io.on('connection', async (socket) => {
     console.log(`[SOCKET CONNECT] Um novo socket se conectou: ${socket.id}`);
 
@@ -146,7 +298,6 @@ io.on('connection', async (socket) => {
             const currentSocketId = socket.id;
             let listNeedsUpdate = false;
 
-            // Use a URL do frontend para o avatar padrão, pois a imagem será servida pelo frontend
             let avatarUrl = `${FRONTEND_URL}/img/avatar-placeholder.png`;
 
             try {
@@ -224,7 +375,6 @@ io.on('connection', async (socket) => {
         const sender = onlineUsers.get(senderUserId);
         const recipient = onlineUsers.get(data.toUserId);
 
-        // NOVO: Verificação de bloqueio
         try {
             const senderDB = await User.findById(senderUserId);
             const recipientDB = await User.findById(data.toUserId);
@@ -253,7 +403,7 @@ io.on('connection', async (socket) => {
     });
 
     socket.on('join matchmaking queue', async (data) => {
-        const userId = data.id; // Corrigido de data.userId para data.id
+        const userId = data.id;
         const game = data.game;
         const platform = data.console;
         const betAmount = data.betAmount;
@@ -289,7 +439,6 @@ io.on('connection', async (socket) => {
                 for (const [betKey, userMap] of betAmountMap.entries()) {
                     for (const [entryUserId, entry] of userMap.entries()) {
                         if (entry && String(entryUserId) !== String(userId)) {
-                            // NOVO: Verificar se o oponente não está na lista de bloqueados do usuário atual e vice-versa
                             const currentUserDB = await User.findById(userId);
                             const opponentUserDB = await User.findById(entryUserId);
 
@@ -358,7 +507,7 @@ io.on('connection', async (socket) => {
                 if (foundOpponentObject && foundOpponentObject.socketId) io.to(foundOpponentObject.socketId).emit('matchmaking error', { message: 'Erro ao criar partida. Tente novamente.' });
             }
 
-        } else { // Se nenhum oponente foi encontrado, adiciona o usuário atual à fila
+        } else {
             if (!matchmakingQueue.has(game)) {
                 matchmakingQueue.set(game, new Map());
             }
@@ -457,16 +606,19 @@ io.on('connection', async (socket) => {
 });
 
 
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', validateSchema(registerSchema), async (req, res) => {
     try {
         const { username, fullName, cpf, email, password } = req.body;
-        if (!username || !fullName || !cpf || !email || !password) {
-            return res.status(400).json({ message: 'Por favor, preencha todos os campos.' });
-        }
+        
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
         if (existingUser) {
-            return res.status(400).json({ message: 'E-mail ou nome de usuário já cadastrado.' });
+            if (existingUser.email === email) {
+                return res.status(400).json({ message: 'E-mail já cadastrado.' });
+            } else {
+                return res.status(400).json({ message: 'Nome de usuário já cadastrado.' });
+            }
         }
+        
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         const newUser = new User({ username, fullName, cpf, email, password: hashedPassword, wins: 0, losses: 0, coins: 1000, role: 'user', isActive: true, profileCompleted: false });
@@ -475,16 +627,17 @@ app.post('/api/register', async (req, res) => {
     }
     catch (error) {
         console.error('[API REGISTER] Erro no cadastro:', error);
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({ message: 'Erro no servidor, tente novamente mais tarde.' });
     }
 });
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', validateSchema(loginSchema), async (req, res) => {
     try {
         const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Por favor, preencha todos os campos.' });
-        }
+        
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: 'Credenciais inválidas.' });
@@ -498,7 +651,8 @@ app.post('/api/login', async (req, res) => {
         }
 
         const payload = { id: user.id, username: user.username, role: user.role };
-        const token = jwt.sign(payload, process.env.JWT_SECRET || 'seu_segredo_jwt_padrao', { expiresIn: '1h' });
+        // CORRIGIDO: Removido o segredo padrão inseguro, forçando o uso de process.env.JWT_SECRET.
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }); 
 
         res.status(200).json({ message: 'Login bem-sucedido.', token: token, username: user.username, userId: user.id, userRole: user.role, profileCompleted: user.profileCompleted });
     }
@@ -510,10 +664,14 @@ app.post('/api/login', async (req, res) => {
 
 
 // --- ROTA PARA RECEBER NOTIFICAÇÃO DE PAGAMENTO PIX ---
-app.post('/api/payment/notify-pix', auth, async (req, res) => {
+app.post('/api/payment/notify-pix', auth, validateSchema(pixNotifySchema), async (req, res) => {
     const { amount, userId } = req.body;
 
     try {
+        if (String(req.user.id) !== String(userId)) {
+             return res.status(403).json({ message: 'O ID de usuário fornecido não corresponde ao usuário autenticado.' });
+        }
+
         const newNotification = new PixPaymentNotification({
             userId: userId,
             amount: amount,
@@ -536,7 +694,7 @@ app.post('/api/payment/notify-pix', auth, async (req, res) => {
 app.get('/api/admin/pending-pix', adminAuth, async (req, res) => {
     try {
         const pendingPayments = await PixPaymentNotification.find({ status: 'pending' })
-            .populate('userId', 'username email') // Preenche com dados do usuário
+            .populate('userId', 'username email')
             .sort({ createdAt: 1 });
         
         res.status(200).json(pendingPayments);
@@ -560,15 +718,12 @@ app.patch('/api/admin/confirm-pix/:paymentId', adminAuth, async (req, res) => {
             return res.status(404).json({ message: 'Usuário não encontrado.' });
         }
 
-        // Atualiza o saldo do usuário
         user.coins += payment.amount;
         await user.save();
 
-        // Atualiza o status do pagamento para 'approved'
         payment.status = 'approved';
         await payment.save();
 
-        // Opcional: Emite uma notificação via Socket.IO para o frontend do usuário
         if (onlineUsers.has(String(user._id))) {
             io.to(onlineUsers.get(String(user._id)).socketId).emit('wallet updated', { newBalance: user.coins });
         }
@@ -582,20 +737,12 @@ app.patch('/api/admin/confirm-pix/:paymentId', adminAuth, async (req, res) => {
 });
 
 // NOVO: Rota para o usuário solicitar um saque
-app.post('/api/wallet/withdraw-request', auth, async (req, res) => {
+app.post('/api/wallet/withdraw-request', auth, validateSchema(withdrawRequestSchema), async (req, res) => {
     const { amount, pixKeyType, pixKeyValue } = req.body;
     const userId = req.user.id;
 
     try {
-        // 1. Validação básica
-        if (typeof amount !== 'number' || amount <= 0) {
-            return res.status(400).json({ message: 'Valor de saque inválido. Deve ser um número positivo.' });
-        }
-        if (!pixKeyType || !pixKeyValue) {
-            return res.status(400).json({ message: 'Tipo ou valor da chave Pix ausente.' });
-        }
-
-        // 2. Verifica se o usuário tem saldo suficiente
+        // A validação de formato e min/max é feita pelo Joi.
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: 'Usuário não encontrado.' });
@@ -604,7 +751,6 @@ app.post('/api/wallet/withdraw-request', auth, async (req, res) => {
             return res.status(400).json({ message: 'Saldo insuficiente para realizar este saque.' });
         }
 
-        // 3. Cria a nova solicitação de saque
         const newWithdrawal = new WithdrawalRequest({
             userId: userId,
             amount: amount,
@@ -613,7 +759,6 @@ app.post('/api/wallet/withdraw-request', auth, async (req, res) => {
         });
         await newWithdrawal.save();
 
-        // 4. Debita as moedas do saldo do usuário imediatamente
         user.coins -= amount;
         await user.save();
 
@@ -655,7 +800,6 @@ app.patch('/api/admin/withdrawals/:id/approve', adminAuth, async (req, res) => {
         withdrawal.processedAt = Date.now();
         await withdrawal.save();
 
-        // Opcional: Notificar o usuário
         const userSocketId = onlineUsers.get(String(withdrawal.userId))?.socketId;
         if (userSocketId) {
             io.to(userSocketId).emit('wallet updated', { status: 'approved', amount: withdrawal.amount });
@@ -678,7 +822,6 @@ app.patch('/api/admin/withdrawals/:id/reject', adminAuth, async (req, res) => {
             return res.status(404).json({ message: 'Solicitação de saque pendente não encontrada ou já processada.' });
         }
 
-        // Devolve o valor para o usuário
         const user = await User.findById(withdrawal.userId);
         if (user) {
             user.coins += withdrawal.amount;
@@ -689,7 +832,6 @@ app.patch('/api/admin/withdrawals/:id/reject', adminAuth, async (req, res) => {
         withdrawal.processedAt = Date.now();
         await withdrawal.save();
 
-        // Opcional: Notificar o usuário
         const userSocketId = onlineUsers.get(String(withdrawal.userId))?.socketId;
         if (userSocketId) {
             io.to(userSocketId).emit('withdrawal status updated', { status: 'rejected', amount: withdrawal.amount, newBalance: user.coins });
@@ -704,16 +846,18 @@ app.patch('/api/admin/withdrawals/:id/reject', adminAuth, async (req, res) => {
 
 
 // MODIFICADO: Emite um evento de socket quando um desafio é criado
-app.post('/api/challenges', auth, async (req, res) => {
+app.post('/api/challenges', auth, validateSchema(challengeCreateSchema), async (req, res) => {
     try {
         const { game, console: platform, betAmount, scheduledTime } = req.body;
-        if (!game || !platform || !betAmount) { return res.status(400).json({ message: 'Por favor, preencha todos os campos do desafio.' }); }
+        
         const user = await User.findById(req.user.id);
-        if (betAmount > 0 && user.coins < betAmount) { return res.status(400).json({ message: 'Você não tem moedas suficientes para esta aposta.' }); }
+        if (user.coins < betAmount) { return res.status(400).json({ message: 'Você não tem moedas suficientes para esta aposta.' }); }
+        
         const newChallenge = new Challenge({ game, console: platform, betAmount, scheduledTime, createdBy: req.user.id });
         await newChallenge.save();
+        
         if (betAmount > 0) { user.coins -= betAmount; await user.save(); }
-        // Emite o evento para atualizar a lista de desafios abertos para todos os usuários
+        
         io.emit('challenge created');
         res.status(201).json(newChallenge);
     } catch (error) {
@@ -723,18 +867,19 @@ app.post('/api/challenges', auth, async (req, res) => {
 });
 
 // MODIFICADO: Emite um evento de socket para o oponente quando um desafio privado é criado
-app.post('/api/challenges/private', auth, async (req, res) => {
+app.post('/api/challenges/private', auth, validateSchema(challengePrivateSchema), async (req, res) => {
     try {
         const { opponentId, game, console: platform, betAmount } = req.body;
         const createdBy = req.user.id;
-        if (!opponentId || !game || !platform || betAmount === undefined || betAmount === null || betAmount < 0) { return res.status(400).json({ message: 'Dados do desafio privado incompletos ou inválidos.' }); }
+        
         if (String(createdBy) === String(opponentId)) { return res.status(400).json({ message: 'Você não pode desafiar a si mesmo.' }); }
+        
         const creatorUser = await User.findById(createdBy);
         const opponentUser = await User.findById(opponentId);
+        
         if (!creatorUser || !opponentUser) { return res.status(404).json({ message: 'Criador ou oponente não encontrado.' }); }
         if (!creatorUser.friends.includes(opponentId)) { return res.status(400).json({ message: 'Você só pode desafiar amigos diretamente.' }); }
         
-        // NOVO: Verificação de bloqueio
         if (creatorUser.blockedUsers.includes(opponentId) || opponentUser.blockedUsers.includes(createdBy)) {
             return res.status(403).json({ message: 'Você não pode desafiar um usuário que você bloqueou, ou que te bloqueou.' });
         }
@@ -744,12 +889,13 @@ app.post('/api/challenges/private', auth, async (req, res) => {
         
         const newChallenge = new Challenge({ game, console: platform, betAmount, createdBy: createdBy, opponent: opponentId, status: 'open' });
         await newChallenge.save();
+        
         const opponentSocketId = onlineUsers.get(String(opponentId))?.socketId;
         if (opponentSocketId) { io.to(opponentSocketId).emit('private challenge received', { challengeId: newChallenge._id, senderUsername: creatorUser.username, game: newChallenge.game, console: newChallenge.console, betAmount: newChallenge.betAmount, createdBy: createdBy }); }
-        // Emite um evento para o criador e o oponente atualizarem seus painéis
+        
         const creatorSocketId = onlineUsers.get(String(createdBy))?.socketId;
         io.to(creatorSocketId).emit('challenge updated');
-        io.to(opponentSocketId).emit('challenge updated');
+        
         res.status(201).json({ message: 'Desafio privado criado com sucesso e enviado ao seu amigo.', challenge: newChallenge });
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao criar desafio privado:', error);
@@ -768,7 +914,6 @@ app.get('/api/challenges', auth, async (req, res) => {
 
         const blockedUsers = user.blockedUsers;
         
-        // NOVO: Filtrar desafios criados por usuários que estão na lista de bloqueio
         const challenges = await Challenge.find({ 
             status: 'open',
             createdBy: { $nin: blockedUsers } 
@@ -781,7 +926,6 @@ app.get('/api/challenges', auth, async (req, res) => {
     }
 });
 
-// MODIFICADO: Emite eventos de socket para os usuários envolvidos quando um desafio é aceito
 app.patch('/api/challenges/:id/accept', auth, async (req, res) => {
     try {
         const challenge = await Challenge.findById(req.params.id);
@@ -795,12 +939,11 @@ app.patch('/api/challenges/:id/accept', auth, async (req, res) => {
         challenge.status = 'accepted';
         await challenge.save();
         if (challenge.betAmount > 0) { acceptorUser.coins -= challenge.betAmount; await acceptorUser.save(); }
-        // Emite o evento para o criador e o oponente atualizarem seus painéis
         const creatorSocketId = onlineUsers.get(String(challenge.createdBy))?.socketId;
         const opponentSocketId = onlineUsers.get(String(challenge.opponent))?.socketId;
         if (creatorSocketId) io.to(creatorSocketId).emit('challenge updated');
         if (opponentSocketId) io.to(opponentSocketId).emit('challenge updated');
-        io.emit('challenge created'); // Para remover o desafio da lista aberta de todos os usuários
+        io.emit('challenge created');
         res.json(challenge);
     } catch (error) {
         console.error('[API CHALLENGE] Erro ao aceitar desafio:', error);
@@ -811,7 +954,6 @@ app.patch('/api/challenges/:id/accept', auth, async (req, res) => {
 app.get('/api/my-challenges', auth, async (req, res) => {
     try {
         const userId = req.user.id;
-        // NOVO: Adiciona um filtro para não mostrar desafios onde o oponente está na lista de bloqueados do usuário
         const user = await User.findById(userId);
         const blockedUsers = user.blockedUsers;
         
@@ -833,7 +975,6 @@ app.get('/api/my-challenges', auth, async (req, res) => {
     }
 });
 
-// MODIFICADO: Emite eventos de socket quando o resultado é reportado
 app.post('/api/challenges/:id/result', auth, async (req, res) => {
     try {
         const { winnerId } = req.body;
@@ -890,7 +1031,6 @@ app.patch('/api/challenges/:id/archive', auth, async (req, res) => {
     }
 });
 
-// NOVO: Rota para o criador cancelar um desafio aberto
 app.patch('/api/challenges/:id/cancel', auth, async (req, res) => {
     try {
         const challengeId = req.params.id;
@@ -900,29 +1040,23 @@ app.patch('/api/challenges/:id/cancel', auth, async (req, res) => {
             return res.status(404).json({ message: "Desafio não encontrado." });
         }
 
-        // 1. O desafio deve estar em status 'open' para ser cancelado pelo criador.
         if (challenge.status !== 'open') {
             return res.status(400).json({ message: "Apenas desafios abertos podem ser cancelados." });
         }
 
-        // 2. Apenas o criador pode cancelar o desafio.
         if (String(challenge.createdBy) !== String(userId)) {
             return res.status(403).json({ message: "Você não tem permissão para cancelar este desafio." });
         }
 
-        // 3. Devolver as moedas apostadas
         if (challenge.betAmount > 0) {
             await User.findByIdAndUpdate(userId, { $inc: { coins: challenge.betAmount } });
         }
 
-        // 4. Mudar o status do desafio para 'cancelled'
         challenge.status = 'cancelled';
         await challenge.save();
 
-        // 5. Emitir evento para o socket remover o desafio da lista de todos os usuários
-        io.emit('challenge created'); // Reutilizamos este evento para forçar o recarregamento das listas.
+        io.emit('challenge created');
         
-        // 6. Emitir evento para o criador atualizar o dashboard
         const creatorSocketId = onlineUsers.get(String(userId))?.socketId;
         if (creatorSocketId) {
             io.to(creatorSocketId).emit('challenge updated');
@@ -995,7 +1129,6 @@ app.get('/api/search', auth, async (req, res) => {
         const user = await User.findById(userId);
         const blockedUsers = user.blockedUsers;
         
-        // NOVO: Excluir usuários bloqueados e que bloquearam o usuário atual dos resultados da pesquisa
         const users = await User.find({ 
             username: { $regex: query, $options: 'i' }, 
             _id: { $ne: userId, $nin: blockedUsers }, 
@@ -1024,12 +1157,13 @@ app.get('/api/users/:id', auth, async (req, res) => {
     }
 });
 
-app.patch('/api/users/profile', auth, upload.single('avatar'), async (req, res) => {
+app.patch('/api/users/profile', auth, upload.single('avatar'), validateSchema(profileUpdateSchema), async (req, res) => {
     try {
         const userId = req.user.id;
         const updates = req.body;
         const user = await User.findById(userId);
         if (!user) { return res.status(404).json({ message: 'Usuário não encontrado.' }); }
+        
         if (updates.username && updates.username !== user.username) {
             const existingUsername = await User.findOne({ username: updates.username });
             if (existingUsername && String(existingUsername._id) !== String(user._id)) {
@@ -1038,14 +1172,20 @@ app.patch('/api/users/profile', auth, upload.single('avatar'), async (req, res) 
             }
             user.username = updates.username;
         }
-        // if (updates.phone !== undefined) user.phone = updates.phone; // CAMPO DE TELEFONE REMOVIDO
+        
         if (updates.bio !== undefined) user.bio = updates.bio;
         if (updates.description !== undefined) user.description = updates.description;
         if (updates.console !== undefined) user.console = updates.console;
-        // NOVO: Use a URL dinâmica do backend para o avatar
+        
         if (req.file) { user.avatarUrl = `${BACKEND_URL}/avatars/${req.file.filename}`; }
-        if (!user.profileCompleted) { user.profileCompleted = true; }
+        
+        // Verifica se o perfil foi completado
+        if (!user.profileCompleted && user.username && user.console) { 
+             user.profileCompleted = true; 
+        }
+
         await user.save();
+        
         if (onlineUsers.has(userId)) {
             const onlineUser = onlineUsers.get(userId);
             onlineUser.username = user.username; onlineUser.avatarUrl = user.avatarUrl; onlineUser.console = user.console;
@@ -1068,7 +1208,6 @@ app.post('/api/friends/request/:receiverId', auth, async (req, res) => {
         if (!sender || !receiver) { return res.status(404).json({ message: 'Usuário remetente ou destinatário não encontrado.' }); }
         if (sender.friends.includes(receiverId)) { return res.status(400).json({ message: 'Vocês já são amigos.' }); }
         
-        // NOVO: Verificação de bloqueio
         if (sender.blockedUsers.includes(receiverId) || receiver.blockedUsers.includes(senderId)) {
             return res.status(403).json({ message: 'Não é possível enviar uma solicitação para um usuário bloqueado ou que te bloqueou.' });
         }
@@ -1146,7 +1285,6 @@ app.patch('/api/friends/request/:requestId/reject', auth, async (req, res) => {
 app.get('/api/friends/requests/received', auth, async (req, res) => {
     try {
         const userId = req.user.id;
-        // NOVO: Adicionar filtro para não mostrar solicitações de quem o usuário bloqueou
         const user = await User.findById(userId);
         const blockedUsers = user.blockedUsers;
 
@@ -1181,7 +1319,6 @@ app.get('/api/friends', auth, async (req, res) => {
         const user = await User.findById(userId).populate('friends', 'username avatarUrl console');
         if (!user) { return res.status(404).json({ message: 'Usuário não encontrado.' }); }
         
-        // NOVO: Filtra amigos que o usuário bloqueou
         const blockedUsers = user.blockedUsers;
         const friendsWithStatus = user.friends
             .filter(friend => !blockedUsers.includes(friend._id))
@@ -1238,7 +1375,6 @@ app.get('/api/admin/dashboard-stats', adminAuth, async (req, res) => {
         const disputedChallenges = await Challenge.countDocuments({ status: 'disputed' });
         const result = await Challenge.aggregate([ { $match: { status: 'completed' } }, { $group: { _id: null, totalBetAmount: { $sum: '$betAmount' } } } ]);
         const totalCoinsBet = result.length > 0 ? result[0].totalBetAmount : 0;
-        // NOVO: Adiciona contagem de torneios
         const totalTournaments = await Tournament.countDocuments();
         const activeTournaments = await Tournament.countDocuments({ status: 'in-progress' });
         const completedTournaments = await Tournament.countDocuments({ status: 'completed' });
@@ -1250,9 +1386,9 @@ app.get('/api/admin/dashboard-stats', adminAuth, async (req, res) => {
             disputedChallenges, 
             totalCoinsBet, 
             onlineUsersCount: onlineUsers.size,
-            totalTournaments, // Adicionado
-            activeTournaments, // Adicionado
-            completedTournaments // Adicionado
+            totalTournaments,
+            activeTournaments,
+            completedTournaments
         });
     } catch (error) {
         console.error('[API ADMIN] Erro ao buscar stats do dashboard admin:', error);
@@ -1336,18 +1472,28 @@ app.patch('/api/admin/challenges/:id/cancel', adminAuth, async (req, res) => {
     }
 });
 
-app.post('/api/forgot-password', async (req, res) => {
+app.post('/api/forgot-password', validateSchema(Joi.object({
+    email: Joi.string().email().required().messages({
+        'string.email': 'Formato de e-mail inválido.',
+        'any.required': 'E-mail é obrigatório.'
+    })
+})), async (req, res) => {
     try {
         const { email } = req.body;
-        if (!email) { return res.status(400).json({ message: 'Por favor, insira seu e-mail.' }); }
+        
         const user = await User.findOne({ email });
         if (!user) { return res.status(200).json({ message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' }); }
+        
         const resetToken = crypto.randomBytes(32).toString('hex');
         const resetExpires = Date.now() + 3600000;
+        
         user.resetPasswordToken = resetToken; user.resetPasswordExpires = resetExpires; await user.save();
+        
         const resetUrl = `${FRONTEND_URL}/login-split-form.html?resetToken=${resetToken}`;
         const mailOptions = { to: user.email, from: process.env.EMAIL_USER, subject: 'GameRivals - Redefinição de Senha', html: `<p>Você solicitou uma redefinição de senha para sua conta GameRivals.</p><p>Por favor, clique no link a seguir para redefinir sua senha:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Este link expirará em 1 hora.</p><p>Se você não solicitou esta redefinição, por favor, ignore este e-mail.</p>` };
+        
         await transporter.sendMail(mailOptions);
+        
         res.status(200).json({ message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' });
     } catch (error) {
         console.error('[API FORGOT PASSWORD] Erro ao solicitar redefinição de senha:', error);
@@ -1355,16 +1501,27 @@ app.post('/api/forgot-password', async (req, res) => {
     }
 });
 
-app.post('/api/reset-password/:token', async (req, res) => {
+app.post('/api/reset-password/:token', validateSchema(Joi.object({
+    newPassword: Joi.string().min(6).required().messages({
+        'string.min': 'A nova senha deve ter pelo menos 6 caracteres.',
+        'any.required': 'A nova senha é obrigatória.'
+    })
+})), async (req, res) => {
     try {
-        const { token } = req.params; const { newPassword } = req.body;
-        if (!newPassword || newPassword.length < 6) { return res.status(400).json({ message: 'A nova senha deve ter pelo menos 6 caracteres.' }); }
+        const { token } = req.params; 
+        const { newPassword } = req.body;
+        
         const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } });
         if (!user) { return res.status(400).json({ message: 'Token de redefinição de senha inválido ou expirado.' }); }
-        const salt = await bcrypt.genSalt(10); user.password = await bcrypt.hash(newPassword, salt);
+        
+        const salt = await bcrypt.genSalt(10); 
+        user.password = await bcrypt.hash(newPassword, salt);
+        
         user.resetPasswordToken = undefined; user.resetPasswordExpires = undefined; await user.save();
+        
         const mailOptionsConfirm = { to: user.email, from: process.env.EMAIL_USER, subject: 'GameRivals - Sua senha foi redefinida com sucesso', html: '<p>Sua senha da conta GameRivals foi redefinida com sucesso.</p><p>Se você não fez esta alteração, por favor, entre em contato com o suporte imediatamente.</p>' };
         await transporter.sendMail(mailOptionsConfirm);
+        
         res.status(200).json({ message: 'Sua senha foi redefinida com sucesso.' });
     } catch (error) {
         console.error('[API RESET PASSWORD] Erro ao redefinir senha:', error);
@@ -1373,10 +1530,10 @@ app.post('/api/reset-password/:token', async (req, res) => {
 });
 
 // =========================================================================
-// NOVAS ROTAS PARA CAMPEONATOS (TOURNAMENTS)
+// ROTAS DE CAMPEONATOS (TOURNAMENTS)
 // =========================================================================
 
-// Função auxiliar para gerar o chaveamento de um torneio
+// Função auxiliar para gerar o chaveamento de um torneio (Mantida)
 const generateBracket = (participants) => {
     let matches = [];
     const numParticipants = participants.length;
@@ -1386,7 +1543,6 @@ const generateBracket = (participants) => {
         throw new Error('O número de participantes deve ser uma potência de 2.');
     }
 
-    // Cria as partidas da primeira rodada (oitavas, se 8)
     const firstRoundMatches = [];
     for (let i = 0; i < numParticipants; i += 2) {
         firstRoundMatches.push({
@@ -1398,7 +1554,6 @@ const generateBracket = (participants) => {
 
     matches.push(...firstRoundMatches);
 
-    // Conecta as próximas rodadas
     let previousRoundMatches = firstRoundMatches;
     let roundsNames = ['Quartas', 'Semifinal', 'Final'];
     for (let i = 0; i < numRounds - 1; i++) {
@@ -1414,7 +1569,6 @@ const generateBracket = (participants) => {
             nextRoundMatches.push(newMatch);
         }
 
-        // Conecta as partidas do round atual com as do próximo
         for (let j = 0; j < previousRoundMatches.length; j += 2) {
             previousRoundMatches[j].nextMatch = nextRoundMatches[j / 2];
             if (previousRoundMatches[j + 1]) {
@@ -1430,15 +1584,9 @@ const generateBracket = (participants) => {
 
 
 // Rota para o admin criar um novo campeonato
-app.post('/api/admin/tournaments', adminAuth, async (req, res) => {
+app.post('/api/admin/tournaments', adminAuth, validateSchema(adminTournamentSchema), async (req, res) => {
     try {
         const { name, game, console, betAmount, maxParticipants, scheduledTime } = req.body;
-        if (!name || !game || !console || !maxParticipants) {
-            return res.status(400).json({ message: 'Dados incompletos para criar o campeonato.' });
-        }
-        if (maxParticipants < 2 || (Math.log2(maxParticipants) % 1 !== 0)) {
-            return res.status(400).json({ message: 'O número de participantes deve ser uma potência de 2 (ex: 2, 4, 8, 16, 32...).' });
-        }
         
         const newTournament = new Tournament({
             name,
@@ -1569,10 +1717,8 @@ app.post('/api/admin/tournaments/:id/start', adminAuth, async (req, res) => {
             return res.status(400).json({ message: 'O campeonato não está no status de inscrição.' });
         }
         
-        // Embaralha os participantes para um chaveamento aleatório
         const shuffledParticipants = tournament.participants.sort(() => 0.5 - Math.random());
 
-        // Gera o chaveamento do torneio
         const bracket = generateBracket(shuffledParticipants.map(p => p._id));
         tournament.bracket = bracket;
         tournament.status = 'in-progress';
@@ -1645,7 +1791,6 @@ app.patch('/api/admin/tournaments/:tournamentId/resolve-match/:matchId', adminAu
             return res.status(404).json({ message: 'Partida não encontrada.' });
         }
 
-        // Verifica se o vencedor é um dos jogadores do match
         if (String(winnerId) !== String(match.player1) && String(winnerId) !== String(match.player2)) {
             return res.status(400).json({ message: 'O vencedor selecionado não é um dos jogadores desta partida.' });
         }
@@ -1653,7 +1798,6 @@ app.patch('/api/admin/tournaments/:tournamentId/resolve-match/:matchId', adminAu
         match.winner = winnerId;
         match.status = 'completed';
 
-        // Atualiza o próximo match com o vencedor
         if (match.nextMatch) {
             const nextMatch = tournament.bracket.id(match.nextMatch);
             if (nextMatch) {
@@ -1717,7 +1861,6 @@ app.delete('/api/admin/tournaments/:id', adminAuth, async (req, res) => {
             return res.status(404).json({ message: 'Campeonato não encontrado.' });
         }
 
-        // Devolve o valor das inscrições aos participantes, se houver
         if (tournament.betAmount > 0) {
             await User.updateMany(
                 { _id: { $in: tournament.participants } },
@@ -1733,10 +1876,3 @@ app.delete('/api/admin/tournaments/:id', adminAuth, async (req, res) => {
         res.status(500).json({ message: 'Erro no servidor ao excluir campeonato.' });
     }
 });
-
-
-// Fim das novas rotas para campeonatos
-
-// =========================================================================
-// FIM NOVAS ROTAS
-// =========================================================================
