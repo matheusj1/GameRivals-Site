@@ -1,5 +1,21 @@
 // arquivo: site_de_jogos/js/dashboard.js
 
+// --- FUNÇÕES DE TEMA (ADICIONADAS PARA GARANTIR EXECUÇÃO JÁ QUE main.js NÃO É INCLUÍDO) ---
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+}
+
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        applyTheme(savedTheme);
+    } else {
+        applyTheme('light');
+    }
+}
+// ---------------------------------------------------------------------------------------
+
 // Importa as funções utilitárias
 import { showNotification, getConsoleIconPath, API_BASE_URL, FRONTEND_BASE_URL } from './utils.js';
 // Importa as funções de desafios
@@ -10,6 +26,9 @@ import { initFriendsAndChat, fetchAndDisplayFriends, fetchAndDisplayFriendReques
 import { setupMatchmaking } from './matchmaking.js';
 // NOVO: Importa as funções de campeonatos
 import { fetchAndDisplayTournaments, setupTournamentListeners } from './tournaments.js';
+
+// Executa a função de carregar o tema imediatamente ao carregar o script
+loadTheme();
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- DADOS GLOBAIS E VERIFICAÇÃO DE AUTENTICAÇÃO ---
@@ -233,12 +252,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         socket.on('challenge updated', () => {
-             showNotification('Um desafio foi atualizado. Atualizando seu painel...', 'info');
-             refreshDashboard();
+            showNotification('Um desafio foi atualizado. Atualizando seu painel...', 'info');
+            refreshDashboard();
         });
 
         socket.on('challenge created', () => {
-             refreshDashboard();
+            refreshDashboard();
         });
         
         // NOVO: Evento para quando o saldo da carteira é atualizado (ex: pagamento confirmado pelo admin)
