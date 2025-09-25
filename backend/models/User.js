@@ -104,33 +104,12 @@ const UserSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         }
-    ],
-    // ===== NOVOS CAMPOS PARA O SISTEMA DE GRUPOS =====
-    groups: [ // Grupos dos quais o usuário é membro
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Group'
-        }
-    ],
-    receivedGroupInvites: [ // Convites de grupo que o usuário recebeu
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'GroupInvite'
-        }
-    ],
-    sentGroupInvites: [ // Convites de grupo que o usuário enviou
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'GroupInvite'
-        }
-    ],
-    // NOVO: Solicitações de entrada em grupo enviadas pelo usuário
-    sentGroupJoinRequests: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'GroupJoinRequest' // Referencia o novo modelo GroupJoinRequest
-        }
     ]
+    // ===== NOVOS CAMPOS PARA O SISTEMA DE GRUPOS REMOVIDOS =====
+    // groups: [...]
+    // receivedGroupInvites: [...]
+    // sentGroupInvites: [...]
+    // sentGroupJoinRequests: [...]
 });
 
 module.exports = mongoose.model('User', UserSchema);
