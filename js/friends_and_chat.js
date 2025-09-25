@@ -658,11 +658,6 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                     blockUserFromModalBtn.dataset.userId = userData._id;
                     sendFriendRequestFromModalBtn.dataset.userId = userData._id;
 
-                    const inviteToGroupFromModalBtn = document.getElementById('invite-to-group-from-modal');
-                    if (inviteToGroupFromModalBtn) {
-                        inviteToGroupFromModalBtn.style.display = 'none';
-                    }
-
                     // Verifica o status de amizade/bloqueio para exibir os botões corretos
                     const friendsResponse = await fetch(`${API_BASE_URL}/api/friends`, { headers: { 'x-auth-token': token } }); // Atualizado
                     const friendsList = await friendsResponse.json();
@@ -682,14 +677,12 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                         sendFriendRequestFromModalBtn.style.display = 'none';
                         startPrivateChatFromModalBtn.style.display = 'none';
                         blockUserFromModalBtn.style.display = 'none';
-                        if (inviteToGroupFromModalBtn) inviteToGroupFromModalBtn.style.display = 'none';
                     } else if (isBlocked) {
                         sendFriendRequestFromModalBtn.style.display = 'none';
                         startPrivateChatFromModalBtn.style.display = 'none';
                         blockUserFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.textContent = 'Desbloquear Usuário';
                         blockUserFromModalBtn.style.backgroundColor = '#28a745';
-                        if (inviteToGroupFromModalBtn) inviteToGroupFromModalBtn.style.display = 'none';
                     }
                     else if (isFriend || hasSentRequest || hasReceivedRequest) {
                         sendFriendRequestFromModalBtn.style.display = 'none';
@@ -697,14 +690,12 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                         blockUserFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.textContent = 'Bloquear Usuário';
                         blockUserFromModalBtn.style.backgroundColor = '#e74c3c';
-                        if (inviteToGroupFromModalBtn) inviteToGroupFromModalBtn.style.display = 'none';
                     } else {
                         sendFriendRequestFromModalBtn.style.display = 'inline-block';
                         startPrivateChatFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.textContent = 'Bloquear Usuário';
                         blockUserFromModalBtn.style.backgroundColor = '#e74c3c';
-                        if (inviteToGroupFromModalBtn) inviteToGroupFromModalBtn.style.display = 'none';
                     }
 
 
@@ -1090,18 +1081,6 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                 e.preventDefault();
                 performSearch();
             }
-        });
-    }
-
-    const inviteToGroupFromModalBtn = document.getElementById('invite-to-group-from-modal');
-    if (inviteToGroupFromModalBtn) {
-        inviteToGroupFromModalBtn.addEventListener('click', async () => {
-            const targetUserId = inviteToGroupFromModalBtn.dataset.userId;
-            const targetUsername = document.getElementById('other-user-profile-username').textContent;
-
-            otherUserProfileModalBackdrop.classList.remove('active');
-
-            showNotification('A funcionalidade de grupos foi desativada.', 'info');
         });
     }
 };
