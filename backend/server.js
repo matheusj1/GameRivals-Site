@@ -15,6 +15,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Joi = require('joi'); // NOVO: Importa o Joi para validação
+const rateLimit = require('express-rate-limit'); // NOVO: Importa o Rate Limit
 
 const User = require('./models/User');
 const Challenge = require('./models/Challenge');
@@ -52,6 +53,33 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// =========================================================================
+// CONFIGURAÇÃO DO RATE LIMITING
+// =========================================================================
+
+// 1. Limiter para rotas de Autenticação (contra Brute-Force/DoS leve)
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100, // Limita cada IP a 100 requisições por janela
+    message: { message: 'Muitas requisições desta IP, tente novamente após 15 minutos.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// 2. Limiter para rotas Financeiras Sensíveis (contra DoS pesado)
+const sensitiveLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 60 minutos
+    max: 10, // Limita cada IP a 10 requisições por hora
+    message: { message: 'Muitas requisições sensíveis, tente novamente após 1 hora.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// =========================================================================
+// FIM CONFIGURAÇÃO DO RATE LIMITING
+// =========================================================================
+
 
 const avatarsDir = path.join(__dirname, '../img/avatars');
 
@@ -94,9 +122,7 @@ mongoose.connect(process.env.MONGO_URI)
     .catch((err) => { console.error('Erro ao conectar ao MongoDB:', err); });
 
 let onlineUsers = new Map();
-
 let socketIdToUserId = new Map();
-
 const matchmakingQueue = new Map();
 
 const emitUpdatedUserList = () => {
@@ -152,7 +178,6 @@ const registerSchema = Joi.object({
         'string.min': 'Nome completo deve ter no mínimo 3 caracteres.',
         'any.required': 'Nome completo é obrigatório.'
     }),
-    // Validação de CPF: string de 11 dígitos numéricos
     cpf: Joi.string().pattern(/^[0-9]{11}$/).required().messages({
         'string.pattern.base': 'CPF deve ter 11 dígitos (apenas números).',
         'any.required': 'CPF é obrigatório.'
@@ -606,7 +631,11 @@ io.on('connection', async (socket) => {
 });
 
 
-app.post('/api/register', validateSchema(registerSchema), async (req, res) => {
+// =========================================================================
+// ROTAS DE AUTENTICAÇÃO (PROTEGIDAS POR authLimiter)
+// =========================================================================
+
+app.post('/api/register', authLimiter, validateSchema(registerSchema), async (req, res) => {
     try {
         const { username, fullName, cpf, email, password } = req.body;
         
@@ -634,7 +663,7 @@ app.post('/api/register', validateSchema(registerSchema), async (req, res) => {
     }
 });
 
-app.post('/api/login', validateSchema(loginSchema), async (req, res) => {
+app.post('/api/login', authLimiter, validateSchema(loginSchema), async (req, res) => {
     try {
         const { email, password } = req.body;
         
@@ -651,7 +680,6 @@ app.post('/api/login', validateSchema(loginSchema), async (req, res) => {
         }
 
         const payload = { id: user.id, username: user.username, role: user.role };
-        // CORRIGIDO: Removido o segredo padrão inseguro, forçando o uso de process.env.JWT_SECRET.
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }); 
 
         res.status(200).json({ message: 'Login bem-sucedido.', token: token, username: user.username, userId: user.id, userRole: user.role, profileCompleted: user.profileCompleted });
@@ -662,9 +690,68 @@ app.post('/api/login', validateSchema(loginSchema), async (req, res) => {
     }
 });
 
+app.post('/api/forgot-password', authLimiter, validateSchema(Joi.object({
+    email: Joi.string().email().required().messages({
+        'string.email': 'Formato de e-mail inválido.',
+        'any.required': 'E-mail é obrigatório.'
+    })
+})), async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        const user = await User.findOne({ email });
+        if (!user) { return res.status(200).json({ message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' }); }
+        
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetExpires = Date.now() + 3600000;
+        
+        user.resetPasswordToken = resetToken; user.resetPasswordExpires = resetExpires; await user.save();
+        
+        const resetUrl = `${FRONTEND_URL}/login-split-form.html?resetToken=${resetToken}`;
+        const mailOptions = { to: user.email, from: process.env.EMAIL_USER, subject: 'GameRivals - Redefinição de Senha', html: `<p>Você solicitou uma redefinição de senha para sua conta GameRivals.</p><p>Por favor, clique no link a seguir para redefinir sua senha:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Este link expirará em 1 hora.</p><p>Se você não solicitou esta redefinição, por favor, ignore este e-mail.</p>` };
+        
+        await transporter.sendMail(mailOptions);
+        
+        res.status(200).json({ message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' });
+    } catch (error) {
+        console.error('[API FORGOT PASSWORD] Erro ao solicitar redefinição de senha:', error);
+        res.status(500).json({ message: 'Erro no servidor ao processar a solicitação de redefinição de senha.' });
+    }
+});
 
-// --- ROTA PARA RECEBER NOTIFICAÇÃO DE PAGAMENTO PIX ---
-app.post('/api/payment/notify-pix', auth, validateSchema(pixNotifySchema), async (req, res) => {
+app.post('/api/reset-password/:token', authLimiter, validateSchema(Joi.object({
+    newPassword: Joi.string().min(6).required().messages({
+        'string.min': 'A nova senha deve ter pelo menos 6 caracteres.',
+        'any.required': 'A nova senha é obrigatória.'
+    })
+})), async (req, res) => {
+    try {
+        const { token } = req.params; 
+        const { newPassword } = req.body;
+        
+        const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } });
+        if (!user) { return res.status(400).json({ message: 'Token de redefinição de senha inválido ou expirado.' }); }
+        
+        const salt = await bcrypt.genSalt(10); 
+        user.password = await bcrypt.hash(newPassword, salt);
+        
+        user.resetPasswordToken = undefined; user.resetPasswordExpires = undefined; await user.save();
+        
+        const mailOptionsConfirm = { to: user.email, from: process.env.EMAIL_USER, subject: 'GameRivals - Sua senha foi redefinida com sucesso', html: '<p>Sua senha da conta GameRivals foi redefinida com sucesso.</p><p>Se você não fez esta alteração, por favor, entre em contato com o suporte imediatamente.</p>' };
+        await transporter.sendMail(mailOptionsConfirm);
+        
+        res.status(200).json({ message: 'Sua senha foi redefinida com sucesso.' });
+    } catch (error) {
+        console.error('[API RESET PASSWORD] Erro ao redefinir senha:', error);
+        res.status(500).json({ message: 'Erro no servidor ao redefinir a senha.' });
+    }
+});
+
+// =========================================================================
+// ROTAS FINANCEIRAS (PROTEGIDAS POR sensitiveLimiter)
+// =========================================================================
+
+app.post('/api/payment/notify-pix', auth, sensitiveLimiter, validateSchema(pixNotifySchema), async (req, res) => {
     const { amount, userId } = req.body;
 
     try {
@@ -689,60 +776,11 @@ app.post('/api/payment/notify-pix', auth, validateSchema(pixNotifySchema), async
     }
 });
 
-
-// --- NOVO: Rotas de administração para pagamentos Pix ---
-app.get('/api/admin/pending-pix', adminAuth, async (req, res) => {
-    try {
-        const pendingPayments = await PixPaymentNotification.find({ status: 'pending' })
-            .populate('userId', 'username email')
-            .sort({ createdAt: 1 });
-        
-        res.status(200).json(pendingPayments);
-    } catch (error) {
-        console.error('[API ADMIN] Erro ao buscar pagamentos Pix pendentes:', error);
-        res.status(500).json({ message: 'Erro no servidor ao buscar pagamentos pendentes.' });
-    }
-});
-
-app.patch('/api/admin/confirm-pix/:paymentId', adminAuth, async (req, res) => {
-    const { paymentId } = req.params;
-
-    try {
-        const payment = await PixPaymentNotification.findById(paymentId);
-        if (!payment || payment.status !== 'pending') {
-            return res.status(404).json({ message: 'Pagamento pendente não encontrado ou já processado.' });
-        }
-
-        const user = await User.findById(payment.userId);
-        if (!user) {
-            return res.status(404).json({ message: 'Usuário não encontrado.' });
-        }
-
-        user.coins += payment.amount;
-        await user.save();
-
-        payment.status = 'approved';
-        await payment.save();
-
-        if (onlineUsers.has(String(user._id))) {
-            io.to(onlineUsers.get(String(user._id)).socketId).emit('wallet updated', { newBalance: user.coins });
-        }
-
-        res.status(200).json({ message: 'Pagamento confirmado e saldo atualizado com sucesso.' });
-
-    } catch (error) {
-        console.error('[API ADMIN] Erro ao confirmar pagamento Pix:', error);
-        res.status(500).json({ message: 'Erro no servidor ao confirmar o pagamento.' });
-    }
-});
-
-// NOVO: Rota para o usuário solicitar um saque
-app.post('/api/wallet/withdraw-request', auth, validateSchema(withdrawRequestSchema), async (req, res) => {
+app.post('/api/wallet/withdraw-request', auth, sensitiveLimiter, validateSchema(withdrawRequestSchema), async (req, res) => {
     const { amount, pixKeyType, pixKeyValue } = req.body;
     const userId = req.user.id;
 
     try {
-        // A validação de formato e min/max é feita pelo Joi.
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: 'Usuário não encontrado.' });
@@ -772,80 +810,10 @@ app.post('/api/wallet/withdraw-request', auth, validateSchema(withdrawRequestSch
     }
 });
 
-// NOVO: Rota de admin para listar solicitações de saque pendentes
-app.get('/api/admin/pending-withdrawals', adminAuth, async (req, res) => {
-    try {
-        const pendingWithdrawals = await WithdrawalRequest.find({ status: 'pending' })
-            .populate('userId', 'username email cpf')
-            .sort({ createdAt: 1 });
-        
-        res.status(200).json(pendingWithdrawals);
-    } catch (error) {
-        console.error('[API ADMIN] Erro ao buscar solicitações de saque pendentes:', error);
-        res.status(500).json({ message: 'Erro no servidor ao buscar solicitações de saque.' });
-    }
-});
+// =========================================================================
+// ROTAS DE DESAFIO, USUÁRIO, AMIGOS E ADMIN
+// =========================================================================
 
-// NOVO: Rota de admin para aprovar uma solicitação de saque
-app.patch('/api/admin/withdrawals/:id/approve', adminAuth, async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        const withdrawal = await WithdrawalRequest.findById(id);
-        if (!withdrawal || withdrawal.status !== 'pending') {
-            return res.status(404).json({ message: 'Solicitação de saque pendente não encontrada ou já processada.' });
-        }
-
-        withdrawal.status = 'approved';
-        withdrawal.processedAt = Date.now();
-        await withdrawal.save();
-
-        const userSocketId = onlineUsers.get(String(withdrawal.userId))?.socketId;
-        if (userSocketId) {
-            io.to(userSocketId).emit('wallet updated', { status: 'approved', amount: withdrawal.amount });
-        }
-
-        res.status(200).json({ message: 'Solicitação de saque aprovada com sucesso.' });
-    } catch (error) {
-        console.error('[API ADMIN] Erro ao aprovar solicitação de saque:', error);
-        res.status(500).json({ message: 'Erro no servidor ao aprovar a solicitação.' });
-    }
-});
-
-// NOVO: Rota de admin para rejeitar uma solicitação de saque
-app.patch('/api/admin/withdrawals/:id/reject', adminAuth, async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        const withdrawal = await WithdrawalRequest.findById(id);
-        if (!withdrawal || withdrawal.status !== 'pending') {
-            return res.status(404).json({ message: 'Solicitação de saque pendente não encontrada ou já processada.' });
-        }
-
-        const user = await User.findById(withdrawal.userId);
-        if (user) {
-            user.coins += withdrawal.amount;
-            await user.save();
-        }
-
-        withdrawal.status = 'rejected';
-        withdrawal.processedAt = Date.now();
-        await withdrawal.save();
-
-        const userSocketId = onlineUsers.get(String(withdrawal.userId))?.socketId;
-        if (userSocketId) {
-            io.to(userSocketId).emit('withdrawal status updated', { status: 'rejected', amount: withdrawal.amount, newBalance: user.coins });
-        }
-
-        res.status(200).json({ message: 'Solicitação de saque rejeitada e valor devolvido ao saldo do usuário.' });
-    } catch (error) {
-        console.error('[API ADMIN] Erro ao rejeitar solicitação de saque:', error);
-        res.status(500).json({ message: 'Erro no servidor ao rejeitar a solicitação.' });
-    }
-});
-
-
-// MODIFICADO: Emite um evento de socket quando um desafio é criado
 app.post('/api/challenges', auth, validateSchema(challengeCreateSchema), async (req, res) => {
     try {
         const { game, console: platform, betAmount, scheduledTime } = req.body;
@@ -866,7 +834,6 @@ app.post('/api/challenges', auth, validateSchema(challengeCreateSchema), async (
     }
 });
 
-// MODIFICADO: Emite um evento de socket para o oponente quando um desafio privado é criado
 app.post('/api/challenges/private', auth, validateSchema(challengePrivateSchema), async (req, res) => {
     try {
         const { opponentId, game, console: platform, betAmount } = req.body;
@@ -1179,7 +1146,6 @@ app.patch('/api/users/profile', auth, upload.single('avatar'), validateSchema(pr
         
         if (req.file) { user.avatarUrl = `${BACKEND_URL}/avatars/${req.file.filename}`; }
         
-        // Verifica se o perfil foi completado
         if (!user.profileCompleted && user.username && user.console) { 
              user.profileCompleted = true; 
         }
@@ -1472,68 +1438,124 @@ app.patch('/api/admin/challenges/:id/cancel', adminAuth, async (req, res) => {
     }
 });
 
-app.post('/api/forgot-password', validateSchema(Joi.object({
-    email: Joi.string().email().required().messages({
-        'string.email': 'Formato de e-mail inválido.',
-        'any.required': 'E-mail é obrigatório.'
-    })
-})), async (req, res) => {
+app.get('/api/admin/pending-pix', adminAuth, async (req, res) => {
     try {
-        const { email } = req.body;
+        const pendingPayments = await PixPaymentNotification.find({ status: 'pending' })
+            .populate('userId', 'username email')
+            .sort({ createdAt: 1 });
         
-        const user = await User.findOne({ email });
-        if (!user) { return res.status(200).json({ message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' }); }
-        
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        const resetExpires = Date.now() + 3600000;
-        
-        user.resetPasswordToken = resetToken; user.resetPasswordExpires = resetExpires; await user.save();
-        
-        const resetUrl = `${FRONTEND_URL}/login-split-form.html?resetToken=${resetToken}`;
-        const mailOptions = { to: user.email, from: process.env.EMAIL_USER, subject: 'GameRivals - Redefinição de Senha', html: `<p>Você solicitou uma redefinição de senha para sua conta GameRivals.</p><p>Por favor, clique no link a seguir para redefinir sua senha:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Este link expirará em 1 hora.</p><p>Se você não solicitou esta redefinição, por favor, ignore este e-mail.</p>` };
-        
-        await transporter.sendMail(mailOptions);
-        
-        res.status(200).json({ message: 'Se o e-mail estiver cadastrado, um link de redefinição será enviado.' });
+        res.status(200).json(pendingPayments);
     } catch (error) {
-        console.error('[API FORGOT PASSWORD] Erro ao solicitar redefinição de senha:', error);
-        res.status(500).json({ message: 'Erro no servidor ao processar a solicitação de redefinição de senha.' });
+        console.error('[API ADMIN] Erro ao buscar pagamentos Pix pendentes:', error);
+        res.status(500).json({ message: 'Erro no servidor ao buscar pagamentos pendentes.' });
     }
 });
 
-app.post('/api/reset-password/:token', validateSchema(Joi.object({
-    newPassword: Joi.string().min(6).required().messages({
-        'string.min': 'A nova senha deve ter pelo menos 6 caracteres.',
-        'any.required': 'A nova senha é obrigatória.'
-    })
-})), async (req, res) => {
+app.patch('/api/admin/confirm-pix/:paymentId', adminAuth, async (req, res) => {
+    const { paymentId } = req.params;
+
     try {
-        const { token } = req.params; 
-        const { newPassword } = req.body;
-        
-        const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } });
-        if (!user) { return res.status(400).json({ message: 'Token de redefinição de senha inválido ou expirado.' }); }
-        
-        const salt = await bcrypt.genSalt(10); 
-        user.password = await bcrypt.hash(newPassword, salt);
-        
-        user.resetPasswordToken = undefined; user.resetPasswordExpires = undefined; await user.save();
-        
-        const mailOptionsConfirm = { to: user.email, from: process.env.EMAIL_USER, subject: 'GameRivals - Sua senha foi redefinida com sucesso', html: '<p>Sua senha da conta GameRivals foi redefinida com sucesso.</p><p>Se você não fez esta alteração, por favor, entre em contato com o suporte imediatamente.</p>' };
-        await transporter.sendMail(mailOptionsConfirm);
-        
-        res.status(200).json({ message: 'Sua senha foi redefinida com sucesso.' });
+        const payment = await PixPaymentNotification.findById(paymentId);
+        if (!payment || payment.status !== 'pending') {
+            return res.status(404).json({ message: 'Pagamento pendente não encontrado ou já processado.' });
+        }
+
+        const user = await User.findById(payment.userId);
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não encontrado.' });
+        }
+
+        user.coins += payment.amount;
+        await user.save();
+
+        payment.status = 'approved';
+        await payment.save();
+
+        if (onlineUsers.has(String(user._id))) {
+            io.to(onlineUsers.get(String(user._id)).socketId).emit('wallet updated', { newBalance: user.coins });
+        }
+
+        res.status(200).json({ message: 'Pagamento confirmado e saldo atualizado com sucesso.' });
+
     } catch (error) {
-        console.error('[API RESET PASSWORD] Erro ao redefinir senha:', error);
-        res.status(500).json({ message: 'Erro no servidor ao redefinir a senha.' });
+        console.error('[API ADMIN] Erro ao confirmar pagamento Pix:', error);
+        res.status(500).json({ message: 'Erro no servidor ao confirmar o pagamento.' });
     }
 });
 
-// =========================================================================
-// ROTAS DE CAMPEONATOS (TOURNAMENTS)
-// =========================================================================
+app.get('/api/admin/pending-withdrawals', adminAuth, async (req, res) => {
+    try {
+        const pendingWithdrawals = await WithdrawalRequest.find({ status: 'pending' })
+            .populate('userId', 'username email cpf')
+            .sort({ createdAt: 1 });
+        
+        res.status(200).json(pendingWithdrawals);
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao buscar solicitações de saque pendentes:', error);
+        res.status(500).json({ message: 'Erro no servidor ao buscar solicitações de saque.' });
+    }
+});
 
-// Função auxiliar para gerar o chaveamento de um torneio (Mantida)
+app.patch('/api/admin/withdrawals/:id/approve', adminAuth, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const withdrawal = await WithdrawalRequest.findById(id);
+        if (!withdrawal || withdrawal.status !== 'pending') {
+            return res.status(404).json({ message: 'Solicitação de saque pendente não encontrada ou já processada.' });
+        }
+
+        withdrawal.status = 'approved';
+        withdrawal.processedAt = Date.now();
+        await withdrawal.save();
+
+        const userSocketId = onlineUsers.get(String(withdrawal.userId))?.socketId;
+        if (userSocketId) {
+            io.to(userSocketId).emit('wallet updated', { status: 'approved', amount: withdrawal.amount });
+        }
+
+        res.status(200).json({ message: 'Solicitação de saque aprovada com sucesso.' });
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao aprovar solicitação de saque:', error);
+        res.status(500).json({ message: 'Erro no servidor ao aprovar a solicitação.' });
+    }
+});
+
+app.patch('/api/admin/withdrawals/:id/reject', adminAuth, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const withdrawal = await WithdrawalRequest.findById(id);
+        if (!withdrawal || withdrawal.status !== 'pending') {
+            return res.status(404).json({ message: 'Solicitação de saque pendente não encontrada ou já processada.' });
+        }
+
+        const user = await User.findById(withdrawal.userId);
+        if (user) {
+            user.coins += withdrawal.amount;
+            await user.save();
+        }
+
+        withdrawal.status = 'rejected';
+        withdrawal.processedAt = Date.now();
+        await withdrawal.save();
+
+        const userSocketId = onlineUsers.get(String(withdrawal.userId))?.socketId;
+        if (userSocketId) {
+            io.to(userSocketId).emit('withdrawal status updated', { status: 'rejected', amount: withdrawal.amount, newBalance: user.coins });
+        }
+
+        res.status(200).json({ message: 'Solicitação de saque rejeitada e valor devolvido ao saldo do usuário.' });
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao rejeitar solicitação de saque:', error);
+        res.status(500).json({ message: 'Erro no servidor ao rejeitar a solicitação.' });
+    }
+});
+
+
+// ... Rotas de Tournament ...
+
+
 const generateBracket = (participants) => {
     let matches = [];
     const numParticipants = participants.length;
@@ -1583,7 +1605,6 @@ const generateBracket = (participants) => {
 };
 
 
-// Rota para o admin criar um novo campeonato
 app.post('/api/admin/tournaments', adminAuth, validateSchema(adminTournamentSchema), async (req, res) => {
     try {
         const { name, game, console, betAmount, maxParticipants, scheduledTime } = req.body;
@@ -1607,7 +1628,6 @@ app.post('/api/admin/tournaments', adminAuth, validateSchema(adminTournamentSche
     }
 });
 
-// Rota para listar campeonatos (visível para usuários e admin)
 app.get('/api/tournaments', auth, async (req, res) => {
     try {
         const tournaments = await Tournament.find({ status: { $in: ['registration', 'in-progress'] } })
@@ -1620,7 +1640,6 @@ app.get('/api/tournaments', auth, async (req, res) => {
     }
 });
 
-// NOVO: Rota para obter detalhes de um único torneio para o usuário
 app.get('/api/tournaments/:id', auth, async (req, res) => {
     try {
         const tournament = await Tournament.findById(req.params.id)
@@ -1638,7 +1657,6 @@ app.get('/api/tournaments/:id', auth, async (req, res) => {
     }
 });
 
-// Rota para o usuário se inscrever em um campeonato
 app.post('/api/tournaments/:id/register', auth, async (req, res) => {
     try {
         const tournamentId = req.params.id;
@@ -1679,7 +1697,6 @@ app.post('/api/tournaments/:id/register', auth, async (req, res) => {
     }
 });
 
-// Rota para o admin remover um participante
 app.patch('/api/admin/tournaments/:id/remove-participant', adminAuth, async (req, res) => {
     try {
         const { userId } = req.body;
@@ -1706,7 +1723,6 @@ app.patch('/api/admin/tournaments/:id/remove-participant', adminAuth, async (req
 });
 
 
-// Rota para o admin iniciar o campeonato e gerar o chaveamento
 app.post('/api/admin/tournaments/:id/start', adminAuth, async (req, res) => {
     try {
         const tournament = await Tournament.findById(req.params.id).populate('participants', 'username');
@@ -1733,7 +1749,6 @@ app.post('/api/admin/tournaments/:id/start', adminAuth, async (req, res) => {
 });
 
 
-// Rota para o admin enviar uma mensagem para todos os participantes de um campeonato
 app.post('/api/admin/tournaments/:id/message-participants', adminAuth, async (req, res) => {
     try {
         const { message } = req.body;
@@ -1775,7 +1790,6 @@ app.get('/api/admin/tournaments', adminAuth, async (req, res) => {
     }
 });
 
-// Rota para o admin resolver um match do torneio
 app.patch('/api/admin/tournaments/:tournamentId/resolve-match/:matchId', adminAuth, async (req, res) => {
     try {
         const { tournamentId, matchId } = req.params;
@@ -1851,7 +1865,6 @@ app.get('/api/admin/tournament/:id', adminAuth, async (req, res) => {
     }
 });
 
-// NOVO: Rota para o admin excluir um campeonato
 app.delete('/api/admin/tournaments/:id', adminAuth, async (req, res) => {
     try {
         const tournamentId = req.params.id;
