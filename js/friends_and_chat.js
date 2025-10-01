@@ -405,7 +405,7 @@ export const fetchAndDisplayBlockedUsers = async (token) => {
                 const initial = user.username.charAt(0).toUpperCase();
                 blockedItem.querySelector('.app-list-item-initial-text').textContent = initial;
 
-                // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de forma segura
+                // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de console de forma segura
                 setUsernameAndIcon(blockedItem.querySelector('.app-list-item-username'), user.username, user.console);
 
                 blockedItem.querySelector('.app-list-item-sub-info.console-name').textContent = user.console || '';
@@ -470,7 +470,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                         playerItem.dataset.username = user.username;
                         playerItem.querySelector('.app-list-item-initial-text').textContent = initial;
                         
-                        // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de forma segura
+                        // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de console de forma segura
                         setUsernameAndIcon(playerItem.querySelector('.app-list-item-username'), user.username, user.console);
                         
                         playerItem.querySelector('.app-list-item-sub-info.console-name').textContent = user.console || '';
@@ -479,6 +479,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                     }
                 });
             }
+            // CORREÇÃO: Força a atualização da lista de amigos aqui para sincronizar o status online/offline
             refreshFriendsAndRequests(token);
         });
     }
@@ -732,20 +733,20 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                         startPrivateChatFromModalBtn.style.display = 'none';
                         blockUserFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.textContent = 'Desbloquear Usuário';
-                        blockUserFromModalBtn.style.backgroundColor = '#28a745';
+                        blockUserFromModalBtn.style.backgroundColor = 'var(--win-color)'; // Verde para Desbloquear
                     }
                     else if (isFriend || hasSentRequest || hasReceivedRequest) {
                         sendFriendRequestFromModalBtn.style.display = 'none';
                         startPrivateChatFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.textContent = 'Bloquear Usuário';
-                        blockUserFromModalBtn.style.backgroundColor = '#e74c3c';
+                        blockUserFromModalBtn.style.backgroundColor = 'var(--loss-color)'; // Vermelho para Bloquear
                     } else {
                         sendFriendRequestFromModalBtn.style.display = 'inline-block';
                         startPrivateChatFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.textContent = 'Bloquear Usuário';
-                        blockUserFromModalBtn.style.backgroundColor = '#e74c3c';
+                        blockUserFromModalBtn.style.backgroundColor = 'var(--loss-color)'; // Vermelho para Bloquear
                     }
 
 
@@ -1122,7 +1123,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                             searchItem.dataset.username = result.username;
                             searchItem.querySelector('.app-list-item-initial-text').textContent = initial;
                             
-                            // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de forma segura
+                            // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de console de forma segura
                             setUsernameAndIcon(searchItem.querySelector('.app-list-item-username'), result.username, result.console);
                             
                             searchItem.querySelector('.app-list-item-sub-info.console-name').textContent = result.console || '';
