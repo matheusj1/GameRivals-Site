@@ -534,10 +534,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const challengeId = row.dataset.challengeId;
 
             // Botão Resolver Disputa (FIX: Usando closest para lidar com cliques no ícone)
-            const resolveDisputeBtn = target.closest('.resolve-dispute-btn');
-            if (resolveDisputeBtn) {
-                const challenge = allChallenges.find(c => c._id === challengeId);
-                if (challenge) {
+             const resolveDisputeBtn = target.closest('.resolve-dispute-btn');
+        if (resolveDisputeBtn) {
+            const challenge = allChallenges.find(c => c._id === challengeId);
+            if (challenge) {
                     
                     // Dados básicos
                     document.getElementById('dispute-challenge-info').textContent = challenge._id.substring(0, 8);
