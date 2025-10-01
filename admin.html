@@ -251,13 +251,30 @@
             <button class="close-modal-btn">&times;</button>
             <h2>Resolver Disputa de Desafio</h2>
             <p>Desafio: <strong id="dispute-challenge-info"></strong></p>
-            <p>Criado por: <span id="dispute-creator-username"></span> (ID: <span id="dispute-creator-id"></span>)</p>
-            <p>Oponente: <span id="dispute-opponent-username"></span> (ID: <span id="dispute-opponent-id"></span>)</p>
+            
+            <div class="dispute-players-summary" style="border: 1px dashed var(--border-color); padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+                <p>Criado por: <span id="dispute-creator-username"></span> (ID: <span id="dispute-creator-id"></span>)</p>
+                <p>Oponente: <span id="dispute-opponent-username"></span> (ID: <span id="dispute-opponent-id"></span>)</p>
+            </div>
+            
+            <div class="dispute-evidence-section" style="margin-bottom: 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="player-evidence">
+                    <h4 style="color: var(--secondary-neon); margin-bottom: 10px;">Evidências do Criador</h4>
+                    <p style="font-size: 14px;">Vencedor Reportado: <strong id="dispute-winner-reported-1">N/A</strong></p>
+                    <a href="#" id="dispute-evidence-link-1" target="_blank" style="font-size: 14px;">Nenhuma evidência fornecida</a>
+                </div>
+                <div class="player-evidence">
+                    <h4 style="color: var(--secondary-neon); margin-bottom: 10px;">Evidências do Oponente</h4>
+                    <p style="font-size: 14px;">Vencedor Reportado: <strong id="dispute-winner-reported-2">N/A</strong></p>
+                    <a href="#" id="dispute-evidence-link-2" target="_blank" style="font-size: 14px;">Nenhuma evidência fornecida</a>
+                </div>
+            </div>
+
             <div id="dispute-winner-options"></div>
             <form id="resolve-dispute-form" class="modal-form">
                 <input type="hidden" id="dispute-challenge-id">
             </form>
-            <span id="resolve-dispute-error" style="color: red;"></span>
+            <span class="form-error-message" id="resolve-dispute-error" style="color: var(--loss-color); text-align: center;"></span>
         </div>
     </div>
 

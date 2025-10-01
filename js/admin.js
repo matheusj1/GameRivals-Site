@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <td>${user.isActive ? 'Sim' : 'Não'}</td>
                             <td class="table-actions">
                                 <button class="edit-coins-btn cta-button edit" title="Editar Moedas">💰</button>
-                                <button class="toggle-active-btn cta-button toggle-active" title="${user.isActive ? 'Desativar' : 'Ativar'} Conta">${user.isActive ? '🚫' : '✅'}</button>
+                                <button class="toggle-active-btn cta-button toggle-active" title="${user.isActive ? 'Desativar' : 'Ativar Conta'}">${user.isActive ? '🚫' : '✅'}</button>
                             </td>
                         </tr>
                     `;
@@ -543,8 +543,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     document.getElementById('dispute-challenge-info').textContent = challenge._id.substring(0, 8);
                     document.getElementById('dispute-challenge-id').value = challenge._id;
                     
-                    // Popula informações das evidências
-                    
                     const creatorId = String(challenge.createdBy._id);
                     const opponentId = String(challenge.opponent._id);
                     
@@ -563,9 +561,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Report 1 (Criador)
                     document.getElementById('dispute-creator-username').textContent = challenge.createdBy.username;
                     document.getElementById('dispute-creator-id').textContent = creatorId;
-                    document.getElementById('dispute-winner-reported-1').textContent = getReportedWinnerName(report1, challenge);
+                    
+                    // Preenche as evidências do Criador
+                    const disputeWinnerReported1 = document.getElementById('dispute-winner-reported-1');
                     const evidenceLink1 = document.getElementById('dispute-evidence-link-1');
-                    if (evidenceLink1) { // Verifica se o elemento existe no modal
+                    
+                    // CORREÇÃO: Verifica se os elementos existem antes de tentar preencher
+                    if (disputeWinnerReported1) {
+                         disputeWinnerReported1.textContent = getReportedWinnerName(report1, challenge);
+                    }
+
+                    if (evidenceLink1) { 
                         if (report1 && report1.evidence && report1.evidence.trim() !== '') {
                             evidenceLink1.href = report1.evidence;
                             evidenceLink1.textContent = 'Visualizar Evidência';
@@ -580,9 +586,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Report 2 (Oponente)
                     document.getElementById('dispute-opponent-username').textContent = challenge.opponent.username;
                     document.getElementById('dispute-opponent-id').textContent = opponentId;
-                    document.getElementById('dispute-winner-reported-2').textContent = getReportedWinnerName(report2, challenge);
+                    
+                    // Preenche as evidências do Oponente
+                    const disputeWinnerReported2 = document.getElementById('dispute-winner-reported-2');
                     const evidenceLink2 = document.getElementById('dispute-evidence-link-2');
-                    if (evidenceLink2) { // Verifica se o elemento existe no modal
+
+                    // CORREÇÃO: Verifica se os elementos existem antes de tentar preencher
+                    if (disputeWinnerReported2) {
+                        disputeWinnerReported2.textContent = getReportedWinnerName(report2, challenge);
+                    }
+
+                    if (evidenceLink2) { 
                         if (report2 && report2.evidence && report2.evidence.trim() !== '') {
                             evidenceLink2.href = report2.evidence;
                             evidenceLink2.textContent = 'Visualizar Evidência';
@@ -609,6 +623,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `;
 
                     document.getElementById('dispute-winner-options').innerHTML = optionsHtml;
+                    document.getElementById('resolve-dispute-error').textContent = ''; // Limpa erro anterior
 
                     document.getElementById('resolve-dispute-modal-backdrop').classList.add('active');
                 }
