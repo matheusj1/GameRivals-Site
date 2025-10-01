@@ -71,8 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- VARIÁVEIS E FUNÇÕES GLOBAIS (PARA O SOCKET.IO E NOTIFICAÇÕES) ---
     let socket;
-    let emitUserConnected = () => { /* Função vazia inicial */ };
-    let readyToConnectUser = false;
+    // REMOVIDO: let emitUserConnected = () => { /* Função vazia inicial */ };
+    // REMOVIDO: let readyToConnectUser = false;
 
     // --- FUNÇÕES PARA CARREGAR E EXIBIR DADOS DO USUÁRIO E AVATAR ---
     const fetchUserProfile = async () => {
@@ -129,8 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             localStorage.setItem('profileCompleted', userData.profileCompleted);
 
-            readyToConnectUser = true;
-            emitUserConnected();
+            // REMOVIDO: readyToConnectUser = true;
+            // REMOVIDO: emitUserConnected();
         } catch (error) {
             console.error('Erro ao buscar perfil do usuário:', error);
             showNotification('Não foi possível carregar o perfil. Algumas funcionalidades podem estar limitadas.', 'error');
@@ -225,19 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let connectionTimeout;
 
-        emitUserConnected = () => {
-            if (socket.connected && username && userId && readyToConnectUser) {
-                const userConsole = document.getElementById('current-user-console-icon') ? (document.getElementById('current-user-console-icon').dataset.consoleName || '') : '';
-                const avatarInitial = document.getElementById('user-initial-desktop')?.textContent || '';
-                console.log('Emitindo user connected:', { username, id: userId, avatarInitial, console: userConsole });
-                socket.emit('user connected', {
-                    username,
-                    id: userId,
-                    avatarInitial,
-                    console: userConsole
-                });
-            }
-        };
+        // REMOVIDO: A função emitUserConnected não é mais necessária
 
         socket.on('connecting', () => {
             console.log('Conectando ao servidor...');
@@ -249,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.on('connect', () => {
             clearTimeout(connectionTimeout);
             console.log('Socket conectado. ID:', socket.id);
-            emitUserConnected();
+            // O registro do usuário online é feito automaticamente pelo middleware do backend
             refreshFriendsAndRequests(token);
             if (socket) socket.emit('request matchmaking queue counts');
         });
