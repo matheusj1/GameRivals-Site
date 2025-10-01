@@ -484,6 +484,44 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+    
+    // --- Modal Resolver Disputa ---
+    setupModal('resolve-dispute-modal-backdrop', '.close-modal-btn', 'resolve-dispute-form', async (e) => {
+        const challengeId = document.getElementById('dispute-challenge-id').value;
+        const winnerRadio = document.querySelector('#dispute-winner-options input[name="winner"]:checked');
+        const errorElement = document.getElementById('resolve-dispute-error');
+        errorElement.textContent = '';
+        
+        if (!winnerRadio) {
+            errorElement.textContent = 'Por favor, selecione um vencedor para resolver a disputa.';
+            return;
+        }
+        
+        const winnerId = winnerRadio.value;
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/admin/challenges/${challengeId}/resolve-dispute`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({ winnerId })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                errorElement.textContent = data.message || 'Erro ao resolver disputa.';
+            } else {
+                showNotification(data.message, 'success');
+                document.getElementById('resolve-dispute-modal-backdrop').classList.remove('active');
+                loadChallenges();
+                loadDashboardStats();
+                loadUsers(); // Atualiza o saldo e vitórias/derrotas
+            }
+        } catch (error) {
+            errorElement.textContent = 'Não foi possível conectar ao servidor.';
+        }
+    });
 
     // Delegando eventos para a tabela de desafios
     const challengesTableBody = document.querySelector('#challenges-table tbody');
@@ -495,28 +533,63 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const challengeId = row.dataset.challengeId;
 
-            // Botão Resolver Disputa (NOVO BLOCO ADICIONADO)
+            // Botão Resolver Disputa
             if (target.classList.contains('resolve-dispute-btn')) {
                 const challenge = allChallenges.find(c => c._id === challengeId);
                 if (challenge) {
+                    
+                    // Dados básicos
                     document.getElementById('dispute-challenge-info').textContent = challenge._id.substring(0, 8);
                     document.getElementById('dispute-challenge-id').value = challenge._id;
+                    
+                    // Popula informações das evidências (assumindo que challenge.results está preenchido
+                    // pelo backend, embora a rota /api/admin/challenges não o faça atualmente, esta é a
+                    // intenção da lógica do modal)
+                    
+                    const creatorId = String(challenge.createdBy._id);
+                    const opponentId = String(challenge.opponent._id);
+                    
+                    // Os resultados reportados pelos jogadores
+                    const report1 = challenge.results.find(r => String(r.reportedBy) === creatorId);
+                    const report2 = challenge.results.find(r => String(r.reportedBy) === opponentId);
+
+                    const getReportedWinnerName = (report, challenge) => {
+                        if (!report || !report.winner) return 'N/A';
+                        const winnerId = String(report.winner);
+                        if (winnerId === String(challenge.createdBy._id)) return challenge.createdBy.username;
+                        if (winnerId === String(challenge.opponent._id)) return challenge.opponent.username;
+                        return 'ID Inválido';
+                    };
+                    
+                    // Report 1 (Criador)
                     document.getElementById('dispute-creator-username').textContent = challenge.createdBy.username;
-                    document.getElementById('dispute-creator-id').textContent = challenge.createdBy._id;
+                    document.getElementById('dispute-creator-id').textContent = creatorId;
+                    document.getElementById('dispute-winner-reported-1').textContent = getReportedWinnerName(report1, challenge);
+                    const evidenceLink1 = document.getElementById('dispute-evidence-link-1');
+                    if (report1 && report1.evidence && report1.evidence.trim() !== '') {
+                        evidenceLink1.href = report1.evidence;
+                        evidenceLink1.textContent = 'Visualizar Evidência';
+                        evidenceLink1.style.color = 'var(--primary-neon)';
+                    } else {
+                        evidenceLink1.textContent = 'Nenhuma evidência fornecida';
+                        evidenceLink1.href = '#';
+                        evidenceLink1.style.color = 'var(--text-muted)';
+                    }
+
+                    // Report 2 (Oponente)
                     document.getElementById('dispute-opponent-username').textContent = challenge.opponent.username;
-                    document.getElementById('dispute-opponent-id').textContent = challenge.opponent._id;
-
-                    const optionsHtml = `
-                        <label>
-                            <input type="radio" name="winner" value="${challenge.createdBy._id}"> ${challenge.createdBy.username}
-                        </label><br>
-                        <label>
-                            <input type="radio" name="winner" value="${challenge.opponent._id}"> ${challenge.opponent.username}
-                        </label><br>
-                        <button type="submit" class="cta-button form-submit-btn">Confirmar Vencedor</button>
-                    `;
-
-                    document.getElementById('dispute-winner-options').innerHTML = optionsHtml;
+                    document.getElementById('dispute-opponent-id').textContent = opponentId;
+                    document.getElementById('dispute-winner-reported-2').textContent = getReportedWinnerName(report2, challenge);
+                    const evidenceLink2 = document.getElementById('dispute-evidence-link-2');
+                    if (report2 && report2.evidence && report2.evidence.trim() !== '') {
+                        evidenceLink2.href = report2.evidence;
+                        evidenceLink2.textContent = 'Visualizar Evidência';
+                        evidenceLink2.style.color = 'var(--primary-neon)';
+                    } else {
+                        evidenceLink2.textContent = 'Nenhuma evidência fornecida';
+                        evidenceLink2.href = '#';
+                        evidenceLink2.style.color = 'var(--text-muted)';
+                    }
 
                     document.getElementById('resolve-dispute-modal-backdrop').classList.add('active');
                 }

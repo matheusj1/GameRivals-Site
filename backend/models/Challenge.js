@@ -24,7 +24,9 @@ const ChallengeSchema = new mongoose.Schema({
     results: [
         {
             reportedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-            winner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+            winner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+            // NOVO: Campo para armazenar a evidência (link ou texto)
+            evidence: { type: String, trim: true, default: '' }
         }
     ],
 

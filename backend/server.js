@@ -942,9 +942,10 @@ app.get('/api/my-challenges', auth, async (req, res) => {
     }
 });
 
+// ROTA CORRIGIDA COM O CAMPO DE EVIDÊNCIA
 app.post('/api/challenges/:id/result', auth, async (req, res) => {
     try {
-        const { winnerId } = req.body;
+        const { winnerId, evidence } = req.body; // NOVO: Captura o campo de evidência
         const challengeId = req.params.id;
         const reporterId = req.user.id;
         const challenge = await Challenge.findById(challengeId);
@@ -955,26 +956,39 @@ app.post('/api/challenges/:id/result', auth, async (req, res) => {
         if (!winnerId || !playerIds.includes(winnerId)) { return res.status(400).json({ message: "O vencedor informado não é válido para esta partida." }); }
         const hasAlreadyReported = challenge.results.some(result => result.reportedBy.toString() === reporterId);
         if (hasAlreadyReported) { return res.status(400).json({ message: "Você já reportou um resultado para esta partida." }); }
-        challenge.results.push({ reportedBy: reporterId, winner: winnerId });
-        if (challenge.results.length === 1) { await challenge.save(); return res.json({ message: "Seu resultado foi registrado. Aguardando oponente.", challenge }); }
+        
+        // CORREÇÃO: Adiciona o campo evidence ao array results
+        challenge.results.push({ reportedBy: reporterId, winner: winnerId, evidence: evidence || '' }); 
+        
+        if (challenge.results.length === 1) { 
+            await challenge.save(); 
+            return res.json({ message: "Seu resultado foi registrado. Aguardando oponente.", challenge }); 
+        }
         else if (challenge.results.length === 2) {
             const firstReport = challenge.results[0];
             const secondReport = challenge.results[1];
+            
             if (firstReport.winner.toString() === secondReport.winner.toString()) {
                 challenge.winner = firstReport.winner; challenge.status = 'completed'; await challenge.save();
                 const loserId = playerIds.find(id => id !== firstReport.winner.toString());
                 if (challenge.betAmount > 0) { await User.findByIdAndUpdate(firstReport.winner, { $inc: { wins: 1, coins: challenge.betAmount } }); await User.findByIdAndUpdate(loserId, { $inc: { losses: 1, coins: -challenge.betAmount } }); }
                 else { await User.findByIdAndUpdate(firstReport.winner, { $inc: { wins: 1 } }); await User.findByIdAndUpdate(loserId, { $inc: { losses: 1 } }); }
+                
                 const winnerSocketId = onlineUsers.get(firstReport.winner.toString())?.socketId;
                 const loserSocketId = onlineUsers.get(loserId)?.socketId;
                 if (winnerSocketId) io.to(winnerSocketId).emit('challenge updated');
                 if (loserSocketId) io.to(loserSocketId).emit('challenge updated');
+                
                 return res.json({ message: "Resultado confirmado! Partida finalizada.", challenge });
-            } else { challenge.status = 'disputed'; await challenge.save();
+            } else { 
+                challenge.status = 'disputed'; 
+                await challenge.save();
+                
                 const player1SocketId = onlineUsers.get(playerIds[0])?.socketId;
                 const player2SocketId = onlineUsers.get(playerIds[1])?.socketId;
                 if (player1SocketId) io.to(player1SocketId).emit('challenge updated');
                 if (player2SocketId) io.to(player2SocketId).emit('challenge updated');
+                
                 return res.status(409).json({ message: "Resultados conflitantes. A partida entrou em análise pelo suporte.", challenge });
             }
         }
