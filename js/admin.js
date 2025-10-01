@@ -533,8 +533,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const challengeId = row.dataset.challengeId;
 
-            // Botão Resolver Disputa
-            if (target.classList.contains('resolve-dispute-btn')) {
+            // Botão Resolver Disputa (FIX: Usando closest para lidar com cliques no ícone)
+            const resolveDisputeBtn = target.closest('.resolve-dispute-btn');
+            if (resolveDisputeBtn) {
                 const challenge = allChallenges.find(c => c._id === challengeId);
                 if (challenge) {
                     
@@ -542,9 +543,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     document.getElementById('dispute-challenge-info').textContent = challenge._id.substring(0, 8);
                     document.getElementById('dispute-challenge-id').value = challenge._id;
                     
-                    // Popula informações das evidências (assumindo que challenge.results está preenchido
-                    // pelo backend, embora a rota /api/admin/challenges não o faça atualmente, esta é a
-                    // intenção da lógica do modal)
+                    // Popula informações das evidências
                     
                     const creatorId = String(challenge.createdBy._id);
                     const opponentId = String(challenge.opponent._id);
@@ -566,14 +565,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     document.getElementById('dispute-creator-id').textContent = creatorId;
                     document.getElementById('dispute-winner-reported-1').textContent = getReportedWinnerName(report1, challenge);
                     const evidenceLink1 = document.getElementById('dispute-evidence-link-1');
-                    if (report1 && report1.evidence && report1.evidence.trim() !== '') {
-                        evidenceLink1.href = report1.evidence;
-                        evidenceLink1.textContent = 'Visualizar Evidência';
-                        evidenceLink1.style.color = 'var(--primary-neon)';
-                    } else {
-                        evidenceLink1.textContent = 'Nenhuma evidência fornecida';
-                        evidenceLink1.href = '#';
-                        evidenceLink1.style.color = 'var(--text-muted)';
+                    if (evidenceLink1) { // Verifica se o elemento existe no modal
+                        if (report1 && report1.evidence && report1.evidence.trim() !== '') {
+                            evidenceLink1.href = report1.evidence;
+                            evidenceLink1.textContent = 'Visualizar Evidência';
+                            evidenceLink1.style.color = 'var(--primary-neon)';
+                        } else {
+                            evidenceLink1.textContent = 'Nenhuma evidência fornecida';
+                            evidenceLink1.href = '#';
+                            evidenceLink1.style.color = 'var(--text-muted)';
+                        }
                     }
 
                     // Report 2 (Oponente)
@@ -581,15 +582,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                     document.getElementById('dispute-opponent-id').textContent = opponentId;
                     document.getElementById('dispute-winner-reported-2').textContent = getReportedWinnerName(report2, challenge);
                     const evidenceLink2 = document.getElementById('dispute-evidence-link-2');
-                    if (report2 && report2.evidence && report2.evidence.trim() !== '') {
-                        evidenceLink2.href = report2.evidence;
-                        evidenceLink2.textContent = 'Visualizar Evidência';
-                        evidenceLink2.style.color = 'var(--primary-neon)';
-                    } else {
-                        evidenceLink2.textContent = 'Nenhuma evidência fornecida';
-                        evidenceLink2.href = '#';
-                        evidenceLink2.style.color = 'var(--text-muted)';
+                    if (evidenceLink2) { // Verifica se o elemento existe no modal
+                        if (report2 && report2.evidence && report2.evidence.trim() !== '') {
+                            evidenceLink2.href = report2.evidence;
+                            evidenceLink2.textContent = 'Visualizar Evidência';
+                            evidenceLink2.style.color = 'var(--primary-neon)';
+                        } else {
+                            evidenceLink2.textContent = 'Nenhuma evidência fornecida';
+                            evidenceLink2.href = '#';
+                            evidenceLink2.style.color = 'var(--text-muted)';
+                        }
                     }
+
+                    const optionsHtml = `
+                        <div class="winner-selection">
+                            <div class="winner-option">
+                                <input type="radio" name="winner" id="admin-winner-${challenge.createdBy._id}" value="${challenge.createdBy._id}" required>
+                                <label for="admin-winner-${challenge.createdBy._id}">${challenge.createdBy.username}</label>
+                            </div>
+                            <div class="winner-option">
+                                <input type="radio" name="winner" id="admin-winner-${challenge.opponent._id}" value="${challenge.opponent._id}" required>
+                                <label for="admin-winner-${challenge.opponent._id}">${challenge.opponent.username}</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="cta-button form-submit-btn" style="margin-top: 15px;">Confirmar Vencedor</button>
+                    `;
+
+                    document.getElementById('dispute-winner-options').innerHTML = optionsHtml;
 
                     document.getElementById('resolve-dispute-modal-backdrop').classList.add('active');
                 }
