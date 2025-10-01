@@ -40,7 +40,7 @@ let startPrivateChatFromModalBtn;
 let blockUserFromModalBtn;
 
 let currentOnlineUsers = new Map();
-let privateChatWindows = new Map();
+let privateChatWindows = new Map(); // Mapa que armazena {userId: chatWindowElement}
 let unreadPrivateMessages = 0;
 const originalTitle = document.title;
 
@@ -117,25 +117,30 @@ function applyButtonFeedback(button, isSuccess) {
 }
 
 
-// MODIFICAÇÃO: Adicionar 'export' à função openPrivateChat
+// FIX PRINCIPAL: openPrivateChat agora retorna o elemento da janela de chat
 export const openPrivateChat = (targetUser, socket, userId, privateChatsContainerElement, chatTemplateElement) => {
     if (!privateChatsContainerElement || !chatTemplateElement || !targetUser || !targetUser.id || String(targetUser.id) === String(userId)) {
         console.warn('[friends_and_chat] Tentativa de abrir chat privado inválida: Tentando abrir chat consigo mesmo ou dados incompletos ou inválidos.', targetUser, { loggedInUserId: userId, privateChatsContainerExists: !!privateChatsContainerElement, chatTemplateExists: !!chatTemplateElement });
-        return;
+        return null; // Retorna null em caso de falha
     }
 
     const chatWindowId = `chat-with-${targetUser.id}`;
-    let chatWindow = document.getElementById(chatWindowId);
+    
+    // 1. Tenta recuperar a janela do mapa interno
+    let chatWindow = privateChatWindows.get(targetUser.id);
 
     if (!chatWindow) {
+        // 2. Se não existir, cria a nova janela
         chatWindow = chatTemplateElement.content.cloneNode(true).firstElementChild;
         chatWindow.id = chatWindowId;
         chatWindow.dataset.recipientId = targetUser.id;
         // SEGURANÇA: Usando textContent para o nome do parceiro de chat
         chatWindow.querySelector('.chat-partner-name').textContent = targetUser.username;
 
+        // 3. Adiciona ao mapa interno
         privateChatWindows.set(targetUser.id, chatWindow);
 
+        // 4. Configura listeners e formulário
         chatWindow.querySelector('.close-private-chat').addEventListener('click', () => {
             chatWindow.remove();
             privateChatWindows.delete(targetUser.id);
@@ -145,6 +150,7 @@ export const openPrivateChat = (targetUser, socket, userId, privateChatsContaine
         const privateEmojiToggleBtn = chatWindow.querySelector('.emoji-toggle-btn');
         const privateEmojiPalette = chatWindow.querySelector('.emoji-palette');
 
+        // Botão de desafiar amigo (se existir o template)
         const challengeFriendFromChatBtn = chatWindow.querySelector('.challenge-friend-from-chat-btn');
         if (challengeFriendFromChatBtn) {
             challengeFriendFromChatBtn.addEventListener('click', () => {
@@ -156,10 +162,10 @@ export const openPrivateChat = (targetUser, socket, userId, privateChatsContaine
         chatWindow.querySelector('form').addEventListener('submit', (e) => {
             e.preventDefault();
             if (privateChatInput.value.trim()) {
+                // A mensagem é enviada ao servidor, que a retransmite (emitindo 'private message') para o destinatário E o remetente (o que fará com que o listener abaixo a renderize).
                 socket.emit('private message', {
                     text: privateChatInput.value.trim(),
-                    toUserId: targetUser.id,
-                    fromUserId: userId
+                    toUserId: targetUser.id
                 });
                 privateChatInput.value = '';
                 if (privateEmojiPalette) privateEmojiPalette.classList.remove('active');
@@ -191,6 +197,7 @@ export const openPrivateChat = (targetUser, socket, userId, privateChatsContaine
             });
         }
 
+        // 5. Adiciona a janela ao DOM
         privateChatsContainerElement.appendChild(chatWindow);
         chatWindow.classList.add('active'); // Aplica a classe 'active' imediatamente
 
@@ -201,6 +208,8 @@ export const openPrivateChat = (targetUser, socket, userId, privateChatsContaine
         chatWindow.querySelector('input').focus();
         chatWindow.querySelector('.private-chat-messages').scrollTop = chatWindow.querySelector('.private-chat-messages').scrollHeight;
     }
+    
+    return chatWindow; // Retorna a janela criada ou encontrada
 };
 
 
@@ -949,23 +958,17 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
         }
     });
 
+    // FIX PRINCIPAL: Agora obtém a janela de chat de forma confiável usando openPrivateChat.
     socket.on('private message', (data) => {
-        // MODIFICAÇÃO: Log de console para depuração
-        console.log('[friends_and_chat] Mensagem privada recebida:', data);
-
         const otherUserId = String(data.from.id) === String(userId) ? data.to.id : data.from.id;
         const otherUsername = String(data.from.id) === String(userId) ? data.to.username : data.from.username;
 
-        const chatWindowId = `chat-with-${otherUserId}`;
-        let chatWindow = document.getElementById(chatWindowId);
+        // Tenta obter/criar a janela de chat de forma confiável
+        const chatWindow = openPrivateChat({ id: otherUserId, username: otherUsername }, socket, userId, privateChatsContainer, chatTemplate);
 
         if (!chatWindow) {
-            openPrivateChat({ id: otherUserId, username: otherUsername }, socket, userId, privateChatsContainer, chatTemplate);
-            chatWindow = document.getElementById(chatWindowId);
-            if (!chatWindow) {
-                console.error('[friends_and_chat] Não foi possível abrir a janela de chat privado para o usuário:', otherUsername, otherUserId);
-                return;
-            }
+            console.error('[friends_and_chat] Não foi possível encontrar/abrir a janela de chat privado para o usuário e a mensagem foi descartada.', otherUsername, otherUserId);
+            return;
         }
 
         const messagesContainer = chatWindow.querySelector('.private-chat-messages');
@@ -990,6 +993,9 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
         
         messagesContainer.appendChild(item);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        // Garante que a janela fique visível e em foco ao receber uma mensagem
+        chatWindow.classList.add('active');
 
         if (document.hidden && !isMe) {
             const targetChatWindow = privateChatWindows.get(otherUserId);
