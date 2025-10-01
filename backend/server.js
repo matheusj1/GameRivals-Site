@@ -45,7 +45,7 @@ const io = new Server(server, {
 });
 
 // =========================================================================
-// NOVO: MIDDLEWARE DE AUTENTICAÇÃO DO SOCKET.IO
+// NOVO: MIDDLEWARE DE AUTENTICAÇÃO DO SOCKET.IO (CORRIGIDO)
 // =========================================================================
 io.use(async (socket, next) => {
     // O token é enviado no payload 'auth' do Socket.IO a partir do frontend
@@ -91,11 +91,9 @@ io.use(async (socket, next) => {
         });
         socketIdToUserId.set(currentSocketId, userIdString);
 
-        socket.join(userIdString);
-
-        if (listNeedsUpdate) {
-            emitUpdatedUserList();
-        }
+        // CORREÇÃO: Força a emissão da lista de usuários online para todos
+        // quando um usuário se conecta/re-conecta com sucesso, eliminando o problema de sincronização.
+        emitUpdatedUserList();
 
         next();
     } catch (err) {
