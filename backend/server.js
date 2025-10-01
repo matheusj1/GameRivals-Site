@@ -44,66 +44,6 @@ const io = new Server(server, {
     }
 });
 
-// =========================================================================
-// MIDDLEWARE DE AUTENTICAÇÃO DO SOCKET.IO (FIX: Garante sincronização)
-// =========================================================================
-io.use(async (socket, next) => {
-    // O token é enviado no payload 'auth' do Socket.IO a partir do frontend
-    const token = socket.handshake.auth.token;
-    if (!token) {
-        return next(new Error('Authentication error: Token not provided.'));
-    }
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userIdString = String(decoded.id);
-        const currentSocketId = socket.id;
-
-        // Busca o usuário para obter dados de perfil (username, console, avatar)
-        const dbUser = await User.findById(userIdString).select('avatarUrl console username');
-
-        if (!dbUser) {
-            return next(new Error('Authentication error: User not found.'));
-        }
-        
-        // Popula o objeto socket com as informações do usuário
-        socket.userId = userIdString;
-        socket.username = dbUser.username;
-        
-        let listNeedsUpdate = false;
-        
-        // Lógica para registrar/atualizar o status online
-        const existingUserEntry = onlineUsers.get(userIdString);
-        if (existingUserEntry && existingUserEntry.socketId !== currentSocketId) {
-            console.log(`[SOCKET AUTH] Usuário ${dbUser.username} (ID: ${userIdString}) reconectou com NOVO SOCKET: ${currentSocketId} (Antigo: ${existingUserEntry.socketId})`);
-            socketIdToUserId.delete(existingUserEntry.socketId);
-            listNeedsUpdate = true;
-        } else if (!existingUserEntry) {
-            console.log(`[SOCKET AUTH] Novo usuário online: ${dbUser.username} (ID: ${userIdString}, SocketID: ${currentSocketId})`);
-            listNeedsUpdate = true;
-        }
-
-        onlineUsers.set(userIdString, {
-            id: userIdString,
-            username: dbUser.username,
-            socketId: currentSocketId,
-            avatarUrl: dbUser.avatarUrl || `${FRONTEND_URL}/img/avatar-placeholder.png`,
-            console: dbUser.console
-        });
-        socketIdToUserId.set(currentSocketId, userIdString);
-
-        socket.join(userIdString);
-
-        // FIX: Força a emissão da lista de usuários online para todos, 
-        // eliminando o problema de sincronização.
-        emitUpdatedUserList();
-
-        next();
-    } catch (err) {
-        return next(new Error('Authentication error: Invalid or expired token.'));
-    }
-});
-// =========================================================================
-
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
@@ -377,8 +317,63 @@ io.on('connection', async (socket) => {
         console.error("[SOCKET CHAT HISTORY] Erro ao buscar histórico do chat:", error);
     }
 
-    // REMOVIDO: O listener 'user connected' foi removido e substituído pelo middleware io.use()
-    
+    socket.on('user connected', async (user) => {
+        if (user && user.id && user.username) {
+            const userIdString = String(user.id);
+            const currentSocketId = socket.id;
+            let listNeedsUpdate = false;
+
+            let avatarUrl = `${FRONTEND_URL}/img/avatar-placeholder.png`;
+
+            try {
+                const dbUser = await User.findById(userIdString).select('avatarUrl console');
+                if (dbUser) {
+                    if (dbUser.avatarUrl) {
+                        avatarUrl = dbUser.avatarUrl;
+                    }
+                    if (dbUser.console) {
+                        userConsole = dbUser.console;
+                    }
+                }
+            } catch (err) {
+                console.error(`Erro ao buscar avatar/console para user ${userIdString}:`, err.message);
+            }
+
+            const existingUserEntry = onlineUsers.get(userIdString);
+            if (existingUserEntry && existingUserEntry.socketId !== currentSocketId) {
+                console.log(`[SOCKET USER CONNECT] Usuário ${user.username} (ID: ${userIdString}) reconectou com NOVO SOCKET: ${currentSocketId} (Antigo: ${existingUserEntry.socketId})`);
+                socketIdToUserId.delete(existingUserEntry.socketId);
+                listNeedsUpdate = true;
+            } else if (!existingUserEntry) {
+                console.log(`[SOCKET USER CONNECT] Novo usuário online: ${user.username} (ID: ${userIdString}, SocketID: ${currentSocketId})`);
+                listNeedsUpdate = true;
+            } else {
+                console.log(`[SOCKET USER CONNECT] Usuário ${user.username} (ID: ${userIdString}, SocketID: ${currentSocketId}) já estava ativo com este socket.`);
+                if (existingUserEntry.avatarUrl !== avatarUrl || existingUserEntry.console !== userConsole) {
+                    listNeedsUpdate = true;
+                }
+            }
+
+            onlineUsers.set(userIdString, {
+                id: userIdString,
+                username: user.username,
+                socketId: currentSocketId,
+                avatarUrl: avatarUrl,
+                console: user.console
+            });
+            socketIdToUserId.set(currentSocketId, userIdString);
+
+            socket.join(userIdString);
+
+            if (listNeedsUpdate) {
+                emitUpdatedUserList();
+            }
+
+        } else {
+            console.warn('[SOCKET USER CONNECT] Dados de usuário incompletos recebidos para "user connected":', user);
+        }
+    });
+
     socket.on('chat message', async (msgData) => {
         try {
             if (!msgData.user || !msgData.text || msgData.text.trim() === '') {
@@ -409,8 +404,7 @@ io.on('connection', async (socket) => {
             const senderDB = await User.findById(senderUserId);
             const recipientDB = await User.findById(data.toUserId);
 
-            // FIX: Corrigido o erro de referência aqui, estava comparando com 'senderId' em vez de 'senderUserId'
-            if (senderDB.blockedUsers.includes(data.toUserId) || recipientDB.blockedUsers.includes(senderUserId)) {
+            if (senderDB.blockedUsers.includes(data.toUserId) || recipientDB.blockedUsers.includes(senderId)) {
                 console.log('[SOCKET PRIVATE CHAT] Tentativa de enviar mensagem privada para/de um usuário bloqueado. Ação negada.');
                 return;
             }

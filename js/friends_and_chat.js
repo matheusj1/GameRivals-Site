@@ -40,7 +40,7 @@ let startPrivateChatFromModalBtn;
 let blockUserFromModalBtn;
 
 let currentOnlineUsers = new Map();
-let privateChatWindows = new Map(); // Mapa que armazena {userId: chatWindowElement}
+let privateChatWindows = new Map();
 let unreadPrivateMessages = 0;
 const originalTitle = document.title;
 
@@ -117,30 +117,25 @@ function applyButtonFeedback(button, isSuccess) {
 }
 
 
-// FIX PRINCIPAL: openPrivateChat agora retorna o elemento da janela de chat
+// MODIFICAÇÃO: Adicionar 'export' à função openPrivateChat
 export const openPrivateChat = (targetUser, socket, userId, privateChatsContainerElement, chatTemplateElement) => {
     if (!privateChatsContainerElement || !chatTemplateElement || !targetUser || !targetUser.id || String(targetUser.id) === String(userId)) {
         console.warn('[friends_and_chat] Tentativa de abrir chat privado inválida: Tentando abrir chat consigo mesmo ou dados incompletos ou inválidos.', targetUser, { loggedInUserId: userId, privateChatsContainerExists: !!privateChatsContainerElement, chatTemplateExists: !!chatTemplateElement });
-        return null; // Retorna null em caso de falha
+        return;
     }
 
     const chatWindowId = `chat-with-${targetUser.id}`;
-    
-    // 1. Tenta recuperar a janela do mapa interno
-    let chatWindow = privateChatWindows.get(targetUser.id);
+    let chatWindow = document.getElementById(chatWindowId);
 
     if (!chatWindow) {
-        // 2. Se não existir, cria a nova janela
         chatWindow = chatTemplateElement.content.cloneNode(true).firstElementChild;
         chatWindow.id = chatWindowId;
         chatWindow.dataset.recipientId = targetUser.id;
         // SEGURANÇA: Usando textContent para o nome do parceiro de chat
         chatWindow.querySelector('.chat-partner-name').textContent = targetUser.username;
 
-        // 3. Adiciona ao mapa interno
         privateChatWindows.set(targetUser.id, chatWindow);
 
-        // 4. Configura listeners e formulário
         chatWindow.querySelector('.close-private-chat').addEventListener('click', () => {
             chatWindow.remove();
             privateChatWindows.delete(targetUser.id);
@@ -150,7 +145,6 @@ export const openPrivateChat = (targetUser, socket, userId, privateChatsContaine
         const privateEmojiToggleBtn = chatWindow.querySelector('.emoji-toggle-btn');
         const privateEmojiPalette = chatWindow.querySelector('.emoji-palette');
 
-        // Botão de desafiar amigo (se existir o template)
         const challengeFriendFromChatBtn = chatWindow.querySelector('.challenge-friend-from-chat-btn');
         if (challengeFriendFromChatBtn) {
             challengeFriendFromChatBtn.addEventListener('click', () => {
@@ -162,10 +156,10 @@ export const openPrivateChat = (targetUser, socket, userId, privateChatsContaine
         chatWindow.querySelector('form').addEventListener('submit', (e) => {
             e.preventDefault();
             if (privateChatInput.value.trim()) {
-                // A mensagem é enviada ao servidor, que a retransmite (emitindo 'private message') para o destinatário E o remetente (o que fará com que o listener abaixo a renderize).
                 socket.emit('private message', {
                     text: privateChatInput.value.trim(),
-                    toUserId: targetUser.id
+                    toUserId: targetUser.id,
+                    fromUserId: userId
                 });
                 privateChatInput.value = '';
                 if (privateEmojiPalette) privateEmojiPalette.classList.remove('active');
@@ -197,7 +191,6 @@ export const openPrivateChat = (targetUser, socket, userId, privateChatsContaine
             });
         }
 
-        // 5. Adiciona a janela ao DOM
         privateChatsContainerElement.appendChild(chatWindow);
         chatWindow.classList.add('active'); // Aplica a classe 'active' imediatamente
 
@@ -208,8 +201,6 @@ export const openPrivateChat = (targetUser, socket, userId, privateChatsContaine
         chatWindow.querySelector('input').focus();
         chatWindow.querySelector('.private-chat-messages').scrollTop = chatWindow.querySelector('.private-chat-messages').scrollHeight;
     }
-    
-    return chatWindow; // Retorna a janela criada ou encontrada
 };
 
 
@@ -405,7 +396,7 @@ export const fetchAndDisplayBlockedUsers = async (token) => {
                 const initial = user.username.charAt(0).toUpperCase();
                 blockedItem.querySelector('.app-list-item-initial-text').textContent = initial;
 
-                // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de console de forma segura
+                // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de forma segura
                 setUsernameAndIcon(blockedItem.querySelector('.app-list-item-username'), user.username, user.console);
 
                 blockedItem.querySelector('.app-list-item-sub-info.console-name').textContent = user.console || '';
@@ -470,7 +461,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                         playerItem.dataset.username = user.username;
                         playerItem.querySelector('.app-list-item-initial-text').textContent = initial;
                         
-                        // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de console de forma segura
+                        // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de forma segura
                         setUsernameAndIcon(playerItem.querySelector('.app-list-item-username'), user.username, user.console);
                         
                         playerItem.querySelector('.app-list-item-sub-info.console-name').textContent = user.console || '';
@@ -479,7 +470,6 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                     }
                 });
             }
-            // CORREÇÃO: Força a atualização da lista de amigos aqui para sincronizar o status online/offline
             refreshFriendsAndRequests(token);
         });
     }
@@ -733,20 +723,20 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                         startPrivateChatFromModalBtn.style.display = 'none';
                         blockUserFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.textContent = 'Desbloquear Usuário';
-                        blockUserFromModalBtn.style.backgroundColor = 'var(--win-color)'; // Verde para Desbloquear
+                        blockUserFromModalBtn.style.backgroundColor = '#28a745';
                     }
                     else if (isFriend || hasSentRequest || hasReceivedRequest) {
                         sendFriendRequestFromModalBtn.style.display = 'none';
                         startPrivateChatFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.textContent = 'Bloquear Usuário';
-                        blockUserFromModalBtn.style.backgroundColor = 'var(--loss-color)'; // Vermelho para Bloquear
+                        blockUserFromModalBtn.style.backgroundColor = '#e74c3c';
                     } else {
                         sendFriendRequestFromModalBtn.style.display = 'inline-block';
                         startPrivateChatFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.style.display = 'inline-block';
                         blockUserFromModalBtn.textContent = 'Bloquear Usuário';
-                        blockUserFromModalBtn.style.backgroundColor = 'var(--loss-color)'; // Vermelho para Bloquear
+                        blockUserFromModalBtn.style.backgroundColor = '#e74c3c';
                     }
 
 
@@ -959,17 +949,23 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
         }
     });
 
-    // FIX PRINCIPAL: Agora obtém a janela de chat de forma confiável usando openPrivateChat.
     socket.on('private message', (data) => {
+        // MODIFICAÇÃO: Log de console para depuração
+        console.log('[friends_and_chat] Mensagem privada recebida:', data);
+
         const otherUserId = String(data.from.id) === String(userId) ? data.to.id : data.from.id;
         const otherUsername = String(data.from.id) === String(userId) ? data.to.username : data.from.username;
 
-        // Tenta obter/criar a janela de chat de forma confiável
-        const chatWindow = openPrivateChat({ id: otherUserId, username: otherUsername }, socket, userId, privateChatsContainer, chatTemplate);
+        const chatWindowId = `chat-with-${otherUserId}`;
+        let chatWindow = document.getElementById(chatWindowId);
 
         if (!chatWindow) {
-            console.error('[friends_and_chat] Não foi possível encontrar/abrir a janela de chat privado para o usuário e a mensagem foi descartada.', otherUsername, otherUserId);
-            return;
+            openPrivateChat({ id: otherUserId, username: otherUsername }, socket, userId, privateChatsContainer, chatTemplate);
+            chatWindow = document.getElementById(chatWindowId);
+            if (!chatWindow) {
+                console.error('[friends_and_chat] Não foi possível abrir a janela de chat privado para o usuário:', otherUsername, otherUserId);
+                return;
+            }
         }
 
         const messagesContainer = chatWindow.querySelector('.private-chat-messages');
@@ -994,9 +990,6 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
         
         messagesContainer.appendChild(item);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        
-        // Garante que a janela fique visível e em foco ao receber uma mensagem
-        chatWindow.classList.add('active');
 
         if (document.hidden && !isMe) {
             const targetChatWindow = privateChatWindows.get(otherUserId);
@@ -1123,7 +1116,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                             searchItem.dataset.username = result.username;
                             searchItem.querySelector('.app-list-item-initial-text').textContent = initial;
                             
-                            // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de console de forma segura
+                            // SEGURANÇA: Usando a função auxiliar para setar o username e ícone de forma segura
                             setUsernameAndIcon(searchItem.querySelector('.app-list-item-username'), result.username, result.console);
                             
                             searchItem.querySelector('.app-list-item-sub-info.console-name').textContent = result.console || '';

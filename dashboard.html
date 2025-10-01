@@ -202,26 +202,18 @@
         </div>
     </div>
     <div class="modal-backdrop" id="report-modal-backdrop">
-    <div class="modal" id="report-modal">
-        <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
-        <h2>Reportar Resultado</h2>
-        <p class="report-match-info">Partida: <span id="report-match-details"></span></p>
-        <form id="report-result-form">
-            <div class="input-group">
-                <label>Quem venceu o desafio?</label>
-                <div class="winner-selection"></div>
-            </div>
-            
-            <div class="input-group">
-                <label for="evidence-link">Link da Evidência (Opcional)</label>
-                <input type="text" id="evidence-link" name="evidence-link" placeholder="Link para Imagem/Vídeo (Ex: imgur, streamable)">
-            </div>
-            <input type="hidden" id="report-challenge-id">
-            <p class="form-error-message" id="report-error"></p>
-            <button type="submit" class="cta-button form-submit-btn">Confirmar Vencedor</button>
-        </form>
+        <div class="modal" id="report-modal">
+            <button class="close-modal-btn" aria-label="Fechar modal">&times;</button>
+            <h2>Reportar Resultado</h2>
+            <p class="report-match-info">Partida: <span id="report-match-details"></span></p>
+            <form id="report-result-form">
+                <div class="input-group"><label>Quem venceu o desafio?</label><div class="winner-selection"></div></div>
+                <input type="hidden" id="report-challenge-id">
+                <p class="form-error-message" id="report-error"></p>
+                <button type="submit" class="cta-button form-submit-btn">Confirmar Vencedor</button>
+            </form>
+        </div>
     </div>
-</div>
 
     <div class="modal-backdrop" id="match-found-modal-backdrop" style="display: none;">
         <div class="modal" id="match-found-modal">

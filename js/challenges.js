@@ -305,13 +305,6 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
                     const reportModalBackdrop = document.querySelector('#report-modal-backdrop');
                     document.getElementById('report-challenge-id').value = challenge._id;
                     document.getElementById('report-match-details').textContent = `${challenge.createdBy.username} vs ${challenge.opponent.username}`;
-                    
-                    // NOVO: Limpa o campo de evidência do modal antes de abrir
-                    const evidenceLinkInput = document.getElementById('evidence-link');
-                    if (evidenceLinkInput) {
-                        evidenceLinkInput.value = '';
-                    }
-
                     const winnerSelectionDiv = reportModalBackdrop.querySelector('.winner-selection');
                     winnerSelectionDiv.innerHTML = `
                         <div class="winner-option">
@@ -381,8 +374,6 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
     if (reportModalBackdrop) {
         const closeReportModalBtn = reportModalBackdrop.querySelector('.close-modal-btn');
         const reportForm = document.getElementById('report-result-form');
-        // NOVO: Seleciona o campo de evidência aqui também para o listener
-        const evidenceLinkInput = document.getElementById('evidence-link'); 
 
         const closeReportModal = () => reportModalBackdrop.classList.remove('active');
 
@@ -396,8 +387,6 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
                 e.preventDefault();
                 const challengeId = document.getElementById('report-challenge-id').value;
                 const winnerRadio = reportForm.querySelector('input[name="winner"]:checked');
-                // NOVO: Captura o valor da evidência
-                const evidence = evidenceLinkInput ? evidenceLinkInput.value.trim() : ''; 
                 const errorElement = document.getElementById('report-error');
                 errorElement.textContent = '';
 
@@ -416,8 +405,7 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
                     const response = await fetch(`${API_BASE_URL}/api/challenges/${challengeId}/result`, { // Atualizado
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
-                        // NOVO: Inclui a evidência no corpo da requisição
-                        body: JSON.stringify({ winnerId, evidence }) 
+                        body: JSON.stringify({ winnerId })
                     });
                     const data = await response.json();
                     if (!response.ok) {
@@ -439,7 +427,6 @@ export const setupChallengeListeners = (token, userId, refreshDashboard, socket)
     }
 
     const createModalBackdrop = document.querySelector('#challenge-modal-backdrop');
-// ... (restante da função setupChallengeListeners) ...
     if (createChallengeBtn && createModalBackdrop) {
         const closeCreateModalBtn = createModalBackdrop.querySelector('.close-modal-btn');
         const createChallengeForm = document.querySelector('#create-challenge-form');
