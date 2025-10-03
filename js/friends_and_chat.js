@@ -1,9 +1,9 @@
 // arquivo: site_de_jogos/js/friends_and_chat.js
 
 // Dependências importadas do utils.js
-import { showNotification, getConsoleIconPath, API_BASE_URL, FRONTEND_BASE_URL } from './utils.js'; // Adicionado API_BASE_URL e FRONTEND_BASE_URL
+import { showNotification, getConsoleIconPath, API_BASE_URL, FRONTEND_BASE_URL } from './utils.js';
 // Importa a nova função para abrir o modal de desafio privado
-import { openPrivateChallengeModal } from './challenges.js'; //
+import { openPrivateChallengeModal } from './challenges.js';
 
 // Seletores de elementos DOM - declarados no nível superior do módulo para acesso por todas as funções neste arquivo
 const friendsTabsContainer = document.querySelector('.friends-tabs');
@@ -75,7 +75,10 @@ const addUniversalMessageToUI = (msgObject) => {
     const authorText = isMe ? 'Você' : msgObject.username;
     
     const authorSpan = document.createElement('span');
-    authorSpan.classList.add('msg-author', isMe ? 'you' : '');
+    authorSpan.classList.add('msg-author'); // CORREÇÃO: Adiciona a classe base
+    if (isMe) {
+        authorSpan.classList.add('you'); // CORREÇÃO: Adiciona 'you' APENAS se for o usuário logado
+    }
     authorSpan.textContent = `${authorText}:`; // Usa textContent (Seguro)
 
     const textP = document.createElement('p');
@@ -838,7 +841,7 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/friends/request/${requestId}/accept`, { // Atualizado
                         method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json', 'x-auth-token': token }
+                        headers: { 'x-auth-token': token }
                     });
                     const data = await response.json();
                     if (!response.ok) {
@@ -977,7 +980,10 @@ export const initFriendsAndChat = (socketInstance, token, userId, refreshDashboa
         const authorText = isMe ? 'Você' : data.from.username;
         
         const authorSpan = document.createElement('span');
-        authorSpan.classList.add('msg-author', isMe ? 'you' : '');
+        authorSpan.classList.add('msg-author'); // CORRIGIDO: Adiciona a classe base
+        if (isMe) {
+            authorSpan.classList.add('you'); // CORRIGIDO: Adiciona 'you' APENAS se isMe for true
+        }
         authorSpan.textContent = `${authorText}:`; // Usa textContent (Seguro)
 
         const textP = document.createElement('p');
