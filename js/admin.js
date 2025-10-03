@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    // --- VARIÁVEIS GLOBAIS DE JOGO/CONSOLE ---
+    const consoleOptions = ['PS5', 'PS4', 'XBOX Series', 'Xbox One', 'PC', 'Nintendo Switch'];
+    
     // --- SOCKET.IO para atualização de usuários online (apenas a contagem) ---
     if (typeof io !== 'undefined') {
         const socket = io(API_BASE_URL);
@@ -250,6 +253,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // NOVO: CARREGAR E RENDERIZAR JOGOS
+    let allGames = [];
+    const loadGames = async () => {
+        const games = await fetchAdminData('games');
+        const gamesTableBody = document.querySelector('#games-table tbody');
+        if (gamesTableBody) {
+            gamesTableBody.innerHTML = '';
+            if (games && games.length > 0) {
+                allGames = games;
+                games.forEach(game => {
+                    const supportedConsoles = game.supportedConsoles.join(', ');
+                    const row = `
+                        <tr data-game-id="${game._id}">
+                            <td>${game._id.substring(0, 8)}...</td>
+                            <td>${game.name}</td>
+                            <td><a href="${game.iconUrl}" target="_blank">Ver Ícone</a></td>
+                            <td>${supportedConsoles}</td>
+                            <td>${game.isActive ? 'Sim' : 'Não'}</td>
+                            <td class="table-actions">
+                                <button class="edit-game-btn cta-button edit" title="Editar Jogo">✏️</button>
+                            </td>
+                        </tr>
+                    `;
+                    gamesTableBody.innerHTML += row;
+                });
+            } else {
+                gamesTableBody.innerHTML = '<tr><td colspan="6">Nenhum jogo encontrado.</td></tr>';
+            }
+        }
+    };
+
     // NOVO: CARREGAR E RENDERIZAR CAMPEONATOS
     let allTournaments = [];
     const loadTournaments = async () => {
@@ -361,6 +395,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadPendingPixPayments();
         loadPendingWithdrawals();
         loadTournaments();
+        loadGames(); // NOVO
     };
 
     initializeAdminPage();
@@ -545,7 +580,127 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-    
+
+    // NOVO: Delegando eventos para a tabela de jogos
+    const manageGameModalBackdrop = document.getElementById('manage-game-modal-backdrop');
+    const openCreateGameBtn = document.getElementById('open-create-game-modal-btn');
+    const manageGameForm = document.getElementById('manage-game-form');
+    const manageGameTitle = document.getElementById('manage-game-title');
+    const gameActiveToggleGroup = document.getElementById('game-active-toggle-group');
+
+    // Função para preencher os checkboxes de console no modal
+    const populateConsoleCheckboxes = (supportedConsoles) => {
+        const container = document.getElementById('supported-consoles-checkboxes');
+        container.innerHTML = '';
+        consoleOptions.forEach(consoleName => {
+            const isChecked = supportedConsoles.includes(consoleName);
+            const checkboxHtml = `
+                <label>
+                    <input type="checkbox" name="supportedConsoles" value="${consoleName}" ${isChecked ? 'checked' : ''}>
+                    ${consoleName}
+                </label>
+            `;
+            container.innerHTML += checkboxHtml;
+        });
+    };
+
+    if (openCreateGameBtn && manageGameModalBackdrop) {
+        openCreateGameBtn.addEventListener('click', () => {
+            manageGameTitle.textContent = 'Adicionar Novo Jogo';
+            manageGameForm.reset();
+            document.getElementById('game-id-to-manage').value = '';
+            document.getElementById('game-icon-url').value = '';
+            document.getElementById('manage-game-error').textContent = '';
+            gameActiveToggleGroup.style.display = 'none';
+            populateConsoleCheckboxes([]);
+            manageGameModalBackdrop.classList.add('active');
+        });
+
+        const closeBtn = manageGameModalBackdrop.querySelector('.close-modal-btn');
+        closeBtn.addEventListener('click', () => {
+            manageGameModalBackdrop.classList.remove('active');
+        });
+        manageGameModalBackdrop.addEventListener('click', (e) => {
+            if (e.target === manageGameModalBackdrop) manageGameModalBackdrop.classList.remove('active');
+        });
+    }
+
+    const gamesTableBody = document.querySelector('#games-table tbody');
+    if (gamesTableBody) {
+        gamesTableBody.addEventListener('click', (e) => {
+            const target = e.target;
+            const row = target.closest('tr[data-game-id]');
+            if (!row) return;
+
+            const gameId = row.dataset.gameId;
+            const gameToEdit = allGames.find(g => g._id === gameId);
+
+            if (target.classList.contains('edit-game-btn') && gameToEdit) {
+                manageGameTitle.textContent = `Editar Jogo: ${gameToEdit.name}`;
+                document.getElementById('game-id-to-manage').value = gameToEdit._id;
+                document.getElementById('game-name').value = gameToEdit.name;
+                document.getElementById('game-icon-url').value = gameToEdit.iconUrl;
+                document.getElementById('game-is-active').value = gameToEdit.isActive.toString();
+                document.getElementById('manage-game-error').textContent = '';
+                
+                populateConsoleCheckboxes(gameToEdit.supportedConsoles);
+                gameActiveToggleGroup.style.display = 'block';
+
+                manageGameModalBackdrop.classList.add('active');
+            }
+        });
+    }
+
+    if (manageGameForm) {
+        manageGameForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const gameId = document.getElementById('game-id-to-manage').value;
+            const errorElement = document.getElementById('manage-game-error');
+            errorElement.textContent = '';
+            
+            const selectedConsoles = Array.from(manageGameForm.querySelectorAll('input[name="supportedConsoles"]:checked'))
+                                          .map(cb => cb.value);
+
+            const formData = {
+                name: document.getElementById('game-name').value,
+                iconUrl: document.getElementById('game-icon-url').value,
+                supportedConsoles: selectedConsoles
+            };
+            
+            if (gameId) {
+                formData.isActive = document.getElementById('game-is-active').value === 'true';
+            }
+
+            try {
+                const isCreating = !gameId;
+                const method = isCreating ? 'POST' : 'PATCH';
+                const endpoint = isCreating ? 'games' : `games/${gameId}`;
+
+                const response = await fetch(`${API_BASE_URL}/api/admin/${endpoint}`, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    showNotification(data.message, 'success');
+                    manageGameForm.reset();
+                    manageGameModalBackdrop.classList.remove('active');
+                    loadGames();
+                } else {
+                    errorElement.textContent = data.message || `Erro ao ${isCreating ? 'criar' : 'editar'} jogo.`;
+                }
+            } catch (error) {
+                console.error('Erro ao gerenciar jogo:', error);
+                errorElement.textContent = 'Não foi possível conectar ao servidor.';
+            }
+        });
+    }
+
     // NOVO: Delegando eventos para a tabela de solicitações de saque
     const withdrawalsTableBody = document.querySelector('#withdrawals-table tbody');
     if (withdrawalsTableBody) {

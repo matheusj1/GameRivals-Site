@@ -121,6 +121,29 @@
             </div>
         </section>
         
+        <section id="admin-game-management">
+            <h3>Gerenciamento de Jogos</h3>
+            <div style="margin-bottom: 20px;">
+                <button id="open-create-game-modal-btn" class="cta-button">Adicionar Novo Jogo</button>
+            </div>
+            <div class="table-container">
+                <table id="games-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Jogo</th>
+                            <th>Icon URL</th>
+                            <th>Consoles Suportados</th>
+                            <th>Ativo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
         <section id="admin-withdrawal-management">
             <h3>Gerenciamento de Saques</h3>
             <p style="color: var(--text-muted); margin-bottom: 20px;">
@@ -362,6 +385,41 @@
                 <input type="hidden" id="message-tournament-id">
                 <p class="form-error-message" id="send-message-error"></p>
                 <button type="submit" class="cta-button form-submit-btn">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="manage-game-modal-backdrop">
+        <div class="modal" id="manage-game-modal">
+            <button class="close-modal-btn">&times;</button>
+            <h2 id="manage-game-title">Adicionar Novo Jogo</h2>
+            <form id="manage-game-form" class="modal-form">
+                <input type="hidden" id="game-id-to-manage">
+                
+                <div class="input-group">
+                    <label for="game-name">Nome do Jogo</label>
+                    <input type="text" id="game-name" name="name" required>
+                </div>
+                <div class="input-group">
+                    <label for="game-icon-url">URL do Ícone (Imagem)</label>
+                    <input type="url" id="game-icon-url" name="iconUrl" placeholder="Ex: /img/rl.jpg">
+                </div>
+                <div class="input-group">
+                    <label>Consoles Suportados</label>
+                    <div id="supported-consoles-checkboxes" style="display: flex; flex-wrap: wrap; gap: 15px;">
+                        </div>
+                </div>
+                
+                <div class="input-group" id="game-active-toggle-group" style="display: none;">
+                    <label for="game-is-active">Status</label>
+                    <select id="game-is-active" name="isActive">
+                        <option value="true">Ativo</option>
+                        <option value="false">Inativo</option>
+                    </select>
+                </div>
+
+                <p class="form-error-message" id="manage-game-error"></p>
+                <button type="submit" class="cta-button form-submit-btn" id="save-game-btn">Salvar Jogo</button>
             </form>
         </div>
     </div>
