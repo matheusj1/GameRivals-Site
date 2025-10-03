@@ -1,5 +1,3 @@
-// arquivo: backend/server.js
-
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -404,13 +402,16 @@ io.on('connection', async (socket) => {
             const senderDB = await User.findById(senderUserId);
             const recipientDB = await User.findById(data.toUserId);
 
-            if (senderDB.blockedUsers.includes(data.toUserId) || recipientDB.blockedUsers.includes(senderId)) {
+            // CORREÇÃO CRÍTICA: Substituído 'senderId' (indefinido) por 'senderUserId'
+            if (senderDB.blockedUsers.includes(data.toUserId) || recipientDB.blockedUsers.includes(senderUserId)) {
                 console.log('[SOCKET PRIVATE CHAT] Tentativa de enviar mensagem privada para/de um usuário bloqueado. Ação negada.');
                 return;
             }
         } catch (error) {
             console.error('[SOCKET PRIVATE CHAT] Erro ao verificar bloqueio:', error);
-            return;
+            // Retorna se o try/catch falhar para evitar que o bloco de envio seja executado
+            // em um estado inesperado, mantendo o fluxo de segurança original.
+            return; 
         }
 
         if (recipient && sender && String(recipient.id) !== String(sender.id) && data.text && data.text.trim() !== '') {
