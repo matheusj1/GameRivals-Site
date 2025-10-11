@@ -26,11 +26,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const profileForm = document.getElementById('profile-form');
     const usernameInput = document.getElementById('username');
-    const bioTextarea = document.getElementById('bio');
+    // const bioTextarea = document.getElementById('bio'); // REMOVIDO
     const descriptionTextarea = document.getElementById('description');
     const consoleSelect = document.getElementById('console');
     const profileInitialPreview = document.getElementById('profile-initial-preview');
     const profileError = document.getElementById('profile-error');
+    const usernameCooldownMessage = document.getElementById('username-cooldown-message'); // NOVO
 
     // Seletor para os botões de logout, agora pegando ambos por ID
     const logoutButtonDesktop = document.getElementById('logout-button-desktop');
@@ -65,7 +66,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     const saveThemeButton = document.getElementById('save-theme-button');
     const openThemeModalBtn = document.getElementById('open-theme-modal-btn');
     const closeThemeModalBtn = themeModal?.querySelector('.close-modal-btn');
-    // const themeSelector = document.getElementById('profile-theme-selector'); // REMOVIDO: Era a provável causa do bug
+    
+    // Variável para armazenar o último nome de usuário
+    let originalUsername = '';
+    
+    // Variável para armazenar o timestamp da última mudança
+    let lastUsernameChangeDate = null;
+    
+    // Função para verificar e aplicar o cooldown no input
+    const checkUsernameCooldown = (lastChangeTimestamp) => {
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+        const lastChangeTime = lastChangeTimestamp ? new Date(lastChangeTimestamp).getTime() : 0;
+        const timeSinceLastChange = Date.now() - lastChangeTime;
+
+        if (lastChangeTime === 0 || timeSinceLastChange >= thirtyDays) {
+            // Pode mudar
+            usernameInput.removeAttribute('readonly');
+            usernameCooldownMessage.textContent = 'Você pode editar seu nome de usuário.';
+            usernameCooldownMessage.style.color = 'var(--win-color)';
+        } else {
+            // Cooldown ativo
+            const timeRemaining = lastChangeTime + thirtyDays - Date.now();
+            const daysRemaining = Math.ceil(timeRemaining / (24 * 60 * 60 * 1000));
+            
+            usernameInput.setAttribute('readonly', 'true');
+            usernameCooldownMessage.textContent = `Próxima alteração disponível em ${daysRemaining} dias.`;
+            usernameCooldownMessage.style.color = 'var(--loss-color)';
+        }
+    };
 
 
     // Preencher campos com dados existentes do usuário
@@ -88,9 +116,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const userData = await response.json();
 
             usernameInput.value = userData.username || '';
-            bioTextarea.value = userData.bio || '';
+            originalUsername = userData.username || ''; // Salva o nome original
+            // bioTextarea.value = userData.bio || ''; // REMOVIDO
             descriptionTextarea.value = userData.description || '';
             consoleSelect.value = userData.console || '';
+            lastUsernameChangeDate = userData.lastUsernameChange; // NOVO: Captura o timestamp
 
             if (profileInitialPreview) {
                 profileInitialPreview.textContent = userData.username ? userData.username.charAt(0).toUpperCase() : '';
@@ -101,6 +131,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (userInitialMobile) {
                 userInitialMobile.textContent = userData.username ? userData.username.charAt(0).toUpperCase() : '';
             }
+            
+            // NOVO: Aplica a lógica de cooldown
+            checkUsernameCooldown(lastUsernameChangeDate);
+            
         } catch (error) {
             console.error('Erro ao buscar perfil:', error);
             profileError.textContent = error.message;
@@ -155,10 +189,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const formData = {
             username: usernameInput.value,
-            bio: bioTextarea.value,
+            // bio: bioTextarea.value, // REMOVIDO
             description: descriptionTextarea.value,
             console: consoleSelect.value
         };
+
+        // Se o username não mudou E se o campo está bloqueado (deveria estar, mas por segurança), 
+        // evitamos de enviar o campo "username" para a API
+        if (formData.username === originalUsername && usernameInput.hasAttribute('readonly')) {
+            delete formData.username;
+        }
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/users/profile`, {
@@ -180,15 +220,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (data.user.username) {
                     localStorage.setItem('username', data.user.username);
                     usernameInput.value = data.user.username;
+                    originalUsername = data.user.username;
                     profileInitialPreview.textContent = data.user.username.charAt(0).toUpperCase();
                 }
+                
+                // NOVO: Atualiza e verifica o cooldown após o salvamento
+                if (data.user.lastUsernameChange) {
+                    lastUsernameChangeDate = data.user.lastUsernameChange;
+                    checkUsernameCooldown(lastUsernameChangeDate);
+                }
+                
                 localStorage.setItem('profileCompleted', data.user.profileCompleted);
 
                 if (data.user.profileCompleted) {
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1500);
-                } else {
+                    // O redirecionamento só deve acontecer se for a primeira vez
+                    if (data.user.profileCompleted === true && localStorage.getItem('profileCompleted') === 'false') {
+                         setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1500);
+                    } 
+                    // Se o perfil já estava completo, apenas recarrega os dados.
                     fetchUserProfile();
                 }
             }

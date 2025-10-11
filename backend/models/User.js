@@ -53,12 +53,12 @@ const UserSchema = new mongoose.Schema({
         trim: true,
         default: ''
     },
-    bio: {
-        type: String,
-        trim: true,
-        maxlength: 150,
-        default: ''
-    },
+    // bio: { // REMOVIDO A PEDIDO
+    //     type: String,
+    //     trim: true,
+    //     maxlength: 150,
+    //     default: ''
+    // },
     description: {
         type: String,
         trim: true,
@@ -78,6 +78,10 @@ const UserSchema = new mongoose.Schema({
     profileCompleted: { // Indica se o usuário já completou o perfil inicial
         type: Boolean,
         default: false
+    },
+    // NOVO CAMPO: Timestamp da última alteração do username
+    lastUsernameChange: { 
+        type: Date 
     },
     // ===== NOVOS CAMPOS PARA O SISTEMA DE AMIGOS =====
     friends: [

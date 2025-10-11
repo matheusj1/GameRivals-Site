@@ -62,12 +62,8 @@
 
                 <div class="input-group">
                     <label for="username">Nome de Usuário</label>
-                    <input type="text" id="username" name="username" readonly>
-                </div>
-
-                <div class="input-group">
-                    <label for="bio">Bio / Slogan</label>
-                    <textarea id="bio" name="bio" rows="3" placeholder="Conte algo sobre você..."></textarea>
+                    <input type="text" id="username" name="username" required>
+                    <small id="username-cooldown-message" style="color: var(--text-muted); display: block; margin-top: 5px;"></small>
                 </div>
 
                 <div class="input-group">

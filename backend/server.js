@@ -281,9 +281,9 @@ const profileUpdateSchema = Joi.object({
         'string.min': 'Nome de usuário deve ter no mínimo 3 caracteres.',
         'string.max': 'Nome de usuário deve ter no máximo 30 caracteres.'
     }),
-    bio: Joi.string().max(150).allow('').optional().messages({
-        'string.max': 'Bio deve ter no máximo 150 caracteres.'
-    }),
+    // bio: Joi.string().max(150).allow('').optional().messages({ // REMOVIDO A PEDIDO
+    //     'string.max': 'Bio deve ter no máximo 150 caracteres.'
+    // }),
     description: Joi.string().max(500).allow('').optional().messages({
         'string.max': 'Descrição deve ter no máximo 500 caracteres.'
     }),
@@ -1091,7 +1091,8 @@ app.get('/api/users/me/stats', auth, async (req, res) => {
 
 app.get('/api/users/me', auth, async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
+        // Incluir lastUsernameChange e remover 'bio' da seleção
+        const user = await User.findById(req.user.id).select('-password -bio');
         if (!user) { return res.status(404).json({ message: 'Usuário não encontrado.' }); }
         res.json(user);
     } catch (error) {
@@ -1172,16 +1173,35 @@ app.patch('/api/users/profile', auth, upload.single('avatar'), validateSchema(pr
         const user = await User.findById(userId);
         if (!user) { return res.status(404).json({ message: 'Usuário não encontrado.' }); }
         
+        // Cooldown de 30 dias para a mudança de username
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+        const lastChangeTime = user.lastUsernameChange ? user.lastUsernameChange.getTime() : 0;
+        const canChangeUsername = (Date.now() - lastChangeTime) >= thirtyDays;
+        
         if (updates.username && updates.username !== user.username) {
+            
+            if (!canChangeUsername) {
+                // Calcula o tempo restante
+                const timeRemaining = lastChangeTime + thirtyDays - Date.now();
+                const daysRemaining = Math.ceil(timeRemaining / (24 * 60 * 60 * 1000));
+                
+                if (req.file) { fs.unlinkSync(req.file.path); }
+                return res.status(400).json({ message: `Você só pode mudar o nome de usuário novamente em ${daysRemaining} dias.` });
+            }
+            
+            // Verifica se o novo username está disponível
             const existingUsername = await User.findOne({ username: updates.username });
             if (existingUsername && String(existingUsername._id) !== String(user._id)) {
                 if (req.file) { fs.unlinkSync(req.file.path); }
                 return res.status(400).json({ message: 'Nome de usuário já está em uso.' });
             }
+            
+            // Aplica a mudança e atualiza o timestamp
             user.username = updates.username;
+            user.lastUsernameChange = Date.now(); // Atualiza o timestamp da última mudança
         }
         
-        if (updates.bio !== undefined) user.bio = updates.bio;
+        // if (updates.bio !== undefined) user.bio = updates.bio; // REMOVIDO A PEDIDO
         if (updates.description !== undefined) user.description = updates.description;
         if (updates.console !== undefined) user.console = updates.console;
         
@@ -1198,7 +1218,14 @@ app.patch('/api/users/profile', auth, upload.single('avatar'), validateSchema(pr
             onlineUser.username = user.username; onlineUser.avatarUrl = user.avatarUrl; onlineUser.console = user.console;
             onlineUsers.set(userId, onlineUser); emitUpdatedUserList();
         }
-        res.json({ message: 'Perfil atualizado com sucesso.', user: { username: user.username, avatarUrl: user.avatarUrl, profileCompleted: user.profileCompleted, console: user.console } });
+        // Retorna o novo campo
+        res.json({ message: 'Perfil atualizado com sucesso.', user: { 
+            username: user.username, 
+            avatarUrl: user.avatarUrl, 
+            profileCompleted: user.profileCompleted, 
+            console: user.console,
+            lastUsernameChange: user.lastUsernameChange // Retorna para o frontend
+        } });
     } catch (error) {
         console.error('[API PROFILE] Erro ao atualizar perfil:', error);
         if (req.file) { fs.unlink(req.file.path, (err) => { if (err) console.error('Erro ao excluir arquivo de avatar após falha:', err); }); }
