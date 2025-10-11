@@ -132,12 +132,20 @@ document.addEventListener('DOMContentLoaded', () => {
             registerError.textContent = 'A senha deve ter pelo menos 6 caracteres.';
             return;
         }
+        
+        // CORREÇÃO: Limpar o CPF removendo a máscara antes de enviar para o backend
+        const cpfRaw = cpf.replace(/\D/g, '');
+        if (cpfRaw.length !== 11) {
+            // Adiciona uma validação extra no frontend caso o campo não tenha 11 dígitos (antes de tentar o backend)
+            registerError.textContent = 'O CPF deve conter exatamente 11 dígitos.';
+            return;
+        }
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, fullName, cpf, email, password }),
+                body: JSON.stringify({ username, fullName, cpf: cpfRaw, email, password }), // ENVIA O CPF LIMPO
             });
 
             const data = await response.json();
