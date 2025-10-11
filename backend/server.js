@@ -24,6 +24,7 @@ const FriendRequest = require('./models/FriendRequest');
 const PixPaymentNotification = require('./models/PixPaymentNotification');
 const WithdrawalRequest = require('./models/WithdrawalRequest');
 const Tournament = require('./models/Tournament');
+const Game = require('./models/Game'); // NOVO: Importa o modelo Game
 
 const auth = require('./middleware/auth');
 const adminAuth = require('./middleware/adminAuth');
@@ -204,9 +205,21 @@ const loginSchema = Joi.object({
 });
 
 // 2. SCHEMAS DE DESAFIOS E MATCHMAKING
-const consoleOptions = ['PS5', 'PS4', 'XBOX Series', 'Xbox One', 'PC', 'Nintendo Switch'];
+const consoleOptions = ['PS5', 'PS4', 'XBOX Series', 'Xbox One', 'PC', 'Nintendo Switch']; // MANTIDO PARA VALIDAÇÃO DO CONSOLE
+
+// NOVO SCHEMA: Game
+const gameSchema = Joi.object({
+    name: Joi.string().min(2).max(50).required().messages({ 'any.required': 'Nome do jogo é obrigatório.' }),
+    iconUrl: Joi.string().uri().allow('').optional(),
+    supportedConsoles: Joi.array().items(Joi.string().valid(...consoleOptions)).min(1).required().messages({
+        'array.min': 'Pelo menos um console deve ser selecionado.',
+        'any.required': 'Consoles suportados são obrigatórios.'
+    }),
+    isActive: Joi.boolean().optional()
+});
+
 const challengeCreateSchema = Joi.object({
-    game: Joi.string().min(2).max(50).required().messages({ 'any.required': 'Jogo é obrigatório.' }),
+    game: Joi.string().min(2).max(50).required().messages({ 'any.required': 'Jogo é obrigatório.' }), // Jogo validado no middleware validateGame
     console: Joi.string().valid(...consoleOptions).required().messages({
         'any.required': 'Console é obrigatório.',
         'any.only': 'Console inválido.'
@@ -223,7 +236,7 @@ const challengePrivateSchema = Joi.object({
         'string.length': 'ID do oponente inválido.',
         'any.required': 'ID do oponente é obrigatório.'
     }),
-    game: Joi.string().min(2).max(50).required().messages({ 'any.required': 'Jogo é obrigatório.' }),
+    game: Joi.string().min(2).max(50).required().messages({ 'any.required': 'Jogo é obrigatório.' }), // Jogo validado no middleware validateGame
     console: Joi.string().valid(...consoleOptions).required().messages({
         'any.required': 'Console é obrigatório.',
         'any.only': 'Console inválido.'
@@ -284,7 +297,7 @@ const adminTournamentSchema = Joi.object({
         'string.min': 'Nome do campeonato deve ter no mínimo 5 caracteres.',
         'any.required': 'Nome é obrigatório.'
     }),
-    game: Joi.string().min(2).max(50).required().messages({ 'any.required': 'Jogo é obrigatório.' }),
+    game: Joi.string().min(2).max(50).required().messages({ 'any.required': 'Jogo é obrigatório.' }), // Jogo validado no middleware validateGame
     console: Joi.string().valid(...consoleOptions).required().messages({
         'any.required': 'Console é obrigatório.',
         'any.only': 'Console inválido.'
@@ -404,13 +417,13 @@ io.on('connection', async (socket) => {
             const senderDB = await User.findById(senderUserId);
             const recipientDB = await User.findById(data.toUserId);
 
-            if (senderDB.blockedUsers.includes(data.toUserId) || recipientDB.blockedUsers.includes(senderId)) {
+            if (senderDB.blockedUsers.includes(data.toUserId) || recipientDB.blockedUsers.includes(senderUserId)) {
                 console.log('[SOCKET PRIVATE CHAT] Tentativa de enviar mensagem privada para/de um usuário bloqueado. Ação negada.');
                 return;
             }
         } catch (error) {
             console.error('[SOCKET PRIVATE CHAT] Erro ao verificar bloqueio:', error);
-            return;
+            return; 
         }
 
         if (recipient && sender && String(recipient.id) !== String(sender.id) && data.text && data.text.trim() !== '') {
@@ -630,6 +643,27 @@ io.on('connection', async (socket) => {
     });
 });
 
+// =========================================================================
+// MIDDLEWARE DE VALIDAÇÃO DE JOGO
+// =========================================================================
+
+const validateGame = async (req, res, next) => {
+    const gameName = req.body.game;
+    try {
+        const game = await Game.findOne({ name: gameName, isActive: true });
+        if (!game) {
+            return res.status(400).json({ message: `O jogo "${gameName}" não está ativo ou não existe.` });
+        }
+        if (!game.supportedConsoles.includes(req.body.console)) {
+            return res.status(400).json({ message: `O console "${req.body.console}" não é suportado pelo jogo "${gameName}".` });
+        }
+        req.gameData = game; // Anexar dados do jogo para uso posterior
+        next();
+    } catch (error) {
+        console.error('[Middleware Game Validation] Erro:', error);
+        res.status(500).json({ message: 'Erro de validação do jogo no servidor.' });
+    }
+};
 
 // =========================================================================
 // ROTAS DE AUTENTICAÇÃO (PROTEGIDAS POR authLimiter)
@@ -814,7 +848,7 @@ app.post('/api/wallet/withdraw-request', auth, sensitiveLimiter, validateSchema(
 // ROTAS DE DESAFIO, USUÁRIO, AMIGOS E ADMIN
 // =========================================================================
 
-app.post('/api/challenges', auth, validateSchema(challengeCreateSchema), async (req, res) => {
+app.post('/api/challenges', auth, validateSchema(challengeCreateSchema), validateGame, async (req, res) => { // ADICIONADO validateGame
     try {
         const { game, console: platform, betAmount, scheduledTime } = req.body;
         
@@ -834,7 +868,7 @@ app.post('/api/challenges', auth, validateSchema(challengeCreateSchema), async (
     }
 });
 
-app.post('/api/challenges/private', auth, validateSchema(challengePrivateSchema), async (req, res) => {
+app.post('/api/challenges/private', auth, validateSchema(challengePrivateSchema), validateGame, async (req, res) => { // ADICIONADO validateGame
     try {
         const { opponentId, game, console: platform, betAmount } = req.body;
         const createdBy = req.user.id;
@@ -1333,6 +1367,71 @@ app.get('/api/users/me/blocked', auth, async (req, res) => {
     }
 });
 
+// NOVO: Rota para listar jogos ativos (Uso geral no frontend)
+app.get('/api/games', auth, async (req, res) => {
+    try {
+        const games = await Game.find({ isActive: true }).select('name iconUrl supportedConsoles').sort({ name: 1 });
+        res.json(games);
+    } catch (error) {
+        console.error('[API] Erro ao listar jogos ativos:', error);
+        res.status(500).json({ message: 'Erro no servidor ao buscar jogos.' });
+    }
+});
+
+
+// ROTAS ADMIN
+
+// NOVO: Rotas de Gestão de Jogos (Admin)
+app.post('/api/admin/games', adminAuth, validateSchema(gameSchema), async (req, res) => {
+    try {
+        const { name, iconUrl, supportedConsoles } = req.body;
+        const existingGame = await Game.findOne({ name });
+        if (existingGame) {
+            return res.status(400).json({ message: 'Um jogo com este nome já existe.' });
+        }
+        
+        const newGame = new Game({ name, iconUrl, supportedConsoles });
+        await newGame.save();
+        res.status(201).json({ message: 'Jogo adicionado com sucesso!', game: newGame });
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao adicionar jogo:', error);
+        res.status(500).json({ message: 'Erro no servidor ao adicionar jogo.' });
+    }
+});
+
+app.get('/api/admin/games', adminAuth, async (req, res) => {
+    try {
+        const games = await Game.find().sort({ isActive: -1, name: 1 });
+        res.json(games);
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao listar jogos (admin):', error);
+        res.status(500).json({ message: 'Erro no servidor ao listar jogos.' });
+    }
+});
+
+app.patch('/api/admin/games/:id', adminAuth, async (req, res) => {
+    try {
+        const { error } = gameSchema.validate(req.body, { abortEarly: false, partial: true });
+        if (error) {
+            const message = error.details.map(i => i.message.replace(/['"]/g, '')).join(', ');
+            return res.status(400).json({ message: message });
+        }
+
+        const game = await Game.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!game) {
+            return res.status(404).json({ message: 'Jogo não encontrado.' });
+        }
+        res.json({ message: 'Jogo atualizado com sucesso!', game });
+    } catch (error) {
+        console.error('[API ADMIN] Erro ao editar jogo:', error);
+        if (error.code === 11000) { // Duplicação de nome
+            return res.status(400).json({ message: 'Um jogo com este nome já existe.' });
+        }
+        res.status(500).json({ message: 'Erro no servidor ao editar jogo.' });
+    }
+});
+
+
 app.get('/api/admin/dashboard-stats', adminAuth, async (req, res) => {
     try {
         const totalUsers = await User.countDocuments();
@@ -1605,7 +1704,7 @@ const generateBracket = (participants) => {
 };
 
 
-app.post('/api/admin/tournaments', adminAuth, validateSchema(adminTournamentSchema), async (req, res) => {
+app.post('/api/admin/tournaments', adminAuth, validateSchema(adminTournamentSchema), validateGame, async (req, res) => { // ADICIONADO validateGame
     try {
         const { name, game, console, betAmount, maxParticipants, scheduledTime } = req.body;
         
