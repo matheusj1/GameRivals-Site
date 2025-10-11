@@ -669,7 +669,13 @@ const validateGame = async (req, res, next) => {
 // ROTAS DE AUTENTICAÇÃO (PROTEGIDAS POR authLimiter)
 // =========================================================================
 
-app.post('/api/register', authLimiter, validateSchema(registerSchema), async (req, res) => {
+app.post('/api/register', authLimiter, (req, res, next) => {
+    // CORREÇÃO ESSENCIAL: Remove a máscara do CPF no backend antes da validação
+    if (req.body.cpf) {
+        req.body.cpf = req.body.cpf.replace(/\D/g, '');
+    }
+    validateSchema(registerSchema)(req, res, next);
+}, async (req, res) => {
     try {
         const { username, fullName, cpf, email, password } = req.body;
         
@@ -684,6 +690,7 @@ app.post('/api/register', authLimiter, validateSchema(registerSchema), async (re
         
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
+        // O campo 'cpf' aqui já estará limpo devido ao middleware acima
         const newUser = new User({ username, fullName, cpf, email, password: hashedPassword, wins: 0, losses: 0, coins: 1000, role: 'user', isActive: true, profileCompleted: false });
         await newUser.save();
         res.status(201).json({ message: 'Usuário cadastrado com sucesso.' });
