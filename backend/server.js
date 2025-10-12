@@ -1044,9 +1044,7 @@ app.patch('/api/challenges/:id/cancel', auth, async (req, res) => {
         const challengeId = req.params.id;
         const userId = req.user.id;
         const challenge = await Challenge.findById(challengeId);
-        if (!challenge) {
-            return res.status(404).json({ message: "Desafio não encontrado." });
-        }
+        if (!challenge) { return res.status(404).json({ message: "Desafio não encontrado." }); }
 
         if (challenge.status !== 'open') {
             return res.status(400).json({ message: "Apenas desafios abertos podem ser cancelados." });
@@ -1201,7 +1199,7 @@ app.patch('/api/users/profile', auth, upload.single('avatar'), validateSchema(pr
             user.lastUsernameChange = Date.now(); // Atualiza o timestamp da última mudança
         }
         
-        // if (updates.bio !== undefined) user.bio = updates.bio; // REMOVIDO A PEDIDO
+        // if (updates.bio !== undefined) user.bio = updates.bio; // REMOVIDO
         if (updates.description !== undefined) user.description = updates.description;
         if (updates.console !== undefined) user.console = updates.console;
         
@@ -1686,56 +1684,90 @@ app.patch('/api/admin/withdrawals/:id/reject', adminAuth, async (req, res) => {
 });
 
 
-// ... Rotas de Tournament ...
-
+// ===================================================================================================================
+// FUNÇÃO GENERATE BRACKET CORRIGIDA
+// ===================================================================================================================
 
 const generateBracket = (participants) => {
     let matches = [];
     const numParticipants = participants.length;
     let numRounds = Math.log2(numParticipants);
 
-    if (!Number.isInteger(numRounds)) {
-        throw new Error('O número de participantes deve ser uma potência de 2.');
+    if (!Number.isInteger(numRounds) || numParticipants < 2) {
+        throw new Error('O número de participantes deve ser uma potência de 2 (mínimo 2).');
     }
 
-    const firstRoundMatches = [];
-    for (let i = 0; i < numParticipants; i += 2) {
-        firstRoundMatches.push({
-            player1: participants[i],
-            player2: participants[i + 1] || null,
-            round: `Oitavas`
-        });
-    }
+    const roundNamesMap = {
+        2: ['Final'],
+        4: ['Semi-Final', 'Final'],
+        8: ['Quartas', 'Semi-Final', 'Final'],
+        16: ['Oitavas', 'Quartas', 'Semi-Final', 'Final'],
+        32: ['Rodada 32', 'Oitavas', 'Quartas', 'Semi-Final', 'Final'],
+        64: ['Rodada 64', 'Rodada 32', 'Oitavas', 'Quartas', 'Semi-Final', 'Final']
+    };
+    
+    // Use dynamic round names based on numParticipants
+    const roundsNames = roundNamesMap[numParticipants] || 
+        (numRounds > 3 ? ['Rodada 1', 'Rodada 2', 'Rodada 3', 'Final'] : ['Rodada 1', 'Final']);
 
-    matches.push(...firstRoundMatches);
 
-    let previousRoundMatches = firstRoundMatches;
-    let roundsNames = ['Quartas', 'Semifinal', 'Final'];
-    for (let i = 0; i < numRounds - 1; i++) {
-        const nextRoundMatches = [];
-        for (let j = 0; j < previousRoundMatches.length / 2; j++) {
-            const newMatch = {
-                player1: null,
-                player2: null,
+    let finalBracket = [];
+    let offset = 0; // O índice inicial da rodada atual no array final
+    let roundSize = numParticipants / 2; // Número de matches na rodada atual
+
+    for (let r = 0; r < numRounds; r++) {
+        const roundName = roundsNames[r];
+        const isFinalRound = r === numRounds - 1;
+        const nextOffset = offset + roundSize; // O índice inicial da PRÓXIMA rodada
+        
+        for (let i = 0; i < roundSize; i++) {
+            const match = {
+                player1: (r === 0) ? participants[i * 2] : null,
+                player2: (r === 0) ? (participants[i * 2 + 1] || null) : null,
                 winner: null,
                 status: 'pending',
-                round: roundsNames[i]
+                round: roundName,
+                // TEMPORARY FIELD: Armazena o índice do próximo match
+                tempNextMatchIndex: isFinalRound ? null : (nextOffset + Math.floor(i / 2))
             };
-            nextRoundMatches.push(newMatch);
-        }
-
-        for (let j = 0; j < previousRoundMatches.length; j += 2) {
-            previousRoundMatches[j].nextMatch = nextRoundMatches[j / 2];
-            if (previousRoundMatches[j + 1]) {
-                previousRoundMatches[j + 1].nextMatch = nextRoundMatches[j / 2];
-            }
+            finalBracket.push(match);
         }
         
-        matches.push(...nextRoundMatches);
-        previousRoundMatches = nextRoundMatches;
+        offset = finalBracket.length - roundSize; // A nova rodada começa onde a anterior parou
+        roundSize /= 2;
     }
-    return matches;
+
+    // Agora que todos os matches estão no array, precisamos ligar os matches da penúltima
+    // rodada para a última, pois a lógica do loop acima erra os índices
+    // Vamos iterar sobre o array final para corrigir os índices temporários
+    
+    let currentMatchOffset = 0;
+    let currentRoundSize = numParticipants / 2;
+
+    for (let r = 0; r < numRounds - 1; r++) {
+        const nextMatchOffset = currentMatchOffset + currentRoundSize; // O início da próxima rodada
+        const nextRoundSize = currentRoundSize / 2;
+        
+        for (let i = 0; i < currentRoundSize; i++) {
+            const matchIndex = currentMatchOffset + i;
+            // O próximo match está na próxima rodada, no índice [nextMatchOffset + floor(i / 2)]
+            const nextMatchIndex = nextMatchOffset + Math.floor(i / 2);
+            
+            finalBracket[matchIndex].tempNextMatchIndex = nextMatchIndex;
+        }
+
+        currentMatchOffset = nextMatchOffset;
+        currentRoundSize = nextRoundSize;
+    }
+    
+    // O último match do array (a final) terá tempNextMatchIndex = null.
+    // Isso deve garantir que todos os matches sejam linkados corretamente pelo índice.
+
+    return finalBracket;
 };
+
+
+// ... Rotas de Tournament ...
 
 
 app.post('/api/admin/tournaments', adminAuth, validateSchema(adminTournamentSchema), validateGame, async (req, res) => { // ADICIONADO validateGame
@@ -1868,8 +1900,26 @@ app.post('/api/admin/tournaments/:id/start', adminAuth, async (req, res) => {
         
         const shuffledParticipants = tournament.participants.sort(() => 0.5 - Math.random());
 
-        const bracket = generateBracket(shuffledParticipants.map(p => p._id));
-        tournament.bracket = bracket;
+        const bracketData = generateBracket(shuffledParticipants.map(p => p._id));
+
+        // 1. Atribui o array de objetos. Mongoose gera os _id's dos subdocumentos aqui.
+        tournament.bracket = bracketData; 
+        
+        // 2. Itera sobre o subdocument array para ligar os IDs
+        tournament.bracket.forEach((match, index) => {
+            if (match.tempNextMatchIndex !== null && match.tempNextMatchIndex !== undefined) {
+                // Pega o ID real do subdocument na posição do índice temporário
+                const nextMatchId = tournament.bracket[match.tempNextMatchIndex]?._id;
+                
+                if (nextMatchId) {
+                    // Atribui o ObjectId
+                    match.nextMatch = nextMatchId;
+                }
+            }
+            // 3. Remove o campo temporário antes de salvar
+            match.tempNextMatchIndex = undefined; 
+        });
+
         tournament.status = 'in-progress';
         await tournament.save();
 
